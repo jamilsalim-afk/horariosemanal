@@ -127,48 +127,63 @@ function montar(table) {
 
   const dias = ["Seg", "Ter", "Qua", "Qui", "Sex"];
 
-  const bloco = document.createElement("div");
-  bloco.className = "bloco";
+  // 🔥 identifica cursos (AGROEC, AGROPEC, INFO)
+  const cursos = ["Agroecologia", "Agropecuária", "Informática"];
 
-  const tabela = document.createElement("table");
+  cursos.forEach((curso, cursoIndex) => {
 
-  // CABEÇALHO
-  let thead = "<tr><th>Horário</th>";
+    const bloco = document.createElement("div");
+    bloco.className = "bloco";
 
-  dias.forEach(d => {
-    thead += `<th>${d}</th>`;
-  });
+    const titulo = document.createElement("h3");
+    titulo.textContent = curso;
 
-  thead += "</tr>";
+    const tabela = document.createElement("table");
 
-  let tbody = "";
+    // CABEÇALHO
+    let thead = "<tr><th>Horário</th>";
 
-  table.rows.forEach(row => {
+    dias.forEach(d => {
+      thead += `<th>${d}</th>`;
+    });
 
-    const horario = row.c[0] ? row.c[0].v : "";
+    thead += "</tr>";
 
-    tbody += `<tr>`;
-    tbody += `<td class="horario">${horario}</td>`;
+    let tbody = "";
 
-    // 🔥 CORREÇÃO PRINCIPAL: NÃO DUPLICAR COLUNAS
-    for (let i = 1; i <= 5; i++) {
-      const cell = row.c[i];
-      const valor = cell ? cell.v : "";
+    table.rows.forEach(row => {
 
-      if (valor) {
-        tbody += `<td data-prof="${valor.toUpperCase()}">${valor}</td>`;
-      } else {
-        tbody += `<td></td>`;
+      const horario = row.c[0] ? row.c[0].v : "";
+
+      tbody += `<tr>`;
+      tbody += `<td class="horario">${horario}</td>`;
+
+      // 🔥 OFFSET POR CURSO (AQUI ESTAVA O BUG)
+      // cada curso ocupa 5 colunas (Seg a Sex)
+      const base = 1 + (cursoIndex * 5);
+
+      for (let i = 0; i < 5; i++) {
+
+        const cell = row.c[base + i];
+        const valor = cell ? cell.v : "";
+
+        if (valor) {
+          tbody += `<td data-prof="${valor.toUpperCase()}">${valor}</td>`;
+        } else {
+          tbody += `<td></td>`;
+        }
       }
-    }
 
-    tbody += `</tr>`;
+      tbody += `</tr>`;
+    });
+
+    tabela.innerHTML = thead + tbody;
+
+    bloco.appendChild(titulo);
+    bloco.appendChild(tabela);
+
+    container.appendChild(bloco);
   });
-
-  tabela.innerHTML = thead + tbody;
-
-  bloco.appendChild(tabela);
-  container.appendChild(bloco);
 }
 
 // busca
