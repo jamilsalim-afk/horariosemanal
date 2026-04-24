@@ -11,10 +11,6 @@ body {
   background: #f5f7fa;
 }
 
-h2 {
-  margin-bottom: 15px;
-}
-
 .controls {
   margin-bottom: 20px;
 }
@@ -26,7 +22,6 @@ select, input {
   border: 1px solid #ccc;
 }
 
-/* CARD */
 .card {
   background: white;
   border-radius: 10px;
@@ -35,14 +30,12 @@ select, input {
   overflow-x: auto;
 }
 
-/* TABELA */
 table {
   border-collapse: collapse;
   width: 100%;
   min-width: 900px;
 }
 
-/* CABEÇALHO */
 th {
   background: #2c3e50;
   color: white;
@@ -53,7 +46,6 @@ th {
   z-index: 3;
 }
 
-/* CÉLULAS */
 td {
   border: 1px solid #ddd;
   padding: 4px;
@@ -62,22 +54,20 @@ td {
   height: 30px;
 }
 
-/* LINHAS ALTERNADAS */
 tr:nth-child(even) td {
   background-color: #fafafa;
 }
 
-/* COLUNA HORÁRIO */
+/* coluna horário */
 .col-horario {
   writing-mode: vertical-rl;
-  transform: rotate(180deg);
-  text-align: center;
+  text-orientation: mixed;
   font-weight: bold;
   background: #dfe6e9 !important;
   width: 35px;
 }
 
-/* FIXAR PRIMEIRA COLUNA */
+/* fixar coluna */
 td:first-child, th:first-child {
   position: sticky;
   left: 0;
@@ -85,7 +75,7 @@ td:first-child, th:first-child {
   z-index: 2;
 }
 
-/* BUSCA */
+/* busca */
 .highlight {
   background-color: #ffeaa7 !important;
   font-weight: bold;
@@ -98,14 +88,7 @@ td:first-child, th:first-child {
 <h2>Horários</h2>
 
 <div class="controls">
-  <select id="nivel">
-    <option value="integrado">Integrado</option>
-    <option value="superior1">Superior 1º</option>
-    <option value="superior2">Superior 2º</option>
-  </select>
-
   <select id="semana"></select>
-
   <input type="text" id="busca" placeholder="Buscar professor...">
 </div>
 
@@ -116,60 +99,56 @@ td:first-child, th:first-child {
 <script>
 const PLANILHA_ID = "1j33kiPqwtzZNuvkBgYDaIiXZvVMY_J0qWAtRfYGdnD8";
 
-/*
- 🔴 COLOQUE AQUI OS GIDs DAS ABAS (SEMANAS)
-*/
+/* 🔥 SUAS SEMANAS (adicione as outras depois) */
 const SEMANAS = {
-  integrado: {
-    1: "1579045633"
-    2: "491689833"
-    // 2: "GID_SEMANA_2",
-    // ...
-  },
-  superior1: {},
-  superior2: {}
+  1: "1579045633",
+  2: "491689833",
+  3: "1240467307",
+  4: "2044568281"
 };
 
-// Atualiza semanas
-function atualizarSemanas() {
-  const nivel = document.getElementById("nivel").value;
-  const select = document.getElementById("semana");
+// montar select
+const select = document.getElementById("semana");
 
-  select.innerHTML = "";
+Object.keys(SEMANAS).forEach(num => {
+  const opt = document.createElement("option");
+  opt.value = num;
+  opt.textContent = "Semana " + num;
+  select.appendChild(opt);
+});
 
-  Object.keys(SEMANAS[nivel]).forEach(num => {
-    const opt = document.createElement("option");
-    opt.value = num;
-    opt.textContent = "Semana " + num;
-    select.appendChild(opt);
-  });
-
-  carregarTabela();
-}
-
-// Carrega dados
+// carregar tabela
 function carregarTabela() {
-  const nivel = document.getElementById("nivel").value;
   const semana = document.getElementById("semana").value;
+  const gid = SEMANAS[semana];
 
-  const gid = SEMANAS[nivel][semana];
+  if (!gid) {
+    document.getElementById("tabela").innerHTML = "<tr><td>Semana não configurada</td></tr>";
+    return;
+  }
 
   const url = `https://docs.google.com/spreadsheets/d/${PLANILHA_ID}/gviz/tq?tqx=out:json&gid=${gid}`;
 
   fetch(url)
     .then(res => res.text())
     .then(text => {
-      const json = JSON.parse(text.substring(47).slice(0, -2));
-      montarTabela(json.table);
+      try {
+        const json = JSON.parse(text.substring(47).slice(0, -2));
+        montarTabela(json.table);
+      } catch {
+        document.getElementById("tabela").innerHTML = "<tr><td>Erro ao ler dados</td></tr>";
+      }
+    })
+    .catch(() => {
+      document.getElementById("tabela").innerHTML = "<tr><td>Erro de conexão</td></tr>";
     });
 }
 
-// Monta tabela
+// montar tabela
 function montarTabela(table) {
   const tabela = document.getElementById("tabela");
   tabela.innerHTML = "";
 
-  // Cabeçalho
   const trHead = document.createElement("tr");
 
   const thHorario = document.createElement("th");
@@ -177,7 +156,7 @@ function montarTabela(table) {
   trHead.appendChild(thHorario);
 
   table.cols.forEach((col, index) => {
-    if (index === 0) return; // ignora primeira coluna original
+    if (index === 0) return;
 
     const th = document.createElement("th");
     th.textContent = col.label || "";
@@ -186,11 +165,9 @@ function montarTabela(table) {
 
   tabela.appendChild(trHead);
 
-  // Linhas
   table.rows.forEach(row => {
     const tr = document.createElement("tr");
 
-    // Horário (coluna fixa)
     const horario = row.c[0] ? row.c[0].v : "";
 
     const tdHorario = document.createElement("td");
@@ -199,7 +176,6 @@ function montarTabela(table) {
 
     tr.appendChild(tdHorario);
 
-    // Demais colunas
     row.c.forEach((cell, index) => {
       if (index === 0) return;
 
@@ -219,7 +195,7 @@ function montarTabela(table) {
   });
 }
 
-// Busca
+// busca
 document.getElementById("busca").addEventListener("input", function() {
   const valor = this.value.toUpperCase();
 
@@ -234,12 +210,11 @@ document.getElementById("busca").addEventListener("input", function() {
   });
 });
 
-// Eventos
-document.getElementById("nivel").addEventListener("change", atualizarSemanas);
+// eventos
 document.getElementById("semana").addEventListener("change", carregarTabela);
 
-// Iniciar
-atualizarSemanas();
+// iniciar
+carregarTabela();
 </script>
 
 </body>
