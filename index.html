@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Horários da Semana</title>
+
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+  }
+
+  h2 {
+    margin-bottom: 10px;
+  }
+
+  #busca {
+    padding: 10px;
+    width: 320px;
+    font-size: 14px;
+    margin-bottom: 20px;
+  }
+
+  table {
+    border-collapse: collapse;
+    width: 100%;
+  }
+
+  th, td {
+    border: 1px solid #000;
+    padding: 6px;
+    text-align: center;
+    font-size: 13px;
+  }
+
+  th {
+    background-color: #f2f2f2;
+  }
+
+  .highlight {
+    background-color: yellow;
+    font-weight: bold;
+  }
+</style>
+</head>
+
+<body>
+
+<h2>Horário da Semana</h2>
+
+<input type="text" id="busca" placeholder="Digite o nome do professor...">
+
+<table id="tabela"></table>
+
+<script>
+const url = "https://docs.google.com/spreadsheets/d/1V8wZxnisgiFtCslx3YtyW01pVQfwcxKF7HBpXjrGBIE/gviz/tq?tqx=out:json&gid=1579045633";
+
+// Buscar dados
+fetch(url)
+  .then(res => res.text())
+  .then(text => {
+    const json = JSON.parse(text.substring(47).slice(0, -2));
+    const table = json.table;
+    montarTabela(table);
+  });
+
+function montarTabela(table) {
+  const tabela = document.getElementById("tabela");
+
+  // Cabeçalho
+  const trHead = document.createElement("tr");
+  table.cols.forEach(col => {
+    const th = document.createElement("th");
+    th.textContent = col.label || "";
+    trHead.appendChild(th);
+  });
+  tabela.appendChild(trHead);
+
+  // Linhas
+  table.rows.forEach(row => {
+    const tr = document.createElement("tr");
+
+    row.c.forEach(cell => {
+      const td = document.createElement("td");
+
+      const valor = cell ? cell.v : "";
+      td.textContent = valor;
+
+      if (valor) {
+        td.setAttribute("data-prof", valor.toUpperCase());
+      }
+
+      tr.appendChild(td);
+    });
+
+    tabela.appendChild(tr);
+  });
+}
+
+// Busca
+document.getElementById("busca").addEventListener("input", function() {
+  const valor = this.value.toUpperCase();
+
+  document.querySelectorAll("td").forEach(td => {
+    td.classList.remove("highlight");
+
+    if (!valor) return;
+
+    if (td.dataset.prof && td.dataset.prof.includes(valor)) {
+      td.classList.add("highlight");
+    }
+  });
+});
+</script>
+
+</body>
+</html>
