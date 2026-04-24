@@ -127,34 +127,43 @@ function montar(table, inicioSemana) {
 
   const dias = ["Seg", "Ter", "Qua", "Qui", "Sex"];
 
-  // identificar turmas (colunas)
+  // TURMAS = colunas reais da planilha (sem duplicar)
   const turmas = table.cols.slice(1).map(c => c.label);
 
-  turmas.forEach((turma, indexTurma) => {
+  turmas.forEach((turma, turmaIndex) => {
+
     const bloco = document.createElement("div");
     bloco.className = "bloco";
 
+    const titulo = document.createElement("h3");
+    titulo.textContent = turma;
+
     const tabela = document.createElement("table");
 
-    // cabeçalho
-    let thead = `<tr><th class="horario">Horário</th>`;
+    // CABEÇALHO
+    let thead = "<tr><th>Horário</th>";
 
-    dias.forEach((d, i) => {
-      const data = adicionarDias(inicioSemana, i);
-      thead += `<th>${d}<br>${data.slice(5)}</th>`;
+    dias.forEach(d => {
+      thead += `<th>${d}</th>`;
     });
 
     thead += "</tr>";
 
+    // LINHAS
     let tbody = "";
 
     table.rows.forEach(row => {
+
       const horario = row.c[0] ? row.c[0].v : "";
 
-      tbody += `<tr><td class="horario">${horario}</td>`;
+      tbody += `<tr>`;
+      tbody += `<td class="horario">${horario}</td>`;
 
-      dias.forEach((d, i) => {
-        const cell = row.c[indexTurma + 1];
+      dias.forEach((d, diaIndex) => {
+
+        // 🔥 CORREÇÃO PRINCIPAL AQUI
+        const cell = row.c[turmaIndex + 1]; // só 1 valor por turma
+
         const valor = cell ? cell.v : "";
 
         if (valor) {
@@ -164,13 +173,10 @@ function montar(table, inicioSemana) {
         }
       });
 
-      tbody += "</tr>";
+      tbody += `</tr>`;
     });
 
     tabela.innerHTML = thead + tbody;
-
-    const titulo = document.createElement("h3");
-    titulo.textContent = turma;
 
     bloco.appendChild(titulo);
     bloco.appendChild(tabela);
