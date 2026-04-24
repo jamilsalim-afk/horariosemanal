@@ -2,13 +2,13 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>Horários Semanais</title>
+<title>Horários</title>
 
 <style>
 body {
-  font-family: Arial, sans-serif;
+  font-family: Arial;
   margin: 20px;
-  background: #f5f7fa;
+  background: #f4f6f9;
 }
 
 .controls {
@@ -18,22 +18,26 @@ body {
 select, input {
   padding: 8px;
   margin-right: 10px;
-  border-radius: 6px;
-  border: 1px solid #ccc;
 }
 
-.card {
+/* GRID PRINCIPAL */
+.container {
+  display: flex;
+  gap: 20px;
+  overflow-x: auto;
+}
+
+/* BLOCO DE TURMA */
+.bloco {
   background: white;
   border-radius: 10px;
   padding: 10px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-  overflow-x: auto;
 }
 
+/* TABELA */
 table {
   border-collapse: collapse;
-  width: 100%;
-  min-width: 900px;
 }
 
 th {
@@ -41,9 +45,6 @@ th {
   color: white;
   padding: 6px;
   font-size: 12px;
-  position: sticky;
-  top: 0;
-  z-index: 3;
 }
 
 td {
@@ -51,34 +52,20 @@ td {
   padding: 4px;
   text-align: center;
   font-size: 11px;
-  height: 30px;
+  height: 28px;
 }
 
-tr:nth-child(even) td {
-  background-color: #fafafa;
-}
-
-/* coluna horário */
-.col-horario {
-  writing-mode: vertical-rl;
-  text-orientation: mixed;
-  font-weight: bold;
-  background: #dfe6e9 !important;
-  width: 35px;
-}
-
-/* fixar coluna */
-td:first-child, th:first-child {
-  position: sticky;
-  left: 0;
+/* COLUNA HORÁRIO */
+.horario {
   background: #ecf0f1;
-  z-index: 2;
+  font-weight: bold;
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
 }
 
-/* busca */
+/* BUSCA */
 .highlight {
-  background-color: #ffeaa7 !important;
-  font-weight: bold;
+  background: #ffeaa7;
 }
 </style>
 </head>
@@ -92,24 +79,18 @@ td:first-child, th:first-child {
   <input type="text" id="busca" placeholder="Buscar professor...">
 </div>
 
-<div class="card">
-  <table id="tabela"></table>
-</div>
+<div class="container" id="container"></div>
 
 <script>
 const PLANILHA_ID = "1j33kiPqwtzZNuvkBgYDaIiXZvVMY_J0qWAtRfYGdnD8";
 
-/* 🔥 SUAS SEMANAS (adicione as outras depois) */
 const SEMANAS = {
-  1: "1579045633",
-  2: "491689833",
-  3: "1240467307",
-  4: "2044568281"
+  1: { gid: "1579045633", inicio: "2026-04-27" },
+  2: { gid: "491689833", inicio: "2026-05-04" }
 };
 
 // montar select
 const select = document.getElementById("semana");
-
 Object.keys(SEMANAS).forEach(num => {
   const opt = document.createElement("option");
   opt.value = num;
@@ -117,81 +98,84 @@ Object.keys(SEMANAS).forEach(num => {
   select.appendChild(opt);
 });
 
-// carregar tabela
-function carregarTabela() {
-  const semana = document.getElementById("semana").value;
-  const gid = SEMANAS[semana];
+// função data
+function adicionarDias(data, dias) {
+  const d = new Date(data);
+  d.setDate(d.getDate() + dias);
+  return d.toISOString().split("T")[0];
+}
 
-  if (!gid) {
-    document.getElementById("tabela").innerHTML = "<tr><td>Semana não configurada</td></tr>";
-    return;
-  }
+// carregar dados
+function carregar() {
+  const semana = document.getElementById("semana").value;
+  const { gid, inicio } = SEMANAS[semana];
 
   const url = `https://docs.google.com/spreadsheets/d/${PLANILHA_ID}/gviz/tq?tqx=out:json&gid=${gid}`;
 
   fetch(url)
-    .then(res => res.text())
-    .then(text => {
-      try {
-        const json = JSON.parse(text.substring(47).slice(0, -2));
-        montarTabela(json.table);
-      } catch {
-        document.getElementById("tabela").innerHTML = "<tr><td>Erro ao ler dados</td></tr>";
-      }
-    })
-    .catch(() => {
-      document.getElementById("tabela").innerHTML = "<tr><td>Erro de conexão</td></tr>";
+    .then(r => r.text())
+    .then(t => {
+      const json = JSON.parse(t.substring(47).slice(0, -2));
+      montar(json.table, inicio);
     });
 }
 
-// montar tabela
-function montarTabela(table) {
-  const tabela = document.getElementById("tabela");
-  tabela.innerHTML = "";
+// montar layout
+function montar(table, inicioSemana) {
+  const container = document.getElementById("container");
+  container.innerHTML = "";
 
-  const trHead = document.createElement("tr");
+  const dias = ["Seg", "Ter", "Qua", "Qui", "Sex"];
 
-  const thHorario = document.createElement("th");
-  thHorario.textContent = "Horário";
-  trHead.appendChild(thHorario);
+  // identificar turmas (colunas)
+  const turmas = table.cols.slice(1).map(c => c.label);
 
-  table.cols.forEach((col, index) => {
-    if (index === 0) return;
+  turmas.forEach((turma, indexTurma) => {
+    const bloco = document.createElement("div");
+    bloco.className = "bloco";
 
-    const th = document.createElement("th");
-    th.textContent = col.label || "";
-    trHead.appendChild(th);
-  });
+    const tabela = document.createElement("table");
 
-  tabela.appendChild(trHead);
+    // cabeçalho
+    let thead = `<tr><th class="horario">Horário</th>`;
 
-  table.rows.forEach(row => {
-    const tr = document.createElement("tr");
-
-    const horario = row.c[0] ? row.c[0].v : "";
-
-    const tdHorario = document.createElement("td");
-    tdHorario.className = "col-horario";
-    tdHorario.textContent = horario;
-
-    tr.appendChild(tdHorario);
-
-    row.c.forEach((cell, index) => {
-      if (index === 0) return;
-
-      const td = document.createElement("td");
-      const valor = cell ? cell.v : "";
-
-      td.textContent = valor;
-
-      if (valor) {
-        td.setAttribute("data-prof", valor.toUpperCase());
-      }
-
-      tr.appendChild(td);
+    dias.forEach((d, i) => {
+      const data = adicionarDias(inicioSemana, i);
+      thead += `<th>${d}<br>${data.slice(5)}</th>`;
     });
 
-    tabela.appendChild(tr);
+    thead += "</tr>";
+
+    let tbody = "";
+
+    table.rows.forEach(row => {
+      const horario = row.c[0] ? row.c[0].v : "";
+
+      tbody += `<tr><td class="horario">${horario}</td>`;
+
+      dias.forEach((d, i) => {
+        const cell = row.c[indexTurma + 1];
+        const valor = cell ? cell.v : "";
+
+        if (valor) {
+          tbody += `<td data-prof="${valor.toUpperCase()}">${valor}</td>`;
+        } else {
+          tbody += `<td></td>`;
+        }
+      });
+
+      tbody += "</tr>";
+    });
+
+    tabela.innerHTML = thead + tbody;
+
+    const titulo = document.createElement("h3");
+    titulo.textContent = turma;
+
+    bloco.appendChild(titulo);
+    bloco.appendChild(tabela);
+
+    container.appendChild(bloco);
   });
 }
 
@@ -202,8 +186,6 @@ document.getElementById("busca").addEventListener("input", function() {
   document.querySelectorAll("td").forEach(td => {
     td.classList.remove("highlight");
 
-    if (!valor) return;
-
     if (td.dataset.prof && td.dataset.prof.includes(valor)) {
       td.classList.add("highlight");
     }
@@ -211,10 +193,10 @@ document.getElementById("busca").addEventListener("input", function() {
 });
 
 // eventos
-document.getElementById("semana").addEventListener("change", carregarTabela);
+document.getElementById("semana").addEventListener("change", carregar);
 
 // iniciar
-carregarTabela();
+carregar();
 </script>
 
 </body>
