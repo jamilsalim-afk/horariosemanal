@@ -1,221 +1,164 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
-<meta charset="UTF-8">
-<title>Horários Institucionais</title>
-
-<style>
-body {
-  font-family: Arial;
-  margin: 20px;
-  background: #f4f6f9;
-}
-
-/* HEADER FIXO */
-.header {
-  background: #1f2d3d;
-  color: white;
-  padding: 15px;
-  border-radius: 10px;
-  margin-bottom: 15px;
-}
-
-.header h2 {
-  margin: 0;
-}
-
-.header small {
-  opacity: 0.8;
-}
-
-/* CONTROLES */
-.controls {
-  margin: 10px 0 20px 0;
-}
-
-select, input {
-  padding: 8px;
-  margin-right: 10px;
-}
-
-/* TABELA */
-.card {
-  background: white;
-  padding: 10px;
-  border-radius: 10px;
-  overflow-x: auto;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-}
-
-table {
-  border-collapse: collapse;
-  width: 100%;
-}
-
-/* CABEÇALHO */
-th {
-  background: #2c3e50;
-  color: white;
-  padding: 8px;
-  font-size: 12px;
-}
-
-/* CÉLULAS */
-td {
-  border: 1px solid #ddd;
-  padding: 6px;
-  font-size: 12px;
-  text-align: center;
-  height: 36px;
-}
-
-/* HORÁRIO */
-td:first-child {
-  background: #ecf0f1;
-  font-weight: bold;
-}
-
-/* BUSCA FOCO */
-.dim {
-  opacity: 0.2;
-}
-
-.highlight {
-  background: #ffeaa7;
-}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Horários IFRO - Cacoal</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
+    <style>
+        :root { --primary: #28a745; --bg: #f8f9fa; }
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; margin: 20px; background-color: var(--bg); }
+        .controls { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        select, input, button { padding: 10px; border-radius: 5px; border: 1px solid #ddd; font-size: 14px; }
+        button { background-color: var(--primary); color: white; border: none; cursor: pointer; font-weight: bold; }
+        .header-tabela { text-align: center; font-weight: bold; margin: 20px 0; font-size: 1.2em; text-transform: uppercase; color: #155724; }
+        .table-container { overflow-x: auto; background: white; border-radius: 8px; border: 1px solid #dee2e6; }
+        table { width: 100%; border-collapse: collapse; min-width: 1000px; }
+        th, td { border: 1px solid #000; padding: 8px 4px; text-align: center; font-size: 11px; }
+        th { background-color: #f1f3f5; font-weight: bold; }
+        .destaque { background-color: #ffff00 !important; font-weight: bold; color: #000 !important; }
+        .opaco { opacity: 0.2; filter: grayscale(1); }
+        .no-print { display: block; }
+        @media print { .no-print { display: none; } }
+    </style>
 </head>
-
 <body>
 
-<!-- 🔥 HEADER FIXO (TÍTULO + DATA FORA DA PLANILHA) -->
-<div class="header">
-  <h2 id="tituloCurso">Técnico</h2>
-  <small id="periodo">27/04 a 02/05</small>
+<div class="no-print">
+    <h2>🗓️ Sistema de Horários - IFRO</h2>
+    <div class="controls">
+        <select id="nivel" onchange="atualizarSemanas()">
+            <option value="">Selecione o Nível</option>
+            <option value="Integrado">Técnico Integrado</option>
+            <option value="Superior1">Superior - 1º Semestre</option>
+            <option value="Superior2">Superior - 2º Semestre</option>
+        </select>
+
+        <select id="semana" onchange="buscarDados()">
+            <option value="">Selecione a Semana</option>
+        </select>
+
+        <input type="text" id="buscaProfessor" placeholder="Filtrar Professor..." oninput="aplicarFiltro()">
+        <button onclick="baixarPDF()">Gerar PDF (A4 Paisagem)</button>
+    </div>
 </div>
 
-<!-- CONTROLES -->
-<div class="controls">
-  <select id="nivel">
-    <option value="tecnico">Técnico</option>
-    <option value="superior">Superior</option>
-  </select>
-
-  <input type="text" id="busca" placeholder="Buscar professor...">
-</div>
-
-<!-- TABELA -->
-<div class="card">
-  <table id="tabela"></table>
+<div id="areaImpressao">
+    <div id="tituloDinamico" class="header-tabela"></div>
+    <div class="table-container">
+        <table id="tabelaHorario"></table>
+    </div>
 </div>
 
 <script>
+    const SPREADSHEET_ID = "1j33kiPqwtzZNuvkBgYDaIiXZvVMY_J0qWAtRfYGdnD8";
 
-const PLANILHA_ID = "1j33kiPqwtzZNuvkBgYDaIiXZvVMY_J0qWAtRfYGdnD8";
+    // Mapeamento das semanas e GIDs
+    const cronograma = {
+        "Integrado": [
+            { nome: "09.02 a 13.02", gid: "1579045633" },
+            { nome: "16.02 a 20.02", gid: "491689833" }
+        ],
+        "Superior1": [
+            { nome: "Semana 01", gid: "0" }
+        ],
+        "Superior2": [
+            { nome: "Semana 01", gid: "CADASTRE_O_GID" }
+        ]
+    };
 
-const CONFIG = {
-  tecnico: {
-    gid: "1579045633",
-    titulo: "Técnico",
-    periodo: "27/04 a 02/05"
-  },
-  superior: {
-    gid: "491689833",
-    titulo: "Superior",
-    periodo: "27/04 a 02/05"
-  }
-};
-
-// 🔥 CARREGAR
-function carregar() {
-
-  const nivel = document.getElementById("nivel").value;
-  const cfg = CONFIG[nivel];
-
-  // atualiza header (TIRADO DA PLANILHA)
-  document.getElementById("tituloCurso").innerText = cfg.titulo;
-  document.getElementById("periodo").innerText = cfg.periodo;
-
-  // busca só o necessário (gid específico)
-  const url = `https://docs.google.com/spreadsheets/d/${PLANILHA_ID}/gviz/tq?tqx=out:json&gid=${cfg.gid}`;
-
-  fetch(url)
-    .then(r => r.text())
-    .then(t => {
-      const json = JSON.parse(t.substring(47).slice(0, -2));
-      montar(json.table);
-    });
-}
-
-// 🔥 LIMPEZA REAL DA TABELA
-function montar(table) {
-
-  const tabela = document.getElementById("tabela");
-  tabela.innerHTML = "";
-
-  const turmas = table.cols.slice(1, -1).map(c => c.label); 
-  // 🔥 remove última coluna (LIXO)
-
-  let thead = "<tr><th>Horário</th>";
-
-  turmas.forEach(t => {
-    thead += `<th>${t}</th>`;
-  });
-
-  thead += "</tr>";
-
-  let tbody = "";
-
-  table.rows.slice(0, -2).forEach(row => {
-    // 🔥 remove últimas linhas (LIXO)
-
-    const horario = row.c[0] ? row.c[0].v : "";
-
-    tbody += "<tr>";
-    tbody += `<td>${horario}</td>`;
-
-    turmas.forEach((_, i) => {
-
-      const cell = row.c[i + 1];
-      const valor = cell ? cell.v : "";
-
-      tbody += valor
-        ? `<td data-prof="${valor.toUpperCase()}">${valor}</td>`
-        : `<td></td>`;
-    });
-
-    tbody += "</tr>";
-  });
-
-  tabela.innerHTML = thead + tbody;
-}
-
-// 🔥 BUSCA FOCO
-document.getElementById("busca").addEventListener("input", function() {
-  const valor = this.value.toUpperCase();
-
-  document.querySelectorAll("td").forEach(td => {
-
-    td.classList.remove("highlight");
-    td.style.opacity = "1";
-
-    if (!valor) return;
-
-    if (td.dataset.prof && td.dataset.prof.includes(valor)) {
-      td.classList.add("highlight");
-    } else {
-      td.style.opacity = "0.2";
+    function atualizarSemanas() {
+        const nivel = document.getElementById('nivel').value;
+        const select = document.getElementById('semana');
+        select.innerHTML = '<option value="">Selecione a Semana</option>';
+        if (nivel && cronograma[nivel]) {
+            cronograma[nivel].forEach(s => {
+                let opt = document.createElement('option');
+                opt.value = s.gid;
+                opt.textContent = s.nome;
+                select.appendChild(opt);
+            });
+        }
     }
-  });
-});
 
-// 🔥 TROCA DE NÍVEL
-document.getElementById("nivel").addEventListener("change", carregar);
+    async function buscarDados() {
+        const gid = document.getElementById('semana').value;
+        const nivel = document.getElementById('nivel').value;
+        if (!gid) return;
 
-// iniciar
-carregar();
+        // URL da API de Visualização do Google (CORS-friendly para arquivos com link público)
+        const url = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:csv&gid=${gid}`;
 
+        try {
+            const response = await fetch(url);
+            const csvData = await response.text();
+            const rows = processarCSV(csvData);
+            montarTabela(rows);
+            
+            const semanaTexto = document.getElementById('semana').selectedOptions[0].text;
+            document.getElementById('tituloDinamico').innerText = 
+                `HORÁRIO SEMANAL ${nivel.toUpperCase()} - SEMANA ${semanaTexto}`;
+        } catch (error) {
+            alert("Certifique-se de que a planilha está configurada como 'Qualquer pessoa com o link pode ler' no botão Compartilhar.");
+        }
+    }
+
+    function processarCSV(csv) {
+        return csv.split('\n').map(row => {
+            // Regex para separar vírgulas ignorando as que estão dentro de aspas
+            return row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/)
+                      .map(cell => cell.replace(/^"|"$/g, '').trim());
+        });
+    }
+
+    function montarTabela(dados) {
+        const tabela = document.getElementById('tabelaHorario');
+        tabela.innerHTML = "";
+        dados.forEach((linha, i) => {
+            const tr = document.createElement('tr');
+            linha.forEach(celula => {
+                const el = document.createElement(i === 0 ? 'th' : 'td');
+                el.textContent = celula;
+                tr.appendChild(el);
+            });
+            tabela.appendChild(tr);
+        });
+    }
+
+    function aplicarFiltro() {
+        const termo = document.getElementById('buscaProfessor').value.toLowerCase();
+        const celulas = document.querySelectorAll('#tabelaHorario td');
+        celulas.forEach(td => {
+            if (termo && td.innerText.toLowerCase().includes(termo)) {
+                td.classList.add('destaque'); td.classList.remove('opaco');
+            } else if (termo) {
+                td.classList.add('opaco'); td.classList.remove('destaque');
+            } else {
+                td.classList.remove('opaco', 'destaque');
+            }
+        });
+    }
+
+    function baixarPDF() {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF({ orientation: 'l', unit: 'mm', format: 'a4' });
+        const titulo = document.getElementById('tituloDinamico').innerText;
+        
+        doc.setFontSize(14);
+        doc.text(titulo, 15, 12);
+        
+        doc.autoTable({
+            html: '#tabelaHorario',
+            startY: 18,
+            theme: 'grid',
+            styles: { fontSize: 7, cellPadding: 1, lineColor: [0, 0, 0] },
+            headStyles: { fillColor: [240, 240, 240], textColor: 0 },
+            margin: { left: 5, right: 5 }
+        });
+        
+        doc.save(`${titulo}.pdf`);
+    }
 </script>
-
 </body>
 </html>
