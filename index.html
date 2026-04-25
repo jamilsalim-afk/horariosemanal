@@ -6,62 +6,67 @@
 
 <style>
 body {
-  font-family: Arial, sans-serif;
+  font-family: Arial;
   margin: 20px;
   background: #f4f6f9;
 }
 
-h2 {
-  margin-bottom: 10px;
+/* HEADER FIXO */
+.header {
+  background: #1f2d3d;
+  color: white;
+  padding: 15px;
+  border-radius: 10px;
+  margin-bottom: 15px;
+}
+
+.header h2 {
+  margin: 0;
+}
+
+.header small {
+  opacity: 0.8;
 }
 
 /* CONTROLES */
 .controls {
-  margin-bottom: 20px;
+  margin: 10px 0 20px 0;
 }
 
 select, input {
-  padding: 10px;
+  padding: 8px;
   margin-right: 10px;
-  border-radius: 8px;
-  border: 1px solid #ccc;
 }
 
-/* CONTAINER */
+/* TABELA */
 .card {
   background: white;
-  border-radius: 10px;
   padding: 10px;
-  box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+  border-radius: 10px;
   overflow-x: auto;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
 }
 
-/* TABELA PRINCIPAL */
 table {
   border-collapse: collapse;
   width: 100%;
-  min-width: 900px;
 }
 
-/* CABEÇALHO FIXO */
+/* CABEÇALHO */
 th {
-  position: sticky;
-  top: 0;
-  background: #1f2d3d;
+  background: #2c3e50;
   color: white;
-  font-size: 12px;
   padding: 8px;
-  z-index: 10;
-  border-bottom: 2px solid #3498db;
+  font-size: 12px;
 }
 
 /* CÉLULAS */
 td {
   border: 1px solid #ddd;
   padding: 6px;
-  text-align: center;
   font-size: 12px;
-  height: 38px;
+  text-align: center;
+  height: 36px;
 }
 
 /* HORÁRIO */
@@ -70,40 +75,36 @@ td:first-child {
   font-weight: bold;
 }
 
-/* HOVER (FOCO VISUAL) */
-td:hover {
-  background-color: #dff9fb !important;
-}
-
-/* DESTAQUE BUSCA */
-.highlight {
-  background-color: #ffeaa7 !important;
-  font-weight: bold;
-}
-
-/* MODO FOCO (JS controla opacidade) */
+/* BUSCA FOCO */
 .dim {
   opacity: 0.2;
 }
 
-/* MELHORIA MOBILE */
-@media (max-width: 768px) {
-  td, th {
-    font-size: 10px;
-    padding: 4px;
-  }
+.highlight {
+  background: #ffeaa7;
 }
 </style>
 </head>
 
 <body>
 
-<h2>Horários Institucionais</h2>
+<!-- 🔥 HEADER FIXO (TÍTULO + DATA FORA DA PLANILHA) -->
+<div class="header">
+  <h2 id="tituloCurso">Técnico</h2>
+  <small id="periodo">27/04 a 02/05</small>
+</div>
 
+<!-- CONTROLES -->
 <div class="controls">
+  <select id="nivel">
+    <option value="tecnico">Técnico</option>
+    <option value="superior">Superior</option>
+  </select>
+
   <input type="text" id="busca" placeholder="Buscar professor...">
 </div>
 
+<!-- TABELA -->
 <div class="card">
   <table id="tabela"></table>
 </div>
@@ -112,14 +113,31 @@ td:hover {
 
 const PLANILHA_ID = "1j33kiPqwtzZNuvkBgYDaIiXZvVMY_J0qWAtRfYGdnD8";
 
-/* 🔥 EXEMPLO: ajuste para sua realidade */
-const SEMANA_ATUAL = {
-  gid: "1579045633"
+const CONFIG = {
+  tecnico: {
+    gid: "1579045633",
+    titulo: "Técnico",
+    periodo: "27/04 a 02/05"
+  },
+  superior: {
+    gid: "491689833",
+    titulo: "Superior",
+    periodo: "27/04 a 02/05"
+  }
 };
 
-// 🔥 FUNÇÃO PRINCIPAL
+// 🔥 CARREGAR
 function carregar() {
-  const url = `https://docs.google.com/spreadsheets/d/${PLANILHA_ID}/gviz/tq?tqx=out:json&gid=${SEMANA_ATUAL.gid}`;
+
+  const nivel = document.getElementById("nivel").value;
+  const cfg = CONFIG[nivel];
+
+  // atualiza header (TIRADO DA PLANILHA)
+  document.getElementById("tituloCurso").innerText = cfg.titulo;
+  document.getElementById("periodo").innerText = cfg.periodo;
+
+  // busca só o necessário (gid específico)
+  const url = `https://docs.google.com/spreadsheets/d/${PLANILHA_ID}/gviz/tq?tqx=out:json&gid=${cfg.gid}`;
 
   fetch(url)
     .then(r => r.text())
@@ -129,13 +147,14 @@ function carregar() {
     });
 }
 
-// 🔥 MONTA TABELA (MODELO IFRO LIMPO)
+// 🔥 LIMPEZA REAL DA TABELA
 function montar(table) {
 
   const tabela = document.getElementById("tabela");
   tabela.innerHTML = "";
 
-  const turmas = table.cols.slice(1).map(c => c.label);
+  const turmas = table.cols.slice(1, -1).map(c => c.label); 
+  // 🔥 remove última coluna (LIXO)
 
   let thead = "<tr><th>Horário</th>";
 
@@ -147,55 +166,51 @@ function montar(table) {
 
   let tbody = "";
 
-  table.rows.forEach(row => {
+  table.rows.slice(0, -2).forEach(row => {
+    // 🔥 remove últimas linhas (LIXO)
 
     const horario = row.c[0] ? row.c[0].v : "";
 
-    tbody += `<tr>`;
+    tbody += "<tr>";
     tbody += `<td>${horario}</td>`;
 
-    turmas.forEach((turma, i) => {
+    turmas.forEach((_, i) => {
 
       const cell = row.c[i + 1];
       const valor = cell ? cell.v : "";
 
-      if (valor) {
-        tbody += `<td data-prof="${valor.toUpperCase()}">${valor}</td>`;
-      } else {
-        tbody += `<td></td>`;
-      }
+      tbody += valor
+        ? `<td data-prof="${valor.toUpperCase()}">${valor}</td>`
+        : `<td></td>`;
     });
 
-    tbody += `</tr>`;
+    tbody += "</tr>";
   });
 
   tabela.innerHTML = thead + tbody;
 }
 
-// 🔥 MODO FOCO (PROFESSOR)
-function ativarFoco(valor) {
+// 🔥 BUSCA FOCO
+document.getElementById("busca").addEventListener("input", function() {
+  const valor = this.value.toUpperCase();
 
   document.querySelectorAll("td").forEach(td => {
-    td.classList.remove("dim", "highlight");
 
-    if (!valor) {
-      td.style.opacity = "1";
-      return;
-    }
+    td.classList.remove("highlight");
+    td.style.opacity = "1";
 
-    if (td.dataset.prof && td.dataset.prof.includes(valor.toUpperCase())) {
-      td.style.opacity = "1";
+    if (!valor) return;
+
+    if (td.dataset.prof && td.dataset.prof.includes(valor)) {
       td.classList.add("highlight");
     } else {
       td.style.opacity = "0.2";
     }
   });
-}
-
-// 🔥 BUSCA
-document.getElementById("busca").addEventListener("input", function() {
-  ativarFoco(this.value);
 });
+
+// 🔥 TROCA DE NÍVEL
+document.getElementById("nivel").addEventListener("change", carregar);
 
 // iniciar
 carregar();
