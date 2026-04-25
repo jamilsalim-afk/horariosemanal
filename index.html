@@ -3,202 +3,168 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Grade IFRO - Cacoal</title>
+    <title>Grade IFRO - Correção de Renderização</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* Estilo ultra-compacto para maximizar espaço */
-        body { font-size: 11px; font-family: sans-serif; }
+        body { font-size: 10px; font-family: 'Inter', sans-serif; }
         .table-grade { table-layout: fixed; width: 100%; border-collapse: collapse; }
-        .dia-header-sticky { position: sticky; top: 0; z-index: 30; background: #166534; color: white; padding: 4px; font-weight: bold; text-align: center; }
-        .turmas-header-sticky { position: sticky; top: 22px; z-index: 20; background: #f3f4f6; }
+        
+        /* Ajuste do Header Sticky para não cobrir a primeira linha */
+        .dia-header { position: sticky; top: 0; z-index: 40; background: #166534; color: white; padding: 4px; font-weight: bold; text-align: center; height: 25px; }
+        .turmas-header { position: sticky; top: 25px; z-index: 30; background: #f3f4f6; height: 25px; }
+        
+        /* Células e Cards */
+        td { border: 1px solid #e5e7eb; vertical-align: top; height: 40px; padding: 1px; }
+        th { border: 1px solid #e5e7eb; font-size: 9px; }
         
         .aula-card { 
             border-left: 2px solid #166534;
-            padding: 1px 3px;
-            margin-bottom: 1px;
+            padding: 2px;
+            margin: 1px;
             background-color: #f0fdf4;
-            border-radius: 2px;
             line-height: 1.1;
-            overflow: hidden;
         }
-        .nome-disciplina { font-weight: 800; font-size: 8.5px; color: #14532d; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .nome-professor { font-size: 7.5px; color: #1d4ed8; display: block; }
-
-        .loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.8); display: none; justify-content: center; align-items: center; z-index: 100; }
-        .col-horario { width: 60px; font-size: 8px; text-align: center; font-weight: bold; color: #4b5563; }
-        th { border: 1px solid #e5e7eb; }
-        td { border: 1px solid #e5e7eb; vertical-align: top; height: 35px; }
+        .disc-label { font-weight: 800; color: #14532d; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .prof-label { color: #1d4ed8; font-size: 8px; display: block; }
+        
+        .col-horario { width: 55px; background: #f9fafb; text-align: center; font-weight: bold; font-size: 8px; color: #6b7280; }
+        .loading-overlay { position: fixed; inset: 0; background: rgba(255,255,255,0.8); display: none; justify-content: center; align-items: center; z-index: 100; }
     </style>
 </head>
-<body class="bg-gray-50 p-1">
+<body class="bg-gray-100 p-1">
 
-    <div id="loading" class="loading-overlay">
-        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-green-700"></div>
-    </div>
+    <div id="loading" class="loading-overlay"><div class="animate-spin rounded-full h-8 w-8 border-b-2 border-green-700"></div></div>
 
-    <div class="bg-white p-3 rounded shadow-sm mb-4 flex flex-wrap gap-3 items-end">
-        <div>
-            <label class="block text-[10px] font-bold text-gray-500 uppercase">Semana</label>
-            <input type="week" id="weekInputGeral" onchange="renderizarTudo()" class="border rounded p-1 text-[11px]">
-        </div>
-        <div>
-            <label class="block text-[10px] font-bold text-gray-500 uppercase">Nível</label>
-            <select id="nivelSelect" onchange="renderizarTudo()" class="border rounded p-1 text-[11px]">
-                <option value="tecnico">Técnico Integrado</option>
-                <option value="superior">Superior / Noturno</option>
+    <div class="bg-white p-2 rounded shadow-sm mb-4 flex flex-wrap gap-2 items-end">
+        <div class="flex gap-2">
+            <input type="week" id="weekInput" onchange="renderizar()" class="border rounded p-1 text-[10px]">
+            <select id="nivelSelect" onchange="renderizar()" class="border rounded p-1 text-[10px]">
+                <option value="tecnico">Técnico</option>
+                <option value="superior">Superior</option>
             </select>
         </div>
-        <input type="text" id="buscaGeral" oninput="renderizarTudo()" placeholder="Filtrar Professor..." class="border rounded p-1 text-[11px] flex-grow">
-        <button onclick="carregarDadosPlanilha()" class="bg-green-700 text-white px-4 py-1 rounded text-[11px] font-bold hover:bg-green-800 transition">
-            Sincronizar Planilha
-        </button>
+        <input type="text" id="buscaProf" oninput="renderizar()" placeholder="Filtrar professor..." class="border rounded p-1 text-[10px] flex-grow">
+        <button onclick="fetchData()" class="bg-green-700 text-white px-3 py-1 rounded text-[10px] font-bold">Sincronizar</button>
     </div>
 
-    <div id="gradeGeralRender" class="space-y-8"></div>
+    <div id="gradeContainer" class="space-y-6"></div>
 
     <script>
-        const SHEET_ID = '1j33kiPqwtzZNuvkBgYDaIiXZvVMY_J0qWAtRfYGdnD8';
-        const GID = '1589791808';
-        const CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${GID}`;
-
-        let dataStore = {};
+        const SHEET_URL = 'https://docs.google.com/spreadsheets/d/1j33kiPqwtzZNuvkBgYDaIiXZvVMY_J0qWAtRfYGdnD8/export?format=csv&gid=1589791808';
+        let rawData = [];
 
         const GABARITO = [
-            { h: "07:30", full: "07:30 - 08:20", t: "aula" }, 
-            { h: "08:20", full: "08:20 - 09:10", t: "aula" },
-            { h: "09:10", full: "09:10 - 09:30", t: "intervalo", l: "INTERVALO" },
-            { h: "09:30", full: "09:30 - 10:20", t: "aula" }, 
-            { h: "10:20", full: "10:20 - 11:10", t: "aula" },
-            { h: "11:10", full: "11:10 - 12:00", t: "aula" },
-            { h: "12:00", full: "12:00 - 13:50", t: "intervalo", l: "ALMOÇO" },
-            { h: "13:50", full: "13:50 - 14:40", t: "aula" }, 
-            { h: "14:40", full: "14:40 - 15:30", t: "aula" },
-            { h: "15:30", full: "15:30 - 15:50", t: "intervalo", l: "INTERVALO" },
-            { h: "15:50", full: "15:50 - 16:40", t: "aula" }, 
-            { h: "16:40", full: "16:40 - 17:30", t: "aula" },
-            { h: "17:30", full: "17:30 - 18:20", t: "aula" },
-            { h: "18:20", full: "18:20 - 19:00", t: "intervalo", l: "JANTAR" },
-            { h: "19:00", full: "19:00 - 19:50", t: "aula" }, 
-            { h: "19:50", full: "19:50 - 20:40", t: "aula" },
-            { h: "20:40", full: "20:40 - 20:50", t: "intervalo", l: "INTERVALO" },
-            { h: "20:50", full: "20:50 - 21:40", t: "aula" }, 
-            { h: "21:40", full: "21:40 - 22:30", t: "aula" }
+            { start: "07:30", label: "07:30 - 08:20", type: "aula" },
+            { start: "08:20", label: "08:20 - 09:10", type: "aula" },
+            { start: "09:10", label: "INTERVALO", type: "break" },
+            { start: "09:30", label: "09:30 - 10:20", type: "aula" },
+            { start: "10:20", label: "10:20 - 11:10", type: "aula" },
+            { start: "11:10", label: "11:10 - 12:00", type: "aula" },
+            { start: "12:00", label: "ALMOÇO", type: "break" },
+            { start: "13:50", label: "13:50 - 14:40", type: "aula" },
+            { start: "14:40", label: "14:40 - 15:30", type: "aula" },
+            { start: "15:30", label: "INTERVALO", type: "break" },
+            { start: "15:50", label: "15:50 - 16:40", type: "aula" },
+            { start: "16:40", label: "16:40 - 17:30", type: "aula" },
+            { start: "17:30", label: "17:30 - 18:20", type: "aula" },
+            { start: "18:20", label: "JANTAR", type: "break" },
+            { start: "19:00", label: "19:00 - 19:50", type: "aula" },
+            { start: "19:50", label: "19:50 - 20:40", type: "aula" },
+            { start: "20:40", label: "INTERVALO", type: "break" },
+            { start: "20:50", label: "20:50 - 21:40", type: "aula" },
+            { start: "21:40", label: "21:40 - 22:30", type: "aula" }
         ];
 
-        async function carregarDadosPlanilha() {
+        async function fetchData() {
             document.getElementById('loading').style.display = 'flex';
             try {
-                const response = await fetch(CSV_URL);
-                const csvText = await response.text();
-                parsearPlanilha(csvText);
-                renderizarTudo();
-            } catch (e) { alert("Erro ao acessar a planilha. Verifique se ela está pública."); }
+                const res = await fetch(SHEET_URL);
+                const csv = await res.text();
+                const lines = csv.split('\n').map(line => line.split(','));
+                
+                // Limpeza e processamento (Lógica corrigida: Lista Plana)
+                rawData = lines.slice(100).filter(l => l[0] && l[2]).map(l => ({
+                    date: formatarData(l[0]),
+                    time: l[1].trim().replace(/\s+/g, ''),
+                    turma: l[2].trim().replace(/"/g, ''),
+                    disc: l[3].trim().replace(/"/g, ''),
+                    prof: (l[4] || "A Definir").trim().replace(/"/g, '')
+                }));
+                renderizar();
+            } catch (e) { alert("Erro ao carregar dados."); }
             finally { document.getElementById('loading').style.display = 'none'; }
         }
 
-        function parsearPlanilha(csv) {
-            const linhas = csv.split('\n').map(l => l.split(','));
-            const newData = {};
-
-            // Começa da linha 101 (índice 100) conforme solicitado
-            for (let i = 100; i < linhas.length; i++) {
-                let [dataStr, horaStr, turmaStr, discStr, profStr] = linhas[i];
-                if (!dataStr || !turmaStr || dataStr.trim() === "") continue;
-
-                // Normalização da Data (YYYY-MM-DD)
-                const partes = dataStr.includes('/') ? dataStr.split('/') : dataStr.split('-');
-                const d = partes[0].trim().padStart(2, '0');
-                const m = partes[1].trim().padStart(2, '0');
-                let a = partes[2].trim();
-                if(a.length === 2) a = "20" + a;
-                const dataKey = `${a}-${m}-${d}`;
-
-                const turma = turmaStr.trim().replace(/"/g, '');
-                if (!newData[turma]) newData[turma] = { lessons: [] };
-                
-                newData[turma].lessons.push({
-                    dataKey: dataKey,
-                    // Remove espaços para facilitar a busca (ex: "07:30-08:20")
-                    time: horaStr.trim().replace(/\s+/g, ''), 
-                    disc: discStr.replace(/"/g, '').trim(),
-                    prof: profStr?.replace(/"/g, '').trim() || "A Definir"
-                });
-            }
-            dataStore = newData;
+        function formatarData(str) {
+            const p = str.includes('/') ? str.split('/') : str.split('-');
+            if(p.length < 3) return "";
+            return `${p[2].length === 2 ? '20'+p[2] : p[2]}-${p[1].padStart(2,'0')}-${p[0].padStart(2,'0')}`;
         }
 
-        function renderizarTudo() {
-            const weekVal = document.getElementById("weekInputGeral").value;
+        function renderizar() {
+            const weekVal = document.getElementById("weekInput").value;
             if (!weekVal) return;
 
-            const [ano, semana] = weekVal.split("-W").map(Number);
-            const dataSegunda = getMonday(semana, ano);
+            const [ano, sem] = weekVal.split("-W").map(Number);
+            const segunda = getMonday(sem, ano);
             const nivel = document.getElementById("nivelSelect").value;
-            const busca = document.getElementById("buscaGeral").value.toLowerCase();
-            const render = document.getElementById("gradeGeralRender");
+            const busca = document.getElementById("buscaProf").value.toLowerCase();
 
-            const turmasFiltradas = Object.keys(dataStore).filter(tId => {
-                const ehSup = /ads|pos|super|gestao/i.test(tId);
-                return nivel === "superior" ? ehSup : !ehSup;
-            }).sort();
+            // Identificar turmas únicas do nível selecionado
+            const turmas = [...new Set(rawData.map(d => d.turma))]
+                .filter(t => nivel === "superior" ? /ads|pos|super|gestao/i.test(t) : !/ads|pos|super|gestao/i.test(t))
+                .sort();
 
             let html = "";
-            const diasNome = ["SEGUNDA", "TERÇA", "QUARTA", "QUINTA", "SEXTA", "SÁBADO"];
+            const dias = ["SEGUNDA", "TERÇA", "QUARTA", "QUINTA", "SEXTA", "SÁBADO"];
 
             for (let i = 0; i < 6; i++) {
-                const diaLoop = new Date(dataSegunda);
-                diaLoop.setDate(dataSegunda.getDate() + i);
-                const d = String(diaLoop.getDate()).padStart(2, '0');
-                const m = String(diaLoop.getMonth() + 1).padStart(2, '0');
-                const dataRef = `${diaLoop.getFullYear()}-${m}-${d}`;
+                const diaAtual = new Date(segunda);
+                diaAtual.setDate(segunda.getDate() + i);
+                const dataRef = diaAtual.toISOString().split('T')[0];
 
                 html += `
-                <div class="bg-white shadow overflow-hidden rounded border border-gray-300">
-                    <div class="dia-header-sticky uppercase">${diasNome[i]} - ${d}/${m}</div>
+                <div class="bg-white rounded shadow-md overflow-hidden">
+                    <div class="dia-header uppercase">${dias[i]} - ${diaAtual.toLocaleDateString('pt-BR')}</div>
                     <div class="overflow-x-auto">
                         <table class="table-grade">
                             <thead>
-                                <tr class="turmas-header-sticky">
-                                    <th class="col-horario bg-gray-100">Horário</th>
-                                    ${turmasFiltradas.map(t => `<th class="p-1 text-[9px] uppercase truncate">${t}</th>`).join("")}
+                                <tr class="turmas-header">
+                                    <th class="col-horario">Horário</th>
+                                    ${turmas.map(t => `<th class="truncate p-1">${t}</th>`).join("")}
                                 </tr>
                             </thead>
                             <tbody>
-                                ${gerarLinhas(turmasFiltradas, dataRef, busca, nivel)}
+                                ${gerarCorpo(turmas, dataRef, busca, nivel)}
                             </tbody>
                         </table>
                     </div>
                 </div>`;
             }
-            render.innerHTML = html;
+            document.getElementById("gradeContainer").innerHTML = html;
         }
 
-        function gerarLinhas(turmas, dataRef, busca, nivel) {
-            // Filtra horários: se for técnico, para antes das 18:20
-            const slots = nivel === "tecnico" ? GABARITO.filter(s => s.h < "18:20") : GABARITO;
+        function gerarCorpo(turmas, dataRef, busca, nivel) {
+            const slots = nivel === "tecnico" ? GABARITO.filter(s => s.start < "18:20") : GABARITO;
 
             return slots.map(slot => {
-                if (slot.t === "intervalo") {
-                    return `<tr class="bg-gray-50"><td class="col-horario">${slot.full}</td><td colspan="${turmas.length}" class="text-center text-[8px] font-bold text-gray-400 italic uppercase">${slot.l}</td></tr>`;
+                if (slot.type === "break") {
+                    return `<tr class="bg-gray-50"><td class="col-horario">${slot.start}</td><td colspan="${turmas.length}" class="text-center font-bold text-gray-300 text-[8px] italic tracking-widest">${slot.label}</td></tr>`;
                 }
 
                 return `<tr>
-                    <td class="col-horario bg-gray-50">${slot.full}</td>
-                    ${turmas.map(tId => {
-                        let aulasHtml = "";
-                        dataStore[tId].lessons.forEach(aula => {
-                            // CONDIÇÃO MELHORADA: Se a data bate E o horário do gabarito (ex: 07:30) existe na string da planilha
-                            if (aula.dataKey === dataRef && aula.time.includes(slot.h)) {
-                                if (!busca || aula.prof.toLowerCase().includes(busca)) {
-                                    aulasHtml += `
-                                    <div class="aula-card">
-                                        <span class="nome-disciplina">${aula.disc}</span>
-                                        <span class="nome-professor">${aula.prof}</span>
-                                    </div>`;
-                                }
+                    <td class="col-horario">${slot.label}</td>
+                    ${turmas.map(t => {
+                        // Busca todas as aulas que batem com DATA, TURMA e HORÁRIO
+                        const aulas = rawData.filter(a => a.dataKey === dataRef && a.turma === t && a.time.includes(slot.start));
+                        let cellHtml = "";
+                        
+                        aulas.forEach(a => {
+                            if (!busca || a.prof.toLowerCase().includes(busca)) {
+                                cellHtml += `<div class="aula-card"><span class="disc-label">${a.disc}</span><span class="prof-label">${a.prof}</span></div>`;
                             }
                         });
-                        return `<td class="p-0.5">${aulasHtml}</td>`;
+                        return `<td>${cellHtml}</td>`;
                     }).join("")}
                 </tr>`;
             }).join("");
