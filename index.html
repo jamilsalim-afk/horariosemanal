@@ -24,30 +24,30 @@
             overflow-x: auto; 
             background: white; 
             border-radius: 8px; 
-            border: 1px solid black;
+            border: 1px solid #ccc;
             margin-bottom: 30px;
             position: relative;
         }
 
-        table { width: 100%; border-collapse: collapse; font-size: 10px; table-layout: fixed; }
+        table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 10px; table-layout: fixed; }
         th, td { 
-            border: 1px solid black; 
+            border: 0.5px solid #ddd; 
             padding: 8px; 
             text-align: center; 
-            vertical-align: middle; /* Centralização vertical */
+            vertical-align: middle;
             word-wrap: break-word; 
             white-space: normal; 
-            height: 45px; /* Altura mínima para ajudar na centralização */
+            height: 45px;
         }
 
         .time-col { 
             position: sticky; 
             left: 0; 
             z-index: 100; 
-            background: #f1f3f4 !important; 
+            background: #f8f9fa !important; 
             font-weight: bold; 
             width: 85px; 
-            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+            box-shadow: 2px 0 5px rgba(0,0,0,0.05);
         }
 
         .day-divider { 
@@ -60,27 +60,26 @@
             z-index: 150;
         }
 
-        .header-row th { color: #000; position: sticky; top: 0; z-index: 10; }
-        .header-row th.time-col { z-index: 110; background: #444 !important; color: #fff; }
+        .header-row th { background: #444; color: #fff; position: sticky; top: 0; z-index: 10; }
 
-        /* Cores Originais dos Cursos */
-        .c-agroec { background-color: #90ee90 !important; } 
-        .c-agropec { background-color: #87ceeb !important; }
-        .c-info { background-color: #ffeb3b !important; } 
-        .c-geo { background-color: #dda0dd !important; }
-        .c-mat { background-color: #00ffff !important; } 
-        .c-agroneg { background-color: #deb887 !important; }
-        .c-zoo { background-color: #ffc0cb !important; } 
-        .c-agron { background-color: #7cfc00 !important; }
+        /* Cores Suaves (Layout HTML) */
+        .c-agroec { background-color: #e8f5e9 !important; } 
+        .c-agropec { background-color: #e3f2fd !important; }
+        .c-info { background-color: #fff8e1 !important; } 
+        .c-geo { background-color: #f3e5f5 !important; }
+        .c-mat { background-color: #e0f7fa !important; } 
+        .c-agroneg { background-color: #efebe9 !important; }
+        .c-zoo { background-color: #fce4ec !important; } 
+        .c-agron { background-color: #f1f8e9 !important; }
 
-        /* Estilos de Célula Especiais */
-        .intervalo { background-color: #e0e0e0 !important; color: #333; font-weight: bold; }
-        .almoco-jantar { background-color: #bdbdbd !important; color: black; font-weight: bold; text-transform: uppercase; }
-        .aula-extra { background-color: #b3e5fc !important; } /* [+] Azul claro */
-        .aula-asterisco { background-color: #616161 !important; color: white !important; } /* * Cinza Escuro */
+        /* Destaques Especiais */
+        .intervalo { background-color: #f1f1f1 !important; color: #666; font-style: italic; }
+        .almoco-jantar { background-color: #eeeeee !important; font-weight: bold; }
+        .aula-extra { background-color: #e1f5fe !important; border: 1px dashed #03a9f4 !important; } 
+        .aula-asterisco { background-color: #424242 !important; color: white !important; } 
 
         .highlight { background-color: #fbc02d !important; font-weight: bold; border: 2px solid #000; color: black !important; }
-        .opaco { opacity: 0.1; }
+        .opaco { opacity: 0.2; }
     </style>
 </head>
 <body>
@@ -93,7 +92,7 @@
         </select>
         <select id="selectSemana" onchange="renderizarTabela()"></select>
         <input type="text" id="searchProf" class="search-box" placeholder="🔍 Buscar Professor..." onkeyup="filtrarProfessor()">
-        <button class="btn-pdf" onclick="exportarPDF()">📄 PDF Oficial</button>
+        <button class="btn-pdf" onclick="exportarPDF()">📄 PDF (Bordas Pretas)</button>
     </div>
 </div>
 
@@ -141,17 +140,21 @@
         } catch (e) { alert("Erro ao carregar dados."); }
     }
 
-    function getCursoInfo(t) {
+    // Cores para o PDF (Sólidas) e HTML (Suaves)
+    function getCursoInfo(t, isPdf = false) {
         t = t.toUpperCase();
-        if (t.includes("AGROEC")) return { cl: "c-agroec", rgb: [144, 238, 144] };
-        if (t.includes("AGROPEC")) return { cl: "c-agropec", rgb: [135, 206, 235] };
-        if (t.includes("INFO")) return { cl: "c-info", rgb: [255, 235, 59] };
-        if (t.includes("GEO")) return { cl: "c-geo", rgb: [221, 160, 221] };
-        if (t.includes("MAT")) return { cl: "c-mat", rgb: [0, 255, 255] };
-        if (t.includes("AGRONEG")) return { cl: "c-agroneg", rgb: [222, 184, 135] };
-        if (t.includes("ZOO")) return { cl: "c-zoo", rgb: [255, 192, 203] };
-        if (t.includes("AGRON")) return { cl: "c-agron", rgb: [124, 252, 0] };
-        return { cl: "", rgb: [255, 255, 255] };
+        const colors = {
+            "AGROEC": isPdf ? [144, 238, 144] : "c-agroec",
+            "AGROPEC": isPdf ? [135, 206, 235] : "c-agropec",
+            "INFO": isPdf ? [255, 235, 59] : "c-info",
+            "GEO": isPdf ? [221, 160, 221] : "c-geo",
+            "MAT": isPdf ? [0, 255, 255] : "c-mat",
+            "AGRONEG": isPdf ? [222, 184, 135] : "c-agroneg",
+            "ZOO": isPdf ? [255, 192, 203] : "c-zoo",
+            "AGRON": isPdf ? [124, 252, 0] : "c-agron"
+        };
+        for (let key in colors) { if (t.includes(key)) return colors[key]; }
+        return isPdf ? [255, 255, 255] : "";
     }
 
     function processarDados() {
@@ -206,7 +209,7 @@
             html += `<div class="table-responsive"><table><thead>`;
             html += `<tr class="day-divider"><td colspan="${turmasAtivas.length + 1}">${diasS[dObj.getDay()]} - ${dia}</td></tr>`;
             html += `<tr class="header-row"><th class="time-col">Horário</th>`;
-            turmasAtivas.forEach(t => html += `<th class="${getCursoInfo(t).cl}">${t}</th>`);
+            turmasAtivas.forEach(t => html += `<th class="${getCursoInfo(t)}">${t}</th>`);
             html += `</tr></thead><tbody>`;
 
             dias[dia].forEach((row, rowIndex) => {
@@ -214,7 +217,6 @@
                 let rowClass = "";
                 let rowTextOverride = null;
 
-                // Regras de Almoço e Jantar
                 if (horario === "" || horario === "-") {
                     const prevRow = dias[dia][rowIndex-1] ? dias[dia][rowIndex-1][1] : "";
                     if (prevRow.includes("12:00")) { rowClass = "almoco-jantar"; rowTextOverride = "ALMOÇO"; }
@@ -229,10 +231,10 @@
                     let conteudo = (row[idx] || "-").replace(/^"|"$/g, '');
                     
                     let cellClass = "aula-cell";
-                    if (rowClass === "") {
+                    if (!rowClass) {
                         if (conteudo.endsWith("[+]")) cellClass += " aula-extra";
-                        if (conteudo.endsWith("*")) cellClass += " aula-asterisco";
-                        if (conteudo !== "-") cellClass += " " + getCursoInfo(tNome).cl;
+                        else if (conteudo.endsWith("*")) cellClass += " aula-asterisco";
+                        else if (conteudo !== "-") cellClass += " " + getCursoInfo(tNome);
                     }
 
                     html += `<td class="${cellClass}">${rowTextOverride ? "" : conteudo}</td>`;
@@ -293,7 +295,6 @@
                     const originalIdx = dadosGlobais[0].indexOf(tNome);
                     let val = (row[originalIdx] || "-").replace(/^"|"$/g, '');
                     if (hText === "ALMOÇO" || hText === "JANTAR") val = "";
-                    if (termo !== "" && !val.toUpperCase().includes(termo) && val !== "") val = "";
                     line.push(val);
                 });
                 return line;
@@ -303,28 +304,24 @@
                 head: [[ 'Horário', ...turmasAtivas ]],
                 body: tableBody,
                 startY: 25,
-                margin: { left: 1, right: 1 },
+                margin: { left: 2, right: 2 },
                 theme: 'grid',
                 styles: { fontSize: turmasAtivas.length > 10 ? 4.5 : 5.5, halign: 'center', valign: 'middle', cellPadding: 0.5, lineColor: [0,0,0] },
                 headStyles: { fillColor: [46, 125, 50], textColor: [255,255,255] },
                 didParseCell: function(data) {
                     const cellText = data.cell.text[0];
                     if (data.section === 'head' && data.column.index > 0) {
-                        data.cell.styles.fillColor = getCursoInfo(turmasAtivas[data.column.index - 1]).rgb;
+                        data.cell.styles.fillColor = getCursoInfo(turmasAtivas[data.column.index - 1], true);
                         data.cell.styles.textColor = [0,0,0];
                     }
                     if (data.section === 'body') {
-                        if (cellText === "ALMOÇO" || cellText === "JANTAR") data.cell.styles.fillColor = [189, 189, 189];
-                        if (cellText.toUpperCase().includes("INTERVALO")) data.cell.styles.fillColor = [224, 224, 224];
+                        if (cellText === "ALMOÇO" || cellText === "JANTAR") data.cell.styles.fillColor = [200, 200, 200];
+                        if (cellText.toUpperCase().includes("INTERVALO")) data.cell.styles.fillColor = [240, 240, 240];
                         
                         if (data.column.index > 0 && cellText !== "-" && cellText !== "") {
-                            if (cellText.endsWith("[+]")) data.cell.styles.fillColor = [179, 229, 252];
-                            else if (cellText.endsWith("*")) { data.cell.styles.fillColor = [97, 97, 97]; data.cell.styles.textColor = [255,255,255]; }
-                            else data.cell.styles.fillColor = getCursoInfo(turmasAtivas[data.column.index - 1]).rgb;
-                        }
-                        if (termo !== "" && cellText.toUpperCase().includes(termo)) {
-                            data.cell.styles.fillColor = [251, 192, 45];
-                            data.cell.styles.textColor = [0,0,0];
+                            if (cellText.endsWith("[+]")) data.cell.styles.fillColor = [225, 245, 254];
+                            else if (cellText.endsWith("*")) { data.cell.styles.fillColor = [66, 66, 66]; data.cell.styles.textColor = [255,255,255]; }
+                            else data.cell.styles.fillColor = getCursoInfo(turmasAtivas[data.column.index - 1], true);
                         }
                     }
                 }
