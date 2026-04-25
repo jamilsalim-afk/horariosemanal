@@ -8,57 +8,31 @@
     
     <style>
         :root { --primary: #2e7d32; --bg: #f4f7f6; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding: 0; overflow-x: hidden; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding: 0; }
         
-        .header-sticky { position: sticky; top: 0; z-index: 2000; background: var(--bg); padding: 10px 15px; }
+        .header-sticky { position: sticky; top: 0; z-index: 1000; background: var(--bg); padding: 10px 15px; }
         .controls-card { background: white; padding: 15px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; align-items: center; }
         
         select, .search-box, .btn-pdf { padding: 8px; border-radius: 6px; border: 1px solid #ddd; font-size: 13px; outline: none; }
         .search-box { width: 220px; border: 2px solid var(--primary); }
         .btn-pdf { background: #d32f2f; color: white; border: none; cursor: pointer; font-weight: bold; }
 
-        .week-container { padding: 15px; width: 100%; box-sizing: border-box; }
-        
-        .table-responsive { 
-            width: 100%; overflow-x: auto; background: white; border-radius: 8px; 
-            border: 1px solid #ccc; margin-bottom: 30px; position: relative;
-        }
+        .week-container { padding: 15px; }
+        .table-responsive { width: 100%; overflow-x: auto; background: white; border-radius: 8px; margin-bottom: 30px; }
 
         table { width: 100%; border-collapse: collapse; font-size: 10px; table-layout: fixed; }
-        th, td { 
-            border: 0.5px solid #eee; padding: 8px; text-align: center; 
-            vertical-align: middle; word-wrap: break-word; height: 45px; color: #333; 
-        }
-
-        /* Coluna de Horário Fixa */
-        .time-col { 
-            position: sticky; left: 0; z-index: 100; background: #f9f9f9 !important; 
-            font-weight: bold; width: 85px; border-right: 1px solid #ddd !important;
-        }
-
-        .day-divider { background: var(--primary); color: white; font-weight: bold; font-size: 12px; position: sticky; left: 0; z-index: 150; }
+        th, td { border: 1px solid #bbb; padding: 6px; text-align: center; word-wrap: break-word; white-space: normal; overflow: hidden; }
         
-        .header-row th { background: #444; color: #fff; position: sticky; top: 0; z-index: 10; border: 0.5px solid #555; }
+        .c-agroec { background-color: #e8f5e9 !important; } .c-agropec { background-color: #e3f2fd !important; }
+        .c-info { background-color: #fff8e1 !important; } .c-geo { background-color: #f3e5f5 !important; }
+        .c-mat { background-color: #e0f7fa !important; } .c-agroneg { background-color: #efebe9 !important; }
+        .c-zoo { background-color: #fce4ec !important; } .c-agron { background-color: #f1f8e9 !important; }
 
-        /* Cores SUAVES para o HTML (Estilo Pastel) */
-        .c-agroec { background-color: #e8f5e9 !important; } 
-        .c-agropec { background-color: #e3f2fd !important; }
-        .c-info { background-color: #fff8e1 !important; } 
-        .c-geo { background-color: #f3e5f5 !important; }
-        .c-mat { background-color: #e0f7fa !important; } 
-        .c-agroneg { background-color: #efebe9 !important; }
-        .c-zoo { background-color: #fce4ec !important; } 
-        .c-agron { background-color: #f1f8e9 !important; }
-
-        /* Intervalos e Refeições */
-        .intervalo { background-color: #f1f1f1 !important; color: #666; font-style: italic; font-weight: bold; }
-        .almoco-jantar { background-color: #e0e0e0 !important; font-weight: bold; color: #444; }
-        
-        .aula-extra { background-color: #e1f5fe !important; border: 1px dashed #81d4fa !important; } 
-        .aula-asterisco { background-color: #424242 !important; color: white !important; } 
-
-        .highlight { background-color: #fbc02d !important; font-weight: bold; border: 2px solid #000; color: #000 !important; }
-        .opaco { opacity: 0.2; }
+        .day-divider { background: var(--primary); color: white; font-weight: bold; font-size: 12px; }
+        .time-col { font-weight: bold; width: 85px; background: #f1f3f4; }
+        .highlight { background-color: #fbc02d !important; font-weight: bold; border: 2px solid #000; }
+        .opaco { opacity: 0.1; }
+        .intervalo { background: #f9f9f9; color: #aaa; font-style: italic; }
     </style>
 </head>
 <body>
@@ -71,12 +45,12 @@
         </select>
         <select id="selectSemana" onchange="renderizarTabela()"></select>
         <input type="text" id="searchProf" class="search-box" placeholder="🔍 Buscar Professor..." onkeyup="filtrarProfessor()">
-        <button class="btn-pdf" onclick="exportarPDF()">📄 Gerar PDF Oficial</button>
+        <button class="btn-pdf" onclick="exportarPDF()">📄 PDF Oficial</button>
     </div>
 </div>
 
 <div class="week-container">
-    <div id="tabelaHorario"></div>
+    <div class="table-responsive" id="tabelaHorario"></div>
 </div>
 
 <script>
@@ -89,16 +63,23 @@
     let turmasDaPlanilha = [];
     let semanasAgrupadas = {};
 
+    // Função para tratar CSV respeitando vírgulas dentro de aspas
     function parseCSV(text) {
         const lines = text.split(/\r?\n/);
         return lines.map(line => {
             const result = [];
-            let current = '', inQuotes = false;
+            let current = '';
+            let inQuotes = false;
             for (let i = 0; i < line.length; i++) {
-                let char = line[i];
-                if (char === '"') inQuotes = !inQuotes;
-                else if (char === ',' && !inQuotes) { result.push(current.trim()); current = ''; }
-                else current += char;
+                char = line[i];
+                if (char === '"') {
+                    inQuotes = !inQuotes;
+                } else if (char === ',' && !inQuotes) {
+                    result.push(current.trim());
+                    current = '';
+                } else {
+                    current += char;
+                }
             }
             result.push(current.trim());
             return result;
@@ -108,6 +89,7 @@
     async function init() {
         const mod = document.getElementById('selectModalidade').value;
         const url = `https://docs.google.com/spreadsheets/d/${SHEETS[mod].id}/export?format=csv&gid=${SHEETS[mod].gid}`;
+        
         try {
             const response = await fetch(url);
             const csvText = await response.text();
@@ -116,47 +98,60 @@
         } catch (e) { alert("Erro ao carregar dados."); }
     }
 
-    // Cores: Sólidas para PDF, Pastel para HTML
-    function getCursoInfo(t, isPdf = false) {
+    function getCursoInfo(t) {
         t = t.toUpperCase();
-        const colors = {
-            "AGROEC": isPdf ? [144, 238, 144] : "c-agroec",
-            "AGROPEC": isPdf ? [135, 206, 235] : "c-agropec",
-            "INFO": isPdf ? [255, 235, 59] : "c-info",
-            "GEO": isPdf ? [221, 160, 221] : "c-geo",
-            "MAT": isPdf ? [0, 255, 255] : "c-mat",
-            "AGRONEG": isPdf ? [222, 184, 135] : "c-agroneg",
-            "ZOO": isPdf ? [255, 192, 203] : "c-zoo",
-            "AGRON": isPdf ? [124, 252, 0] : "c-agron"
-        };
-        for (let key in colors) { if (t.includes(key)) return colors[key]; }
-        return isPdf ? [255, 255, 255] : "";
+        if (t.includes("AGROEC")) return { cl: "c-agroec", rgb: [232, 245, 233] };
+        if (t.includes("AGROPEC")) return { cl: "c-agropec", rgb: [227, 242, 253] };
+        if (t.includes("INFO")) return { cl: "c-info", rgb: [255, 248, 225] };
+        if (t.includes("GEO")) return { cl: "c-geo", rgb: [243, 229, 245] };
+        if (t.includes("MAT")) return { cl: "c-mat", rgb: [224, 247, 250] };
+        if (t.includes("AGRONEG")) return { cl: "c-agroneg", rgb: [239, 235, 233] };
+        if (t.includes("ZOO")) return { cl: "c-zoo", rgb: [252, 228, 236] };
+        if (t.includes("AGRON")) return { cl: "c-agron", rgb: [241, 248, 233] };
+        return { cl: "", rgb: [255, 255, 255] };
     }
 
     function processarDados() {
         semanasAgrupadas = {};
         if (dadosGlobais.length === 0) return;
+        
+        // Remove aspas extras que o parser pode ter deixado e limpa turmas
         turmasDaPlanilha = dadosGlobais[0].slice(2).filter(t => t !== "").map(t => t.replace(/^"|"$/g, ''));
+
         let ultimaData = "";
         for (let i = 1; i < dadosGlobais.length; i++) {
             const row = [...dadosGlobais[i]];
             if (row[0] && row[0] !== "" && row[0] !== "-") ultimaData = row[0];
             row[0] = ultimaData;
             if (!row[0]) continue;
+
             const parts = row[0].split('/');
             if(parts.length < 3) continue;
             const dObj = new Date(parts[2], parts[1]-1, parts[0]);
             const diff = dObj.getDate() - dObj.getDay() + (dObj.getDay() === 0 ? -6 : 1);
             const segunda = new Date(dObj.setDate(diff)).toLocaleDateString('pt-BR');
+
             if (!semanasAgrupadas[segunda]) semanasAgrupadas[segunda] = { dias: {} };
             if (!semanasAgrupadas[segunda].dias[row[0]]) semanasAgrupadas[segunda].dias[row[0]] = [];
             semanasAgrupadas[segunda].dias[row[0]].push(row);
         }
+
         const select = document.getElementById('selectSemana');
         select.innerHTML = "";
         const sortedWeeks = Object.keys(semanasAgrupadas).sort((a,b) => a.split('/').reverse().join('').localeCompare(b.split('/').reverse().join('')));
-        sortedWeeks.forEach(s => select.innerHTML += `<option value="${s}">Semana de ${s}</option>`);
+        sortedWeeks.forEach(s => {
+            select.innerHTML += `<option value="${s}">Semana de ${s}</option>`;
+        });
         renderizarTabela();
+    }
+
+    function getTurmasAtivasNaSemana(diasDaSemana) {
+        return turmasDaPlanilha.filter(tNome => {
+            const idx = dadosGlobais[0].indexOf(tNome);
+            return Object.values(diasDaSemana).some(diaArray => 
+                diaArray.some(row => row[idx] && row[idx] !== "-" && !row[1].toUpperCase().includes("INTERVALO"))
+            );
+        });
     }
 
     function renderizarTabela() {
@@ -164,47 +159,31 @@
         if (!semanasAgrupadas[sem]) return;
         const dias = semanasAgrupadas[sem].dias;
         const container = document.getElementById('tabelaHorario');
-        const turmasAtivas = turmasDaPlanilha;
+        const turmasAtivas = getTurmasAtivasNaSemana(dias);
         
         let html = "";
         Object.keys(dias).forEach(dia => {
             const p = dia.split('/');
             const dObj = new Date(p[2], p[1]-1, p[0]);
-            const diasS = ["DOMINGO", "SEGUNDA-FEIRA", "TERÇA-FEIRA", "QUARTA-FEIRA", "QUINTA-FEIRA", "SEXTA-FEIRA", "SÁBADO"];
+            const diasSemana = ["DOMINGO", "SEGUNDA-FEIRA", "TERÇA-FEIRA", "QUARTA-FEIRA", "QUINTA-FEIRA", "SEXTA-FEIRA", "SÁBADO"];
             
-            html += `<div class="table-responsive"><table><thead>`;
-            html += `<tr class="day-divider"><td colspan="${turmasAtivas.length + 1}">${diasS[dObj.getDay()]} - ${dia}</td></tr>`;
-            html += `<tr class="header-row"><th class="time-col">Horário</th>`;
-            turmasAtivas.forEach(t => html += `<th class="${getCursoInfo(t)}">${t}</th>`);
+            html += `<table><thead><tr class="day-divider"><td colspan="${turmasAtivas.length + 1}">${diasSemana[dObj.getDay()]} - ${dia}</td></tr>`;
+            html += `<tr><th style="background:#444; color:#fff; width:85px">Horário</th>`;
+            turmasAtivas.forEach(t => html += `<th class="${getCursoInfo(t).cl}">${t}</th>`);
             html += `</tr></thead><tbody>`;
 
-            dias[dia].forEach((row, rowIndex) => {
-                const horario = row[1];
-                let rowClass = "";
-                let rowTextOverride = null;
-
-                if (horario === "" || horario === "-") {
-                    const prevRow = dias[dia][rowIndex-1] ? dias[dia][rowIndex-1][1] : "";
-                    if (prevRow.includes("12:00")) { rowClass = "almoco-jantar"; rowTextOverride = "ALMOÇO"; }
-                    else if (prevRow.includes("18:20")) { rowClass = "almoco-jantar"; rowTextOverride = "JANTAR"; }
-                }
-                if (horario.toUpperCase().includes("INTERVALO")) rowClass = "intervalo";
-
-                html += `<tr class="${rowClass}"><td class="time-col">${rowTextOverride || horario}</td>`;
+            dias[dia].forEach(row => {
+                const isInt = row[1].toUpperCase().includes("INTERVALO");
+                html += `<tr class="${isInt ? 'intervalo' : ''}"><td class="time-col">${row[1]}</td>`;
                 turmasAtivas.forEach(tNome => {
                     const idx = dadosGlobais[0].indexOf(tNome);
-                    let conteudo = (row[idx] || "-").replace(/^"|"$/g, '');
-                    let cellClass = "aula-cell";
-                    if (!rowClass) {
-                        if (conteudo.endsWith("[+]")) cellClass += " aula-extra";
-                        else if (conteudo.endsWith("*")) cellClass += " aula-asterisco";
-                        else if (conteudo !== "-") cellClass += " " + getCursoInfo(tNome);
-                    }
-                    html += `<td class="${cellClass}">${rowTextOverride ? "" : conteudo}</td>`;
+                    const conteudo = (row[idx] || "-").replace(/^"|"$/g, '');
+                    const cl = (conteudo !== "-" && !isInt) ? getCursoInfo(tNome).cl : "";
+                    html += `<td class="aula-cell ${cl}">${conteudo}</td>`;
                 });
                 html += `</tr>`;
             });
-            html += `</tbody></table></div>`;
+            html += `</tbody></table><br>`;
         });
         container.innerHTML = html;
         filtrarProfessor();
@@ -216,7 +195,7 @@
         for (let i = 0; i < cells.length; i++) {
             const c = cells[i];
             c.classList.remove('highlight', 'opaco');
-            if (termo !== "" && c.innerText !== "-" && c.innerText !== "") {
+            if (termo !== "" && c.innerText !== "-") {
                 if (c.innerText.toUpperCase().indexOf(termo) > -1) c.classList.add('highlight');
                 else c.classList.add('opaco');
             }
@@ -228,32 +207,33 @@
         const pdf = new jsPDF('l', 'mm', 'a4');
         const sem = document.getElementById('selectSemana').value;
         const diasObj = semanasAgrupadas[sem].dias;
-        const turmasAtivas = turmasDaPlanilha;
+        const turmasAtivas = getTurmasAtivasNaSemana(diasObj);
+        const termo = document.getElementById('searchProf').value.toUpperCase();
+        const mod = document.getElementById('selectModalidade').value;
 
         Object.keys(diasObj).forEach((dia, idx) => {
             if (idx > 0) pdf.addPage();
             const pageWidth = pdf.internal.pageSize.getWidth();
+            
             pdf.setFontSize(8); pdf.setFont(undefined, 'bold');
             pdf.text("INSTITUTO FEDERAL DE EDUCAÇÃO, CIÊNCIA E TECNOLOGIA - CAMPUS CACOAL", pageWidth/2, 10, { align: 'center' });
-            
+            pdf.setFontSize(7); pdf.setFont(undefined, 'normal');
+            pdf.text(`MODALIDADE: ${mod} | SEMANA DE ${sem}`, pageWidth/2, 14, { align: 'center' });
+
             const p = dia.split('/');
             const dObj = new Date(p[2], p[1]-1, p[0]);
             const diasS = ["DOMINGO", "SEGUNDA-FEIRA", "TERÇA-FEIRA", "QUARTA-FEIRA", "QUINTA-FEIRA", "SEXTA-FEIRA", "SÁBADO"];
+
             pdf.setFontSize(10); pdf.setTextColor(46, 125, 50);
             pdf.text(`${diasS[dObj.getDay()]} - ${dia}`, 7, 22);
 
-            const tableBody = diasObj[dia].map((row, rIdx) => {
-                const horario = row[1];
-                let hText = horario;
-                if (horario === "" || horario === "-") {
-                    const prev = diasObj[dia][rIdx-1] ? diasObj[dia][rIdx-1][1] : "";
-                    if (prev.includes("12:00")) hText = "ALMOÇO";
-                    else if (prev.includes("18:20")) hText = "JANTAR";
-                }
-                const line = [hText];
+            const tableBody = diasObj[dia].map(row => {
+                const line = [row[1]];
                 turmasAtivas.forEach(tNome => {
                     const originalIdx = dadosGlobais[0].indexOf(tNome);
-                    line.push((row[originalIdx] || "-").replace(/^"|"$/g, ''));
+                    let val = (row[originalIdx] || "-").replace(/^"|"$/g, '');
+                    if (termo !== "" && !val.toUpperCase().includes(termo)) val = "";
+                    line.push(val);
                 });
                 return line;
             });
@@ -262,30 +242,29 @@
                 head: [[ 'Horário', ...turmasAtivas ]],
                 body: tableBody,
                 startY: 25,
+                margin: { left: 5, right: 5 },
                 theme: 'grid',
-                styles: { fontSize: 5, halign: 'center', valign: 'middle', lineColor: [0,0,0], lineWidth: 0.1 },
-                headStyles: { fillColor: [46, 125, 50], textColor: [255,255,255] },
+                styles: { fontSize: turmasAtivas.length > 10 ? 4.5 : 5.5, halign: 'center', cellPadding: 0.5, overflow: 'linebreak' },
+                headStyles: { fillColor: [46, 125, 50] },
                 didParseCell: function(data) {
-                    const cellText = data.cell.text[0];
                     if (data.section === 'head' && data.column.index > 0) {
-                        data.cell.styles.fillColor = getCursoInfo(turmasAtivas[data.column.index - 1], true);
+                        data.cell.styles.fillColor = getCursoInfo(turmasAtivas[data.column.index - 1]).rgb;
                         data.cell.styles.textColor = [0,0,0];
                     }
-                    if (data.section === 'body') {
-                        if (cellText === "ALMOÇO" || cellText === "JANTAR") data.cell.styles.fillColor = [180, 180, 180];
-                        else if (cellText.toUpperCase().includes("INTERVALO")) data.cell.styles.fillColor = [200, 200, 200];
-                        else if (data.column.index > 0 && cellText !== "-" && cellText !== "") {
-                            if (cellText.endsWith("[+]")) data.cell.styles.fillColor = [225, 245, 254];
-                            else if (cellText.endsWith("*")) { data.cell.styles.fillColor = [80, 80, 80]; data.cell.styles.textColor = [255,255,255]; }
-                            else data.cell.styles.fillColor = getCursoInfo(turmasAtivas[data.column.index - 1], true);
-                        }
+                    if (data.section === 'body' && data.column.index > 0 && data.cell.text[0] !== "-") {
+                        data.cell.styles.fillColor = getCursoInfo(turmasAtivas[data.column.index - 1]).rgb;
+                    }
+                    if (data.section === 'body' && termo !== "" && data.cell.text[0].toUpperCase().includes(termo)) {
+                        data.cell.styles.fillColor = [251, 192, 45];
                     }
                 }
             });
         });
-        pdf.save(`Horario_IFRO_Oficial.pdf`);
+        pdf.save(`Horario_${mod}_${sem.replace(/\//g,'-')}.pdf`);
     }
+
     window.onload = init;
 </script>
+
 </body>
 </html>
