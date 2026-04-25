@@ -2,104 +2,146 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Horário Integrado IFRO - 2026</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Horário Semanal Automático - IFRO</title>
     <style>
-        :root { --primary: #2e7d32; --accent: #fbc02d; --bg: #f4f7f6; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding: 20px; }
-        .container { max-width: 100%; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        h2 { color: var(--primary); text-align: center; }
+        :root { --primary: #2e7d32; --secondary: #fbc02d; --bg: #f4f7f6; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); margin: 0; padding: 20px; }
+        .container { max-width: 100%; margin: auto; }
+        h1, h2 { color: var(--primary); text-align: center; }
         
-        .search-box { text-align: center; margin-bottom: 20px; }
-        #search { padding: 10px; width: 300px; border: 2px solid var(--primary); border-radius: 20px; outline: none; }
+        .search-container { text-align: center; margin: 20px 0; }
+        #search { padding: 12px; width: 350px; border: 2px solid var(--primary); border-radius: 25px; outline: none; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
 
-        .table-wrapper { overflow-x: auto; margin-top: 20px; }
-        table { width: 100%; border-collapse: collapse; min-width: 1200px; font-size: 11px; }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: center; vertical-align: middle; }
-        th { background: var(--primary); color: white; position: sticky; top: 0; }
+        .week-section { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin-bottom: 50px; }
+        .week-title { background: var(--primary); color: white; padding: 15px; border-radius: 8px; margin-bottom: 20px; font-size: 1.2em; }
+
+        .table-wrapper { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; min-width: 1200px; font-size: 12px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
+        th { background: #eee; color: var(--primary); position: sticky; top: 0; }
         
-        .date-row { background: #e8f5e9; font-weight: bold; color: var(--primary); font-size: 14px; text-align: left; }
-        .time-cell { background: #fafafa; font-weight: bold; width: 100px; }
-        .highlight { background-color: var(--accent) !important; font-weight: bold; }
-        .intervalo { background-color: #f1f3f4; color: #999; font-style: italic; }
+        .day-header { background: #e8f5e9; font-weight: bold; color: var(--primary); }
+        .time-col { font-weight: bold; width: 100px; background: #f9f9f9; }
+        .highlight { background-color: var(--secondary) !important; font-weight: bold; color: black; }
+        .empty-cell { color: #ccc; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>Horário Integrado - Cursos Técnicos</h2>
+    <h1>Quadro de Horários por Semana</h1>
     
-    <div class="search-box">
-        <input type="text" id="search" placeholder="🔍 Pesquisar Professor..." onkeyup="filtrar()">
+    <div class="search-container">
+        <input type="text" id="search" placeholder="🔍 Digite o nome do Professor para filtrar..." onkeyup="filterTable()">
     </div>
 
-    <div id="tabelas-container" class="table-wrapper">
-        </div>
+    <div id="dashboard">
+        <p style="text-align:center">Carregando dados da planilha e organizando semanas...</p>
+    </div>
 </div>
 
 <script>
     const sheetID = '1j33kiPqwtzZNuvkBgYDaIiXZvVMY_J0qWAtRfYGdnD8';
     const gid = '1357770092';
-    const url = `https://docs.google.com/spreadsheets/d/${sheetID}/export?format=csv&gid=${gid}`;
+    const csvUrl = `https://docs.google.com/spreadsheets/d/${sheetID}/export?format=csv&gid=${gid}`;
 
-    async function loadData() {
-        const response = await fetch(url);
-        const data = await response.text();
-        const rows = data.split('\n').map(r => r.split(','));
-        
-        const container = document.getElementById('tabelas-container');
-        
-        // 1. Pegar Turmas da Linha 1 (Começa na Coluna C / Índice 2)
-        const turmas = rows[0].slice(2).filter(t => t.trim() !== "");
-        
-        let html = `<table><thead><tr><th>Data</th><th>Horário</th>`;
-        turmas.forEach(t => html += `<th>${t}</th>`);
-        html += `</tr></thead><tbody>`;
-
-        let currentData = "";
-
-        // 2. Processar Linhas (A partir da Linha 2)
-        for (let i = 1; i < rows.length; i++) {
-            const row = rows[i];
-            const dataCel = row[0]; // Coluna A
-            const horaCel = row[1]; // Coluna B
+    async function init() {
+        try {
+            const response = await fetch(csvUrl);
+            const csv = await response.text();
+            const rows = csv.split('\n').map(r => r.split(','));
             
-            if (!horaCel) continue;
-
-            // Se mudar a data, cria uma linha divisória
-            if (dataCel && dataCel !== currentData) {
-                currentData = dataCel;
-                html += `<tr class="date-row"><td colspan="${turmas.length + 2}">${currentData}</td></tr>`;
-            }
-
-            const isIntervalo = horaCel.toUpperCase().includes("INTERVALO");
-            html += `<tr class="${isIntervalo ? 'intervalo' : ''}">`;
-            html += `<td>${dataCel || ""}</td>`;
-            html += `<td class="time-cell">${horaCel}</td>`;
-
-            // 3. Preencher Disciplinas/Professores
-            for (let j = 2; j < (turmas.length + 2); j++) {
-                const conteudo = row[j] ? row[j].trim() : "-";
-                html += `<td class="aula-cell">${conteudo}</td>`;
-            }
-            html += `</tr>`;
+            organizarSemanas(rows);
+        } catch (err) {
+            document.getElementById('dashboard').innerHTML = "Erro ao conectar com a planilha. Verifique se ela está publicada na web.";
         }
-
-        html += `</tbody></table>`;
-        container.innerHTML = html;
     }
 
-    function filtrar() {
-        const termo = document.getElementById('search').value.toUpperCase();
-        document.querySelectorAll('.aula-cell').forEach(c => {
-            if (termo !== "" && c.innerText.toUpperCase().includes(termo)) {
-                c.classList.add('highlight');
+    function parseDate(dateStr) {
+        if (!dateStr) return null;
+        const parts = dateStr.split('/');
+        if (parts.length !== 3) return null;
+        return new Date(parts[2], parts[1] - 1, parts[0]);
+    }
+
+    function getMonday(d) {
+        d = new Date(d);
+        const day = d.getDay(),
+        diff = d.getDate() - day + (day === 0 ? -6 : 1); 
+        return new Date(d.setDate(diff)).toLocaleDateString('pt-BR');
+    }
+
+    function organizarSemanas(rows) {
+        const turmas = rows[0].slice(2).map(t => t.trim()).filter(t => t !== "");
+        const dadosPorSemana = {};
+
+        // Pula cabeçalho e organiza
+        for (let i = 1; i < rows.length; i++) {
+            const row = rows[i];
+            const dataOriginal = row[0].trim();
+            const dataObj = parseDate(dataOriginal);
+            
+            if (dataObj) {
+                const segundaFeira = getMonday(dataObj);
+                if (!dadosPorSemana[segundaFeira]) dadosPorSemana[segundaFeira] = [];
+                dadosPorSemana[segundaFeira].push(row);
+            }
+        }
+
+        renderizarTabelas(dadosPorSemana, turmas);
+    }
+
+    function renderizarTabelas(semanas, turmas) {
+        const dashboard = document.getElementById('dashboard');
+        dashboard.innerHTML = "";
+
+        Object.keys(semanas).sort().forEach(inicioSemana => {
+            const section = document.createElement('div');
+            section.className = 'week-section';
+            
+            let html = `<div class="week-title">Semana com início em: ${inicioSemana}</div>`;
+            html += `<div class="table-wrapper"><table><thead><tr><th>Dia / Horário</th>`;
+            turmas.forEach(t => html += `<th>${t}</th>`);
+            html += `</tr></thead><tbody>`;
+
+            let currentDay = "";
+            semanas[inicioSemana].forEach(row => {
+                const diaAtual = row[0];
+                const horario = row[1];
+
+                // Divisor de Dia
+                if (diaAtual !== currentDay) {
+                    currentDay = diaAtual;
+                    html += `<tr class="day-header"><td colspan="${turmas.length + 1}">${diaAtual}</td></tr>`;
+                }
+
+                html += `<tr><td class="time-col">${horario}</td>`;
+                for (let j = 2; j < (turmas.length + 2); j++) {
+                    const conteudo = row[j] ? row[j].trim() : "";
+                    html += `<td class="cell-data">${conteudo || '<span class="empty-cell">-</span>'}</td>`;
+                }
+                html += `</tr>`;
+            });
+
+            html += `</tbody></table></div>`;
+            section.innerHTML = html;
+            dashboard.appendChild(section);
+        });
+    }
+
+    function filterTable() {
+        const input = document.getElementById('search').value.toUpperCase();
+        document.querySelectorAll('.cell-data').forEach(td => {
+            if (input !== "" && td.innerText.toUpperCase().includes(input)) {
+                td.classList.add('highlight');
             } else {
-                c.classList.remove('highlight');
+                td.classList.remove('highlight');
             }
         });
     }
 
-    window.onload = loadData;
+    window.onload = init;
 </script>
 
 </body>
