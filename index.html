@@ -2,138 +2,141 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>Horários</title>
+<title>Horários Institucionais</title>
 
 <style>
 body {
-  font-family: Arial;
+  font-family: Arial, sans-serif;
   margin: 20px;
   background: #f4f6f9;
 }
 
+h2 {
+  margin-bottom: 10px;
+}
+
+/* CONTROLES */
 .controls {
   margin-bottom: 20px;
 }
 
 select, input {
-  padding: 8px;
+  padding: 10px;
   margin-right: 10px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
 }
 
-/* GRID PRINCIPAL */
-.container {
-  display: flex;
-  gap: 20px;
-  overflow-x: auto;
-}
-
-/* BLOCO DE TURMA */
-.bloco {
+/* CONTAINER */
+.card {
   background: white;
   border-radius: 10px;
   padding: 10px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+  overflow-x: auto;
 }
 
-/* TABELA */
+/* TABELA PRINCIPAL */
 table {
   border-collapse: collapse;
+  width: 100%;
+  min-width: 900px;
 }
 
+/* CABEÇALHO FIXO */
 th {
-  background: #2c3e50;
+  position: sticky;
+  top: 0;
+  background: #1f2d3d;
   color: white;
-  padding: 6px;
   font-size: 12px;
+  padding: 8px;
+  z-index: 10;
+  border-bottom: 2px solid #3498db;
 }
 
+/* CÉLULAS */
 td {
   border: 1px solid #ddd;
-  padding: 4px;
+  padding: 6px;
   text-align: center;
-  font-size: 11px;
-  height: 28px;
+  font-size: 12px;
+  height: 38px;
 }
 
-/* COLUNA HORÁRIO */
-.horario {
+/* HORÁRIO */
+td:first-child {
   background: #ecf0f1;
   font-weight: bold;
-  writing-mode: vertical-rl;
-  transform: rotate(180deg);
 }
 
-/* BUSCA */
+/* HOVER (FOCO VISUAL) */
+td:hover {
+  background-color: #dff9fb !important;
+}
+
+/* DESTAQUE BUSCA */
 .highlight {
-  background: #ffeaa7;
+  background-color: #ffeaa7 !important;
+  font-weight: bold;
+}
+
+/* MODO FOCO (JS controla opacidade) */
+.dim {
+  opacity: 0.2;
+}
+
+/* MELHORIA MOBILE */
+@media (max-width: 768px) {
+  td, th {
+    font-size: 10px;
+    padding: 4px;
+  }
 }
 </style>
 </head>
 
 <body>
 
-<h2>Horários</h2>
+<h2>Horários Institucionais</h2>
 
 <div class="controls">
-  <select id="semana"></select>
   <input type="text" id="busca" placeholder="Buscar professor...">
 </div>
 
-<div class="container" id="container"></div>
+<div class="card">
+  <table id="tabela"></table>
+</div>
 
 <script>
+
 const PLANILHA_ID = "1j33kiPqwtzZNuvkBgYDaIiXZvVMY_J0qWAtRfYGdnD8";
 
-const SEMANAS = {
-  1: { gid: "1579045633", inicio: "2026-04-27" },
-  2: { gid: "491689833", inicio: "2026-05-04" }
+/* 🔥 EXEMPLO: ajuste para sua realidade */
+const SEMANA_ATUAL = {
+  gid: "1579045633"
 };
 
-// montar select
-const select = document.getElementById("semana");
-Object.keys(SEMANAS).forEach(num => {
-  const opt = document.createElement("option");
-  opt.value = num;
-  opt.textContent = "Semana " + num;
-  select.appendChild(opt);
-});
-
-// função data
-function adicionarDias(data, dias) {
-  const d = new Date(data);
-  d.setDate(d.getDate() + dias);
-  return d.toISOString().split("T")[0];
-}
-
-// carregar dados
+// 🔥 FUNÇÃO PRINCIPAL
 function carregar() {
-  const semana = document.getElementById("semana").value;
-  const { gid, inicio } = SEMANAS[semana];
-
-  const url = `https://docs.google.com/spreadsheets/d/${PLANILHA_ID}/gviz/tq?tqx=out:json&gid=${gid}`;
+  const url = `https://docs.google.com/spreadsheets/d/${PLANILHA_ID}/gviz/tq?tqx=out:json&gid=${SEMANA_ATUAL.gid}`;
 
   fetch(url)
     .then(r => r.text())
     .then(t => {
       const json = JSON.parse(t.substring(47).slice(0, -2));
-      montar(json.table, inicio);
+      montar(json.table);
     });
 }
 
-// montar layout
+// 🔥 MONTA TABELA (MODELO IFRO LIMPO)
 function montar(table) {
-  const container = document.getElementById("container");
-  container.innerHTML = "";
 
-  const bloco = document.createElement("div");
-  bloco.className = "bloco";
-
-  const tabela = document.createElement("table");
+  const tabela = document.getElementById("tabela");
+  tabela.innerHTML = "";
 
   const turmas = table.cols.slice(1).map(c => c.label);
-  const horarios = table.rows;
 
-  // 🔥 CABEÇALHO (turmas)
   let thead = "<tr><th>Horário</th>";
 
   turmas.forEach(t => {
@@ -144,17 +147,16 @@ function montar(table) {
 
   let tbody = "";
 
-  // 🔥 LINHAS
-  horarios.forEach(row => {
+  table.rows.forEach(row => {
 
     const horario = row.c[0] ? row.c[0].v : "";
 
     tbody += `<tr>`;
-    tbody += `<td class="horario">${horario}</td>`;
+    tbody += `<td>${horario}</td>`;
 
-    turmas.forEach((turma, index) => {
+    turmas.forEach((turma, i) => {
 
-      const cell = row.c[index + 1];
+      const cell = row.c[i + 1];
       const valor = cell ? cell.v : "";
 
       if (valor) {
@@ -168,48 +170,36 @@ function montar(table) {
   });
 
   tabela.innerHTML = thead + tbody;
-
-  bloco.appendChild(tabela);
-  container.appendChild(bloco);
 }
 
-function agruparCursos(turmas) {
-  const grupos = {};
-
-  turmas.forEach(turma => {
-
-    // 🔥 regra automática por nome
-    let curso = "OUTROS";
-
-    if (turma.toLowerCase().includes("agroec")) curso = "Agroecologia";
-    else if (turma.toLowerCase().includes("agropec")) curso = "Agropecuária";
-    else if (turma.toLowerCase().includes("info")) curso = "Informática";
-
-    if (!grupos[curso]) grupos[curso] = [];
-    grupos[curso].push(turma);
-  });
-
-  return grupos;
-}
-
-// busca
-document.getElementById("busca").addEventListener("input", function() {
-  const valor = this.value.toUpperCase();
+// 🔥 MODO FOCO (PROFESSOR)
+function ativarFoco(valor) {
 
   document.querySelectorAll("td").forEach(td => {
-    td.classList.remove("highlight");
+    td.classList.remove("dim", "highlight");
 
-    if (td.dataset.prof && td.dataset.prof.includes(valor)) {
+    if (!valor) {
+      td.style.opacity = "1";
+      return;
+    }
+
+    if (td.dataset.prof && td.dataset.prof.includes(valor.toUpperCase())) {
+      td.style.opacity = "1";
       td.classList.add("highlight");
+    } else {
+      td.style.opacity = "0.2";
     }
   });
-});
+}
 
-// eventos
-document.getElementById("semana").addEventListener("change", carregar);
+// 🔥 BUSCA
+document.getElementById("busca").addEventListener("input", function() {
+  ativarFoco(this.value);
+});
 
 // iniciar
 carregar();
+
 </script>
 
 </body>
