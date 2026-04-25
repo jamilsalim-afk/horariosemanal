@@ -2,29 +2,31 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema de Horários IFRO</title>
+    <title>Sistema de Horários IFRO - Completo</title>
     <style>
         :root { --primary: #2e7d32; --secondary: #fbc02d; --bg: #f4f7f6; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding: 20px; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding: 15px; }
         
-        .controls-card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 30px; display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; align-items: center; }
-        select { padding: 10px; border-radius: 8px; border: 1px solid #ddd; font-size: 14px; min-width: 200px; }
-        .search-box { padding: 10px; border-radius: 8px; border: 1px solid #ddd; width: 250px; }
+        .controls-card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 20px; display: flex; flex-wrap: wrap; gap: 15px; justify-content: center; align-items: center; }
+        select, .search-box { padding: 10px; border-radius: 8px; border: 1px solid #ddd; font-size: 14px; outline: none; }
+        select { min-width: 220px; cursor: pointer; }
+        .search-box { width: 250px; border: 2px solid var(--primary); }
 
         .week-container { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        h2 { color: var(--primary); text-align: center; margin-top: 0; }
+        h2 { color: var(--primary); text-align: center; margin-top: 0; text-transform: uppercase; }
 
         .table-wrapper { overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; min-width: 1200px; font-size: 12px; }
-        th, td { border: 1px solid #eee; padding: 10px; text-align: center; }
+        table { width: 100%; border-collapse: collapse; min-width: 1400px; font-size: 11px; table-layout: fixed; }
+        th, td { border: 1px solid #eee; padding: 8px; text-align: center; overflow: hidden; word-wrap: break-word; }
         
-        th { background: var(--primary); color: white; position: sticky; top: 0; }
-        .day-divider { background: #e8f5e9; font-weight: bold; color: var(--primary); text-align: left; padding-left: 15px; font-size: 14px; }
-        .time-col { font-weight: bold; width: 120px; background: #fafafa; }
+        th { background: var(--primary); color: white; position: sticky; top: 0; height: 45px; }
+        .day-divider { background: #e8f5e9; font-weight: bold; color: var(--primary); text-align: center; font-size: 14px; height: 35px; }
+        .time-col { font-weight: bold; width: 100px; background: #fafafa; color: #555; }
         
-        .highlight { background-color: var(--secondary) !important; font-weight: bold; color: #000; }
-        .intervalo { background: #f5f5f5; color: #888; font-style: italic; }
+        .aula-cell { height: 50px; transition: 0.2s; }
+        .highlight { background-color: var(--secondary) !important; font-weight: bold; color: #000; transform: scale(1.02); }
+        .intervalo { background: #f1f3f4; color: #777; font-style: italic; font-weight: bold; }
+        .empty { color: #ddd; }
     </style>
 </head>
 <body>
@@ -42,11 +44,11 @@
         <label>Semana: </label>
         <select id="selectSemana" onchange="renderizarTabela()"></select>
     </div>
-    <input type="text" id="searchProf" class="search-box" placeholder="🔍 Filtrar Professor..." onkeyup="filtrarProfessor()">
+    <input type="text" id="searchProf" class="search-box" placeholder="🔍 Filtrar Professor ou Disciplina..." onkeyup="filtrarProfessor()">
 </div>
 
 <div class="week-container">
-    <h2 id="tituloSemana">Selecione uma semana</h2>
+    <h2 id="tituloSemana">Carregando horários...</h2>
     <div id="tabelaHorario" class="table-wrapper"></div>
 </div>
 
@@ -63,44 +65,61 @@
         try {
             const response = await fetch(url);
             const csv = await response.text();
-            dadosGlobais = csv.split('\n').map(r => r.split(','));
+            // Limpeza básica de aspas do CSV
+            dadosGlobais = csv.split('\n').map(r => r.split(',').map(cell => cell.replace(/"/g, '')));
             processarDados();
         } catch (e) {
-            console.error("Erro ao carregar dados", e);
+            document.getElementById('tituloSemana').textContent = "Erro ao carregar dados da planilha.";
         }
     }
 
+    // Converte string DD/MM/AAAA para objeto Date
+    function strToDate(s) {
+        const p = s.split('/');
+        return new Date(p[2], p[1] - 1, p[0]);
+    }
+
+    // Obtém a segunda-feira daquela data para agrupar semanas
     function getMonday(dateStr) {
-        const parts = dateStr.split('/');
-        const d = new Date(parts[2], parts[1] - 1, parts[0]);
-        const day = d.getDay(), diff = d.getDate() - day + (day === 0 ? -6 : 1);
-        return new Date(d.setDate(diff)).toLocaleDateString('pt-BR');
+        const d = strToDate(dateStr);
+        const day = d.getDay();
+        const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+        const monday = new Date(d.setDate(diff));
+        return monday;
     }
 
     function processarDados() {
-        const modalidade = document.getElementById('selectModalidade').value;
         semanasAgrupadas = {};
-        
-        // Na sua planilha, a Linha 1 tem as turmas
         turmasGlobais = dadosGlobais[0].slice(2).filter(t => t.trim() !== "");
 
         for (let i = 1; i < dadosGlobais.length; i++) {
             const row = dadosGlobais[i];
-            const data = row[0].trim();
-            if (!data || data === "") continue;
+            if (!row[0] || row[0].trim() === "") continue;
 
-            const segunda = getMonday(data);
-            if (!semanasAgrupadas[segunda]) semanasAgrupadas[segunda] = [];
-            semanasAgrupadas[segunda].push(row);
+            const dataObj = strToDate(row[0].trim());
+            const segundaObj = getMonday(row[0].trim());
+            const segundaStr = segundaObj.toLocaleDateString('pt-BR');
+
+            if (!semanasAgrupadas[segundaStr]) {
+                semanasAgrupadas[segundaStr] = { 
+                    label: segundaStr, 
+                    date: segundaObj, 
+                    rows: [] 
+                };
+            }
+            semanasAgrupadas[segundaStr].rows.push(row);
         }
 
-        // Preencher o Select de Semanas
         const selectSemana = document.getElementById('selectSemana');
         selectSemana.innerHTML = "";
-        Object.keys(semanasAgrupadas).sort().forEach(s => {
+
+        // Ordenação Cronológica das semanas (Mês crescente)
+        const semanasOrdenadas = Object.values(semanasAgrupadas).sort((a, b) => a.date - b.date);
+
+        semanasOrdenadas.forEach(s => {
             let opt = document.createElement('option');
-            opt.value = s;
-            opt.textContent = `Semana de ${s}`;
+            opt.value = s.label;
+            opt.textContent = `Semana de ${s.label}`;
             selectSemana.appendChild(opt);
         });
 
@@ -109,21 +128,23 @@
 
     function renderizarTabela() {
         const semanaAlvo = document.getElementById('selectSemana').value;
-        const dadosSemana = semanasAgrupadas[semanaAlvo];
+        if(!semanaAlvo) return;
+        
+        const dadosSemana = semanasAgrupadas[semanaAlvo].rows;
         const container = document.getElementById('tabelaHorario');
         document.getElementById('tituloSemana').textContent = `Horário Completo - Semana ${semanaAlvo}`;
 
-        let html = `<table><thead><tr><th>Horário</th>`;
+        let html = `<table><thead><tr><th style="width:120px">Horário</th>`;
         turmasGlobais.forEach(t => html += `<th>${t}</th>`);
         html += `</tr></thead><tbody>`;
 
         let diaAtual = "";
 
         dadosSemana.forEach(row => {
-            const dataRow = row[0];
-            const horaRow = row[1];
+            const dataRow = row[0].trim();
+            const horaRow = row[1].trim();
 
-            // Se mudou o dia, insere a linha divisória do dia (SEGUNDA, TERÇA...)
+            // Divisor de Dia (Aparece uma vez a cada mudança de data na coluna A)
             if (dataRow !== diaAtual) {
                 diaAtual = dataRow;
                 html += `<tr class="day-divider"><td colspan="${turmasGlobais.length + 1}">${diaAtual}</td></tr>`;
@@ -133,9 +154,11 @@
             html += `<tr class="${isIntervalo ? 'intervalo' : ''}">`;
             html += `<td class="time-col">${horaRow}</td>`;
 
+            // Preenche as aulas de todas as turmas para este horário específico
             for (let j = 2; j < (turmasGlobais.length + 2); j++) {
-                const conteudo = row[j] ? row[j].trim() : "-";
-                html += `<td class="aula-cell">${conteudo}</td>`;
+                const conteudo = row[j] ? row[j].trim() : "";
+                const exibicao = (conteudo === "" || conteudo === "-") ? '<span class="empty">-</span>' : conteudo;
+                html += `<td class="aula-cell">${exibicao}</td>`;
             }
             html += `</tr>`;
         });
@@ -147,7 +170,8 @@
     function filtrarProfessor() {
         const termo = document.getElementById('searchProf').value.toUpperCase();
         document.querySelectorAll('.aula-cell').forEach(c => {
-            if (termo !== "" && c.innerText.toUpperCase().includes(termo)) {
+            const texto = c.innerText.toUpperCase();
+            if (termo !== "" && texto.includes(termo) && texto !== "-") {
                 c.classList.add('highlight');
             } else {
                 c.classList.remove('highlight');
