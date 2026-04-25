@@ -63,14 +63,37 @@
     let turmasDaPlanilha = [];
     let semanasAgrupadas = {};
 
+    // Função para tratar CSV respeitando vírgulas dentro de aspas
+    function parseCSV(text) {
+        const lines = text.split(/\r?\n/);
+        return lines.map(line => {
+            const result = [];
+            let current = '';
+            let inQuotes = false;
+            for (let i = 0; i < line.length; i++) {
+                char = line[i];
+                if (char === '"') {
+                    inQuotes = !inQuotes;
+                } else if (char === ',' && !inQuotes) {
+                    result.push(current.trim());
+                    current = '';
+                } else {
+                    current += char;
+                }
+            }
+            result.push(current.trim());
+            return result;
+        });
+    }
+
     async function init() {
         const mod = document.getElementById('selectModalidade').value;
         const url = `https://docs.google.com/spreadsheets/d/${SHEETS[mod].id}/export?format=csv&gid=${SHEETS[mod].gid}`;
         
         try {
             const response = await fetch(url);
-            const csv = await response.text();
-            dadosGlobais = csv.split('\n').map(r => r.split(',').map(c => c.replace(/"/g, '').trim()));
+            const csvText = await response.text();
+            dadosGlobais = parseCSV(csvText);
             processarDados();
         } catch (e) { alert("Erro ao carregar dados."); }
     }
@@ -90,7 +113,10 @@
 
     function processarDados() {
         semanasAgrupadas = {};
-        turmasDaPlanilha = dadosGlobais[0].slice(2).filter(t => t !== "");
+        if (dadosGlobais.length === 0) return;
+        
+        // Remove aspas extras que o parser pode ter deixado e limpa turmas
+        turmasDaPlanilha = dadosGlobais[0].slice(2).filter(t => t !== "").map(t => t.replace(/^"|"$/g, ''));
 
         let ultimaData = "";
         for (let i = 1; i < dadosGlobais.length; i++) {
@@ -100,6 +126,7 @@
             if (!row[0]) continue;
 
             const parts = row[0].split('/');
+            if(parts.length < 3) continue;
             const dObj = new Date(parts[2], parts[1]-1, parts[0]);
             const diff = dObj.getDate() - dObj.getDay() + (dObj.getDay() === 0 ? -6 : 1);
             const segunda = new Date(dObj.setDate(diff)).toLocaleDateString('pt-BR');
@@ -111,14 +138,14 @@
 
         const select = document.getElementById('selectSemana');
         select.innerHTML = "";
-        Object.keys(semanasAgrupadas).sort((a,b) => a.split('/').reverse().join('').localeCompare(b.split('/').reverse().join(''))).forEach(s => {
+        const sortedWeeks = Object.keys(semanasAgrupadas).sort((a,b) => a.split('/').reverse().join('').localeCompare(b.split('/').reverse().join('')));
+        sortedWeeks.forEach(s => {
             select.innerHTML += `<option value="${s}">Semana de ${s}</option>`;
         });
         renderizarTabela();
     }
 
     function getTurmasAtivasNaSemana(diasDaSemana) {
-        // Varre todos os dias daquela semana específica
         return turmasDaPlanilha.filter(tNome => {
             const idx = dadosGlobais[0].indexOf(tNome);
             return Object.values(diasDaSemana).some(diaArray => 
@@ -129,10 +156,9 @@
 
     function renderizarTabela() {
         const sem = document.getElementById('selectSemana').value;
+        if (!semanasAgrupadas[sem]) return;
         const dias = semanasAgrupadas[sem].dias;
         const container = document.getElementById('tabelaHorario');
-        
-        // Identifica quem tem aula em pelo menos UM dia desta semana
         const turmasAtivas = getTurmasAtivasNaSemana(dias);
         
         let html = "";
@@ -151,7 +177,7 @@
                 html += `<tr class="${isInt ? 'intervalo' : ''}"><td class="time-col">${row[1]}</td>`;
                 turmasAtivas.forEach(tNome => {
                     const idx = dadosGlobais[0].indexOf(tNome);
-                    const conteudo = row[idx] || "-";
+                    const conteudo = (row[idx] || "-").replace(/^"|"$/g, '');
                     const cl = (conteudo !== "-" && !isInt) ? getCursoInfo(tNome).cl : "";
                     html += `<td class="aula-cell ${cl}">${conteudo}</td>`;
                 });
@@ -205,7 +231,7 @@
                 const line = [row[1]];
                 turmasAtivas.forEach(tNome => {
                     const originalIdx = dadosGlobais[0].indexOf(tNome);
-                    let val = row[originalIdx] || "-";
+                    let val = (row[originalIdx] || "-").replace(/^"|"$/g, '');
                     if (termo !== "" && !val.toUpperCase().includes(termo)) val = "";
                     line.push(val);
                 });
@@ -218,7 +244,7 @@
                 startY: 25,
                 margin: { left: 5, right: 5 },
                 theme: 'grid',
-                styles: { fontSize: turmasAtivas.length > 10 ? 4.5 : 5.5, halign: 'center', cellPadding: 0.5 },
+                styles: { fontSize: turmasAtivas.length > 10 ? 4.5 : 5.5, halign: 'center', cellPadding: 0.5, overflow: 'linebreak' },
                 headStyles: { fillColor: [46, 125, 50] },
                 didParseCell: function(data) {
                     if (data.section === 'head' && data.column.index > 0) {
