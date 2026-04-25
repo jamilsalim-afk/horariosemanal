@@ -7,35 +7,33 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
     <style>
-        :root { --verde-ifro: #32a041; --cinza-header: #f2f2f2; }
-        body { font-family: 'Arial Narrow', Arial, sans-serif; margin: 5px; background: #fff; }
+        :root { --verde-ifro: #32a041; --bg-intervalo: #fce4ec; }
+        body { font-family: 'Arial Narrow', Arial, sans-serif; margin: 5px; }
         
         .no-print { display: flex; gap: 10px; padding: 10px; background: #f8f9fa; border-bottom: 2px solid var(--verde-ifro); margin-bottom: 10px; }
         button { background: var(--verde-ifro); color: white; border: none; padding: 8px 15px; cursor: pointer; font-weight: bold; border-radius: 4px; }
 
-        .header-tabela { text-align: center; font-weight: bold; font-size: 13px; margin-bottom: 5px; color: #1b5e20; text-transform: uppercase; }
+        .header-tabela { text-align: center; font-weight: bold; font-size: 14px; margin-bottom: 5px; color: #1b5e20; text-transform: uppercase; }
 
         table { width: 100%; border-collapse: collapse; table-layout: fixed; border: 1.5px solid #000; }
-        th, td { border: 1px solid #000; padding: 1px !important; text-align: center; font-size: 8.5px; height: 14px; overflow: hidden; word-wrap: break-word; }
+        th, td { border: 1px solid #000; padding: 1px !important; text-align: center; font-size: 8.5px; height: 16px; overflow: hidden; }
         
-        /* Estilização Identica ao Modelo */
         th { background-color: var(--verde-ifro) !important; color: white !important; font-size: 9px; }
         
+        /* Colunas de DIA com escrita vertical para ganhar espaço */
         .coluna-dia { 
             writing-mode: vertical-rl; 
             transform: rotate(180deg); 
-            background: #e9ecef !important; 
+            background: #f2f2f2 !important; 
             font-weight: bold; 
-            width: 22px !important;
-            text-transform: uppercase;
+            width: 25px !important;
+            white-space: nowrap;
         }
 
-        .horario-cell { width: 65px !important; font-weight: bold; background: #fff; }
-        
-        .intervalo { background-color: #fce4ec !important; font-weight: bold; color: #880e4f; font-size: 8px; }
+        .horario-cell { width: 70px !important; font-weight: bold; background: #ffffff; }
+        .intervalo { background-color: var(--bg-intervalo) !important; font-weight: bold; color: #880e4f; }
 
-        /* Filtro de Busca */
-        .destaque { background-color: #ffff00 !important; font-weight: bold; color: #000 !important; box-shadow: inset 0 0 4px #000; }
+        .destaque { background-color: #ffff00 !important; font-weight: bold; color: #000 !important; }
         .opaco { opacity: 0.15; filter: grayscale(1); }
 
         @media print { .no-print { display: none; } }
@@ -49,8 +47,8 @@
         <option value="1579045633">09.02 a 13.02</option>
         <option value="491689833">16.02 a 20.02</option>
     </select>
-    <input type="text" id="busca" placeholder="Professor ou Disciplina..." oninput="filtrar()">
-    <button onclick="gerarPDF()">Exportar para PDF A4</button>
+    <input type="text" id="busca" placeholder="Filtrar Professor..." oninput="filtrar()">
+    <button onclick="gerarPDF()">Exportar PDF A4 (Achatado)</button>
 </div>
 
 <div id="tituloDinamico" class="header-tabela"></div>
@@ -69,10 +67,10 @@
             const csv = await res.text();
             const dados = csv.split('\n').map(r => r.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.replace(/^"|"$/g, '').trim()));
             
-            // Corte exato: Linha 5 a 88 (indices 4-87), Coluna A a U (indices 0-20)
+            // Corte: Linha 5 a 88, Coluna A a U
             const subset = dados.slice(4, 88).map(r => r.slice(0, 21));
             renderizar(subset);
-            document.getElementById('tituloDinamico').innerText = "CURSOS TÉCNICOS INTEGRADOS - SEMANA " + document.getElementById('semana').selectedOptions[0].text;
+            document.getElementById('tituloDinamico').innerText = "HORÁRIO SEMANAL DOS CURSOS TÉCNICOS INTEGRADOS AO ENSINO MÉDIO - " + document.getElementById('semana').selectedOptions[0].text;
         } catch(e) { alert("Erro ao carregar dados."); }
     }
 
@@ -86,7 +84,7 @@
                 const el = document.createElement(i === 0 ? 'th' : 'td');
                 el.innerText = cell;
                 
-                // Aplicar Escrita Vertical e Classes Específicas
+                // Classes de estilo e orientação
                 if ([0, 5, 13].includes(j)) el.className = 'coluna-dia';
                 if ([1, 6, 14].includes(j)) el.className = 'horario-cell';
                 if (cell.toUpperCase().includes("INTERVALO")) el.className = 'intervalo';
@@ -95,20 +93,26 @@
             });
             tabela.appendChild(tr);
         });
-        aplicarMesclagem([0, 5, 13]); // Mesclar Colunas de Dias
+
+        // Executa a mesclagem em todas as colunas de DIA e na de INTERVALO
+        aplicarMesclagemVertical([0, 5, 13]); 
     }
 
-    function aplicarMesclagem(colunas) {
+    function aplicarMesclagemVertical(colunas) {
         const tabela = document.getElementById('tabelaHorario');
         colunas.forEach(colIdx => {
-            let celulaAlvo = null;
+            let celulaMestre = null;
             for (let i = 1; i < tabela.rows.length; i++) {
                 let celulaAtual = tabela.rows[i].cells[colIdx];
-                if (celulaAlvo && celulaAtual && celulaAtual.innerText === celulaAlvo.innerText && celulaAtual.innerText !== "") {
+                // Compara texto removendo quebras de linha e espaços
+                let textoAtual = celulaAtual.innerText.replace(/\s+/g, '');
+                let textoMestre = celulaMestre ? celulaMestre.innerText.replace(/\s+/g, '') : null;
+
+                if (celulaMestre && textoAtual === textoMestre && textoAtual !== "") {
                     celulaAtual.style.display = "none";
-                    celulaAlvo.rowSpan = (celulaAlvo.rowSpan || 1) + 1;
+                    celulaMestre.rowSpan = (celulaMestre.rowSpan || 1) + 1;
                 } else {
-                    celulaAlvo = celulaAtual;
+                    celulaMestre = celulaAtual;
                 }
             }
         });
@@ -133,15 +137,25 @@
         
         doc.autoTable({
             html: '#tabelaHorario',
-            styles: { fontSize: 5.2, cellPadding: 0.3, lineColor: 0, lineWidth: 0.05, halign: 'center', valign: 'middle' },
+            styles: { 
+                fontSize: 5.2, 
+                cellPadding: 0.3, 
+                lineColor: 0, 
+                lineWidth: 0.05, 
+                halign: 'center', 
+                valign: 'middle',
+                minCellHeight: 3
+            },
             headStyles: { fillColor: [50, 160, 65], textColor: 255 },
-            margin: { top: 8, left: 3, right: 3 },
+            margin: { top: 10, left: 4, right: 4 },
             columnStyles: { 
-                0: { cellWidth: 7 }, 5: { cellWidth: 7 }, 13: { cellWidth: 7 }, // Dias mais finos
-                1: { cellWidth: 15 }, 6: { cellWidth: 15 }, 14: { cellWidth: 15 } // Horários
+                0: { cellWidth: 7 }, 5: { cellWidth: 7 }, 13: { cellWidth: 7 },
+                1: { cellWidth: 16 }, 6: { cellWidth: 16 }, 14: { cellWidth: 16 }
             },
             didParseCell: function(data) {
-                if (data.cell.text[0].includes("INTERVALO")) data.cell.styles.fillColor = [252, 228, 236];
+                if (data.cell.text[0] && data.cell.text[0].includes("INTERVALO")) {
+                    data.cell.styles.fillColor = [252, 228, 236];
+                }
             }
         });
         doc.save("HORARIO_INTEGRADO_IFRO.pdf");
