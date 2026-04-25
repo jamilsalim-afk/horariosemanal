@@ -3,43 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema de Horários - IFRO</title>
+    <title>Horário IFRO - Integrado</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
     <style>
-        :root { --ifro-verde: #32a041; --ifro-dark: #1b5e20; --bg: #f4f4f4; }
-        body { font-family: 'Arial Narrow', sans-serif; margin: 10px; background-color: var(--bg); }
+        :root { --verde-ifro: #32a041; --cinza-header: #f2f2f2; }
+        body { font-family: 'Arial Narrow', Arial, sans-serif; margin: 5px; background: #fff; }
         
-        .no-print { background: white; padding: 15px; border-radius: 8px; margin-bottom: 15px; display: flex; gap: 10px; flex-wrap: wrap; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        select, input, button { padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 13px; }
-        button { background: var(--ifro-verde); color: white; border: none; cursor: pointer; font-weight: bold; }
+        .no-print { display: flex; gap: 10px; padding: 10px; background: #f8f9fa; border-bottom: 2px solid var(--verde-ifro); margin-bottom: 10px; }
+        button { background: var(--verde-ifro); color: white; border: none; padding: 8px 15px; cursor: pointer; font-weight: bold; border-radius: 4px; }
 
-        .header-tabela { text-align: center; font-weight: bold; margin-bottom: 10px; font-size: 14px; color: var(--ifro-dark); }
+        .header-tabela { text-align: center; font-weight: bold; font-size: 13px; margin-bottom: 5px; color: #1b5e20; text-transform: uppercase; }
 
-        .table-container { background: white; padding: 5px; border-radius: 4px; overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; table-layout: fixed; border: 1.5px solid #000; }
+        th, td { border: 1px solid #000; padding: 1px !important; text-align: center; font-size: 8.5px; height: 14px; overflow: hidden; word-wrap: break-word; }
         
-        table { width: 100%; border-collapse: collapse; table-layout: fixed; border: 1px solid #000; }
-        th, td { border: 1px solid #000; padding: 2px 1px; text-align: center; font-size: 9px; word-wrap: break-word; overflow: hidden; }
+        /* Estilização Identica ao Modelo */
+        th { background-color: var(--verde-ifro) !important; color: white !important; font-size: 9px; }
         
-        /* Cabeçalho Verde */
-        th { background-color: var(--ifro-verde) !important; color: white !important; font-weight: bold; height: 30px; }
-        
-        /* Coluna de DIA Vertical */
         .coluna-dia { 
             writing-mode: vertical-rl; 
             transform: rotate(180deg); 
-            white-space: nowrap; 
-            width: 25px !important; 
-            font-weight: bold;
-            background-color: #e8f5e9;
+            background: #e9ecef !important; 
+            font-weight: bold; 
+            width: 22px !important;
+            text-transform: uppercase;
         }
 
-        /* Estilo para Intervalos */
-        .linha-intervalo { background-color: #ffebee !important; font-weight: bold; color: #c62828; }
+        .horario-cell { width: 65px !important; font-weight: bold; background: #fff; }
+        
+        .intervalo { background-color: #fce4ec !important; font-weight: bold; color: #880e4f; font-size: 8px; }
 
-        /* Filtros de Destaque */
-        .destaque { background-color: #ffeb3b !important; font-weight: bold; color: #000 !important; }
-        .opaco { opacity: 0.2; }
+        /* Filtro de Busca */
+        .destaque { background-color: #ffff00 !important; font-weight: bold; color: #000 !important; box-shadow: inset 0 0 4px #000; }
+        .opaco { opacity: 0.15; filter: grayscale(1); }
 
         @media print { .no-print { display: none; } }
     </style>
@@ -47,45 +44,36 @@
 <body>
 
 <div class="no-print">
-    <select id="nivel" onchange="popularSemanas()"><option value="">Nível</option><option value="Integrado">Integrado</option></select>
-    <select id="semana" onchange="carregarDados()"><option value="">Semana</option></select>
-    <input type="text" id="buscaProfessor" placeholder="Filtrar..." oninput="aplicarFiltro()">
-    <button onclick="gerarPDF()">Gerar PDF A4</button>
+    <select id="semana" onchange="carregarDados()">
+        <option value="">Selecione a Semana</option>
+        <option value="1579045633">09.02 a 13.02</option>
+        <option value="491689833">16.02 a 20.02</option>
+    </select>
+    <input type="text" id="busca" placeholder="Professor ou Disciplina..." oninput="filtrar()">
+    <button onclick="gerarPDF()">Exportar para PDF A4</button>
 </div>
 
 <div id="tituloDinamico" class="header-tabela"></div>
-<div class="table-container">
-    <table id="tabelaHorario"></table>
-</div>
+<table id="tabelaHorario"></table>
 
 <script>
     const SPREADSHEET_ID = "1j33kiPqwtzZNuvkBgYDaIiXZvVMY_J0qWAtRfYGdnD8";
-    const cronograma = { "Integrado": [
-        { nome: "16.02 a 20.02", gid: "491689833" },
-        { nome: "27.04 a 02.05", gid: "0" }
-    ]};
-
-    function popularSemanas() {
-        const nivel = document.getElementById('nivel').value;
-        const s = document.getElementById('semana');
-        s.innerHTML = '<option value="">Semana</option>';
-        if(nivel) cronograma[nivel].forEach(i => s.add(new Option(i.nome, i.gid)));
-    }
 
     async function carregarDados() {
         const gid = document.getElementById('semana').value;
+        if(!gid) return;
         const url = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:csv&gid=${gid}`;
-        const res = await fetch(url);
-        const csv = await res.text();
-        const dados = filtrarEProcessar(csv);
-        renderizar(dados);
-        document.getElementById('tituloDinamico').innerText = "HORÁRIO INTEGRADO - " + document.getElementById('semana').selectedOptions[0].text;
-    }
-
-    function filtrarEProcessar(csv) {
-        const rows = csv.split('\n').map(r => r.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.replace(/^"|"$/g, '').trim()));
-        // Corte: Linha 5-88 (índice 4-87), Coluna A-U (índice 0-20)
-        return rows.slice(4, 88).map(r => r.slice(0, 21));
+        
+        try {
+            const res = await fetch(url);
+            const csv = await res.text();
+            const dados = csv.split('\n').map(r => r.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.replace(/^"|"$/g, '').trim()));
+            
+            // Corte exato: Linha 5 a 88 (indices 4-87), Coluna A a U (indices 0-20)
+            const subset = dados.slice(4, 88).map(r => r.slice(0, 21));
+            renderizar(subset);
+            document.getElementById('tituloDinamico').innerText = "CURSOS TÉCNICOS INTEGRADOS - SEMANA " + document.getElementById('semana').selectedOptions[0].text;
+        } catch(e) { alert("Erro ao carregar dados."); }
     }
 
     function renderizar(dados) {
@@ -98,43 +86,40 @@
                 const el = document.createElement(i === 0 ? 'th' : 'td');
                 el.innerText = cell;
                 
-                // Aplicar classe de escrita vertical na primeira coluna (DIA)
-                if (j === 0 && i > 0) el.className = 'coluna-dia';
-                
-                // Detectar Intervalos para colorir
-                if (cell.toUpperCase().includes("INTERVALO")) tr.className = 'linha-intervalo';
+                // Aplicar Escrita Vertical e Classes Específicas
+                if ([0, 5, 13].includes(j)) el.className = 'coluna-dia';
+                if ([1, 6, 14].includes(j)) el.className = 'horario-cell';
+                if (cell.toUpperCase().includes("INTERVALO")) el.className = 'intervalo';
 
                 tr.appendChild(el);
             });
             tabela.appendChild(tr);
         });
-
-        mesclarCelulas();
+        aplicarMesclagem([0, 5, 13]); // Mesclar Colunas de Dias
     }
 
-    function mesclarCelulas() {
+    function aplicarMesclagem(colunas) {
         const tabela = document.getElementById('tabelaHorario');
-        // Mesclar verticalmente a coluna DIA (0) e INTERVALOS
-        [0].forEach(colIdx => {
-            let lastCell = null;
+        colunas.forEach(colIdx => {
+            let celulaAlvo = null;
             for (let i = 1; i < tabela.rows.length; i++) {
-                let currentCell = tabela.rows[i].cells[colIdx];
-                if (lastCell && currentCell && currentCell.innerText === lastCell.innerText && currentCell.innerText !== "") {
-                    currentCell.style.display = "none";
-                    lastCell.rowSpan = (lastCell.rowSpan || 1) + 1;
+                let celulaAtual = tabela.rows[i].cells[colIdx];
+                if (celulaAlvo && celulaAtual && celulaAtual.innerText === celulaAlvo.innerText && celulaAtual.innerText !== "") {
+                    celulaAtual.style.display = "none";
+                    celulaAlvo.rowSpan = (celulaAlvo.rowSpan || 1) + 1;
                 } else {
-                    lastCell = currentCell;
+                    celulaAlvo = celulaAtual;
                 }
             }
         });
     }
 
-    function aplicarFiltro() {
-        const termo = document.getElementById('buscaProfessor').value.toLowerCase();
+    function filtrar() {
+        const busca = document.getElementById('busca').value.toLowerCase();
         document.querySelectorAll('#tabelaHorario td').forEach(td => {
-            if(termo && td.innerText.toLowerCase().includes(termo)) {
+            if(busca && td.innerText.toLowerCase().includes(busca)) {
                 td.classList.add('destaque'); td.classList.remove('opaco');
-            } else if(termo) {
+            } else if(busca) {
                 td.classList.add('opaco'); td.classList.remove('destaque');
             } else {
                 td.classList.remove('opaco', 'destaque');
@@ -148,17 +133,18 @@
         
         doc.autoTable({
             html: '#tabelaHorario',
-            styles: { fontSize: 5.5, cellPadding: 0.5, lineColor: [0, 0, 0], lineWidth: 0.1, halign: 'center' },
+            styles: { fontSize: 5.2, cellPadding: 0.3, lineColor: 0, lineWidth: 0.05, halign: 'center', valign: 'middle' },
             headStyles: { fillColor: [50, 160, 65], textColor: 255 },
-            columnStyles: { 0: { cellWidth: 8 } }, // Coluna do DIA mais estreita
-            margin: { top: 10, left: 5, right: 5 },
+            margin: { top: 8, left: 3, right: 3 },
+            columnStyles: { 
+                0: { cellWidth: 7 }, 5: { cellWidth: 7 }, 13: { cellWidth: 7 }, // Dias mais finos
+                1: { cellWidth: 15 }, 6: { cellWidth: 15 }, 14: { cellWidth: 15 } // Horários
+            },
             didParseCell: function(data) {
-                if (data.cell.text[0].includes("INTERVALO")) {
-                    data.cell.styles.fillColor = [255, 235, 238];
-                }
+                if (data.cell.text[0].includes("INTERVALO")) data.cell.styles.fillColor = [252, 228, 236];
             }
         });
-        doc.save("horario_ifro.pdf");
+        doc.save("HORARIO_INTEGRADO_IFRO.pdf");
     }
 </script>
 </body>
