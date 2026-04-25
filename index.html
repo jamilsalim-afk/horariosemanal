@@ -125,12 +125,15 @@ function montar(table) {
   const container = document.getElementById("container");
   container.innerHTML = "";
 
-  const dias = ["Seg", "Ter", "Qua", "Qui", "Sex"];
+  const horarios = table.rows.map(r => r.c[0]?.v);
 
-  // 🔥 identifica cursos (AGROEC, AGROPEC, INFO)
-  const cursos = ["Agroecologia", "Agropecuária", "Informática"];
+  // 🔥 TURMAS DINÂMICAS (colunas da planilha)
+  const turmas = table.cols.slice(1).map(c => c.label);
 
-  cursos.forEach((curso, cursoIndex) => {
+  // 🔥 AGRUPA AUTOMATICAMENTE POR CURSO
+  const cursos = agruparCursos(turmas);
+
+  Object.keys(cursos).forEach(curso => {
 
     const bloco = document.createElement("div");
     bloco.className = "bloco";
@@ -140,31 +143,29 @@ function montar(table) {
 
     const tabela = document.createElement("table");
 
-    // CABEÇALHO
     let thead = "<tr><th>Horário</th>";
 
-    dias.forEach(d => {
-      thead += `<th>${d}</th>`;
+    cursos[curso].forEach(turma => {
+      thead += `<th>${turma}</th>`;
     });
 
     thead += "</tr>";
 
     let tbody = "";
 
-    table.rows.forEach(row => {
+    table.rows.forEach((row, rowIndex) => {
 
       const horario = row.c[0] ? row.c[0].v : "";
 
       tbody += `<tr>`;
       tbody += `<td class="horario">${horario}</td>`;
 
-      // 🔥 OFFSET POR CURSO (AQUI ESTAVA O BUG)
-      // cada curso ocupa 5 colunas (Seg a Sex)
-      const base = 1 + (cursoIndex * 5);
+      cursos[curso].forEach((turma, turmaIndex) => {
 
-      for (let i = 0; i < 5; i++) {
+        // 🔥 pega posição real da turma na planilha
+        const colIndex = table.cols.findIndex(c => c.label === turma);
 
-        const cell = row.c[base + i];
+        const cell = row.c[colIndex];
         const valor = cell ? cell.v : "";
 
         if (valor) {
@@ -172,7 +173,7 @@ function montar(table) {
         } else {
           tbody += `<td></td>`;
         }
-      }
+      });
 
       tbody += `</tr>`;
     });
@@ -184,6 +185,25 @@ function montar(table) {
 
     container.appendChild(bloco);
   });
+}
+
+function agruparCursos(turmas) {
+  const grupos = {};
+
+  turmas.forEach(turma => {
+
+    // 🔥 regra automática por nome
+    let curso = "OUTROS";
+
+    if (turma.toLowerCase().includes("agroec")) curso = "Agroecologia";
+    else if (turma.toLowerCase().includes("agropec")) curso = "Agropecuária";
+    else if (turma.toLowerCase().includes("info")) curso = "Informática";
+
+    if (!grupos[curso]) grupos[curso] = [];
+    grupos[curso].push(turma);
+  });
+
+  return grupos;
 }
 
 // busca
