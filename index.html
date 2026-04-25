@@ -2,108 +2,96 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Horário Dinâmico IFRO</title>
+    <title>Horário Integrado IFRO - 2026</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f4f7f6; padding: 20px; }
-        .container { max-width: 100%; margin: auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        h2 { color: #2e7d32; text-align: center; margin-bottom: 25px; }
+        :root { --primary: #2e7d32; --accent: #fbc02d; --bg: #f4f7f6; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding: 20px; }
+        .container { max-width: 100%; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        h2 { color: var(--primary); text-align: center; }
         
-        .controls { display: flex; justify-content: center; margin-bottom: 20px; gap: 10px; }
-        input { padding: 12px; width: 350px; border: 2px solid #2e7d32; border-radius: 25px; outline: none; }
+        .search-box { text-align: center; margin-bottom: 20px; }
+        #search { padding: 10px; width: 300px; border: 2px solid var(--primary); border-radius: 20px; outline: none; }
 
-        .table-wrapper { overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; min-width: 800px; }
-        th, td { border: 1px solid #dee2e6; padding: 12px; text-align: center; font-size: 13px; }
-        th { background-color: #2e7d32; color: white; text-transform: uppercase; letter-spacing: 1px; }
+        .table-wrapper { overflow-x: auto; margin-top: 20px; }
+        table { width: 100%; border-collapse: collapse; min-width: 1200px; font-size: 11px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: center; vertical-align: middle; }
+        th { background: var(--primary); color: white; position: sticky; top: 0; }
         
-        .dia-semana { background-color: #e8f5e9; font-weight: bold; color: #2e7d32; font-size: 15px; }
-        .horario-col { background-color: #f8f9fa; font-weight: bold; width: 120px; }
-        .highlight { background-color: #fbc02d !important; font-weight: bold; }
+        .date-row { background: #e8f5e9; font-weight: bold; color: var(--primary); font-size: 14px; text-align: left; }
+        .time-cell { background: #fafafa; font-weight: bold; width: 100px; }
+        .highlight { background-color: var(--accent) !important; font-weight: bold; }
+        .intervalo { background-color: #f1f3f4; color: #999; font-style: italic; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>Quadro de Horários Integrado</h2>
+    <h2>Horário Integrado - Cursos Técnicos</h2>
     
-    <div class="controls">
-        <input type="text" id="filtro" placeholder="🔍 Pesquisar por Professor..." onkeyup="buscarProfessor()">
+    <div class="search-box">
+        <input type="text" id="search" placeholder="🔍 Pesquisar Professor..." onkeyup="filtrar()">
     </div>
 
-    <div class="table-wrapper">
-        <table id="tabelaHorario">
-            <thead>
-                <tr id="headerTurmas">
-                    <th>Horário / Dia</th>
-                    </tr>
-            </thead>
-            <tbody id="corpoTabela">
-                </tbody>
-        </table>
-    </div>
+    <div id="tabelas-container" class="table-wrapper">
+        </div>
 </div>
 
 <script>
-    // URL DE EXPORTAÇÃO CSV DA SUA PLANILHA
     const sheetID = '1j33kiPqwtzZNuvkBgYDaIiXZvVMY_J0qWAtRfYGdnD8';
     const gid = '1357770092';
     const url = `https://docs.google.com/spreadsheets/d/${sheetID}/export?format=csv&gid=${gid}`;
 
-    async function carregarDados() {
-        try {
-            const response = await fetch(url);
-            const data = await response.text();
-            renderizarTabela(data);
-        } catch (error) {
-            console.error("Erro ao ler a planilha:", error);
+    async function loadData() {
+        const response = await fetch(url);
+        const data = await response.text();
+        const rows = data.split('\n').map(r => r.split(','));
+        
+        const container = document.getElementById('tabelas-container');
+        
+        // 1. Pegar Turmas da Linha 1 (Começa na Coluna C / Índice 2)
+        const turmas = rows[0].slice(2).filter(t => t.trim() !== "");
+        
+        let html = `<table><thead><tr><th>Data</th><th>Horário</th>`;
+        turmas.forEach(t => html += `<th>${t}</th>`);
+        html += `</tr></thead><tbody>`;
+
+        let currentData = "";
+
+        // 2. Processar Linhas (A partir da Linha 2)
+        for (let i = 1; i < rows.length; i++) {
+            const row = rows[i];
+            const dataCel = row[0]; // Coluna A
+            const horaCel = row[1]; // Coluna B
+            
+            if (!horaCel) continue;
+
+            // Se mudar a data, cria uma linha divisória
+            if (dataCel && dataCel !== currentData) {
+                currentData = dataCel;
+                html += `<tr class="date-row"><td colspan="${turmas.length + 2}">${currentData}</td></tr>`;
+            }
+
+            const isIntervalo = horaCel.toUpperCase().includes("INTERVALO");
+            html += `<tr class="${isIntervalo ? 'intervalo' : ''}">`;
+            html += `<td>${dataCel || ""}</td>`;
+            html += `<td class="time-cell">${horaCel}</td>`;
+
+            // 3. Preencher Disciplinas/Professores
+            for (let j = 2; j < (turmas.length + 2); j++) {
+                const conteudo = row[j] ? row[j].trim() : "-";
+                html += `<td class="aula-cell">${conteudo}</td>`;
+            }
+            html += `</tr>`;
         }
+
+        html += `</tbody></table>`;
+        container.innerHTML = html;
     }
 
-    function renderizarTabela(csv) {
-        const linhas = csv.split('\n').map(row => row.split(','));
-        const cabecalhoTurmas = document.getElementById('headerTurmas');
-        const corpoTabela = document.getElementById('corpoTabela');
-
-        // 1. Identificar Turmas Únicas (assumindo que a coluna de turmas é a 5ª)
-        const turmas = [...new Set(linhas.slice(1).map(l => l[4]))].filter(t => t);
-        turmas.forEach(turma => {
-            let th = document.createElement('th');
-            th.textContent = turma;
-            cabecalhoTurmas.appendChild(th);
-        });
-
-        // 2. Agrupar por Dia e Horário
-        const dias = ["SEGUNDA-FEIRA", "TERÇA-FEIRA", "QUARTA-FEIRA", "QUINTA-FEIRA", "SEXTA-FEIRA", "SÁBADO"];
-        
-        dias.forEach(dia => {
-            // Linha divisória do dia
-            let trDia = document.createElement('tr');
-            trDia.className = 'dia-semana';
-            trDia.innerHTML = `<td colspan="${turmas.length + 1}">${dia}</td>`;
-            corpoTabela.appendChild(trDia);
-
-            // Filtrar horários únicos para este dia
-            const horariosNoDia = [...new Set(linhas.filter(l => l[0] === dia).map(l => l[1]))].sort();
-
-            horariosNoDia.forEach(hora => {
-                let tr = document.createElement('tr');
-                tr.innerHTML = `<td class="horario-col">${hora}</td>`;
-
-                turmas.forEach(turma => {
-                    const aula = linhas.find(l => l[0] === dia && l[1] === hora && l[4] === turma);
-                    tr.innerHTML += `<td class="celula-aula">${aula ? aula[2] + '<br><small>' + aula[3] + '</small>' : '-'}</td>`;
-                });
-                corpoTabela.appendChild(tr);
-            });
-        });
-    }
-
-    function buscarProfessor() {
-        let busca = document.getElementById('filtro').value.toUpperCase();
-        let celulas = document.querySelectorAll('.celula-aula');
-        
-        celulas.forEach(c => {
-            if (busca !== "" && c.innerText.toUpperCase().includes(busca)) {
+    function filtrar() {
+        const termo = document.getElementById('search').value.toUpperCase();
+        document.querySelectorAll('.aula-cell').forEach(c => {
+            if (termo !== "" && c.innerText.toUpperCase().includes(termo)) {
                 c.classList.add('highlight');
             } else {
                 c.classList.remove('highlight');
@@ -111,7 +99,7 @@
         });
     }
 
-    window.onload = carregarDados;
+    window.onload = loadData;
 </script>
 
 </body>
