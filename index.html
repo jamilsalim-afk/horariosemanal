@@ -10,72 +10,43 @@
         :root { --primary: #2e7d32; --bg: #f4f7f6; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding: 0; }
         
-        /* Menu Fixo no Topo */
-        .header-sticky {
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-            background: var(--bg);
-            padding: 10px 15px;
-        }
-
-        .controls-card { 
-            background: white; 
-            padding: 15px; 
-            border-radius: 12px; 
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1); 
-            display: flex; 
-            flex-wrap: wrap; 
-            gap: 10px; 
-            justify-content: center; 
-            align-items: center; 
-        }
-
+        .header-sticky { position: sticky; top: 0; z-index: 1000; background: var(--bg); padding: 10px 15px; }
+        .controls-card { background: white; padding: 15px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; align-items: center; }
+        
         select, .search-box, .btn-pdf { padding: 8px; border-radius: 6px; border: 1px solid #ddd; font-size: 13px; outline: none; }
-        .search-box { width: 200px; border: 2px solid var(--primary); }
+        .search-box { width: 220px; border: 2px solid var(--primary); }
         .btn-pdf { background: #d32f2f; color: white; border: none; cursor: pointer; font-weight: bold; }
 
-        /* Container de Tabela com Scroll para Mobile */
         .week-container { padding: 15px; }
-        .table-responsive { 
-            width: 100%; 
-            overflow-x: auto; 
-            background: white; 
-            border-radius: 8px; 
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-        }
+        .table-responsive { width: 100%; overflow-x: auto; background: white; border-radius: 8px; }
 
-        table { width: 100%; border-collapse: collapse; font-size: 9px; min-width: 1200px; }
-        th, td { border: 1px solid #bbb; padding: 4px; text-align: center; white-space: nowrap; }
+        table { width: 100%; border-collapse: collapse; font-size: 10px; table-layout: fixed; }
+        th, td { border: 1px solid #bbb; padding: 6px; text-align: center; overflow: hidden; word-wrap: break-word; white-space: normal; }
         
-        /* Cores de Fundo */
-        .c-agroec { background-color: #e8f5e9 !important; }
-        .c-agropec { background-color: #e3f2fd !important; }
-        .c-info { background-color: #fff8e1 !important; }
-        .c-geo { background-color: #f3e5f5 !important; }
-        .c-mat { background-color: #e0f7fa !important; }
-        .c-agroneg { background-color: #efebe9 !important; }
-        .c-zoo { background-color: #fce4ec !important; }
-        .c-agron { background-color: #f1f8e9 !important; }
+        /* Cores */
+        .c-agroec { background-color: #e8f5e9 !important; } .c-agropec { background-color: #e3f2fd !important; }
+        .c-info { background-color: #fff8e1 !important; } .c-geo { background-color: #f3e5f5 !important; }
+        .c-mat { background-color: #e0f7fa !important; } .c-agroneg { background-color: #efebe9 !important; }
+        .c-zoo { background-color: #fce4ec !important; } .c-agron { background-color: #f1f8e9 !important; }
 
-        .day-divider { background: var(--primary); color: white; font-weight: bold; font-size: 11px; position: sticky; left: 0; }
-        .time-col { font-weight: bold; width: 80px; background: #f1f3f4; position: sticky; left: 0; z-index: 5; }
+        .day-divider { background: var(--primary); color: white; font-weight: bold; font-size: 12px; }
+        .time-col { font-weight: bold; width: 85px; background: #f1f3f4; }
         .highlight { background-color: #fbc02d !important; font-weight: bold; border: 2px solid #000; }
         .opaco { opacity: 0.1; }
-        .intervalo { background: #f9f9f9; color: #aaa; font-style: italic; }
+        .intervalo { background: #f9f9f9; height: 15px; color: #aaa; font-style: italic; }
     </style>
 </head>
 <body>
 
 <div class="header-sticky">
     <div class="controls-card">
-        <select id="selectModalidade" onchange="processarDados()">
+        <select id="selectModalidade" onchange="init()">
             <option value="INTEGRADO">ENSINO INTEGRADO</option>
             <option value="SUPERIOR">ENSINO SUPERIOR</option>
         </select>
         <select id="selectSemana" onchange="renderizarTabela()"></select>
-        <input type="text" id="searchProf" class="search-box" placeholder="🔍 Filtrar Professor..." onkeyup="filtrarProfessor()">
-        <button class="btn-pdf" onclick="exportarPDF()">📄 PDF (2 Dias/Pág.)</button>
+        <input type="text" id="searchProf" class="search-box" placeholder="🔍 Buscar Professor..." onkeyup="filtrarProfessor()">
+        <button class="btn-pdf" onclick="exportarPDF()">📄 PDF (1 Dia/Folha)</button>
     </div>
 </div>
 
@@ -84,51 +55,50 @@
 </div>
 
 <script>
-    const sheetID = '1j33kiPqwtzZNuvkBgYDaIiXZvVMY_J0qWAtRfYGdnD8';
-    const gid = '1357770092'; 
-    const url = `https://docs.google.com/spreadsheets/d/${sheetID}/export?format=csv&gid=${gid}`;
+    const SHEETS = {
+        INTEGRADO: { id: '1j33kiPqwtzZNuvkBgYDaIiXZvVMY_J0qWAtRfYGdnD8', gid: '1357770092' },
+        SUPERIOR: { id: '14ALXZgFIT68ee9ajuIdG63SpGVm0HyTjwp63-J6vRyg', gid: '669887707' }
+    };
 
     let dadosGlobais = [];
     let turmasFiltradas = [];
     let semanasAgrupadas = {};
 
     async function init() {
+        const mod = document.getElementById('selectModalidade').value;
+        const url = `https://docs.google.com/spreadsheets/d/${SHEETS[mod].id}/export?format=csv&gid=${SHEETS[mod].gid}`;
+        
         try {
             const response = await fetch(url);
             const csv = await response.text();
             dadosGlobais = csv.split('\n').map(r => r.split(',').map(c => c.replace(/"/g, '').trim()));
             processarDados();
-        } catch (e) { console.error(e); }
+        } catch (e) { alert("Erro ao carregar dados da planilha."); }
     }
 
     function getDiaSemana(dataStr) {
         const parts = dataStr.split('/');
         const d = new Date(parts[2], parts[1]-1, parts[0]);
-        const dias = ["DOMINGO", "SEGUNDA-FEIRA", "TERÇA-FEIRA", "QUARTA-FEIRA", "QUINTA-FEIRA", "SEXTA-FEIRA", "SÁBADO"];
-        return dias[d.getDay()];
+        return ["DOMINGO", "SEGUNDA-FEIRA", "TERÇA-FEIRA", "QUARTA-FEIRA", "QUINTA-FEIRA", "SEXTA-FEIRA", "SÁBADO"][d.getDay()];
     }
 
     function getCursoInfo(t) {
         t = t.toUpperCase();
-        if (t.includes("AGROEC")) return { class: "c-agroec", rgb: [232, 245, 233] };
-        if (t.includes("AGROPEC")) return { class: "c-agropec", rgb: [227, 242, 253] };
-        if (t.includes("INFO")) return { class: "c-info", rgb: [255, 248, 225] };
-        if (t.includes("GEO")) return { class: "c-geo", rgb: [243, 229, 245] };
-        if (t.includes("MAT")) return { class: "c-mat", rgb: [224, 247, 250] };
-        if (t.includes("AGRONEG")) return { class: "c-agroneg", rgb: [239, 235, 233] };
-        if (t.includes("ZOO")) return { class: "c-zoo", rgb: [252, 228, 236] };
-        if (t.includes("AGRON")) return { class: "c-agron", rgb: [241, 248, 233] };
-        return { class: "", rgb: [255, 255, 255] };
+        if (t.includes("AGROEC")) return { cl: "c-agroec", rgb: [232, 245, 233] };
+        if (t.includes("AGROPEC")) return { cl: "c-agropec", rgb: [227, 242, 253] };
+        if (t.includes("INFO")) return { cl: "c-info", rgb: [255, 248, 225] };
+        if (t.includes("GEO")) return { cl: "c-geo", rgb: [243, 229, 245] };
+        if (t.includes("MAT")) return { cl: "c-mat", rgb: [224, 247, 250] };
+        if (t.includes("AGRONEG")) return { cl: "c-agroneg", rgb: [239, 235, 233] };
+        if (t.includes("ZOO")) return { cl: "c-zoo", rgb: [252, 228, 236] };
+        if (t.includes("AGRON")) return { cl: "c-agron", rgb: [241, 248, 233] };
+        return { cl: "", rgb: [255, 255, 255] };
     }
 
     function processarDados() {
         semanasAgrupadas = {};
         const mod = document.getElementById('selectModalidade').value;
-        turmasFiltradas = dadosGlobais[0].slice(2).filter(t => {
-            if (mod === "INTEGRADO") return t.match(/AGROEC|AGROPEC|INFO/i);
-            if (mod === "SUPERIOR") return t.match(/GEO|MAT|AGRONEG|ZOO|AGRON/i);
-            return true;
-        });
+        turmasFiltradas = dadosGlobais[0].slice(2).filter(t => t !== "");
 
         let ultimaData = "";
         for (let i = 1; i < dadosGlobais.length; i++) {
@@ -162,10 +132,9 @@
         let html = "";
 
         Object.keys(dias).forEach(dia => {
-            const diaLabel = `${getDiaSemana(dia)} - ${dia}`;
-            html += `<table><thead><tr class="day-divider"><td colspan="${turmasFiltradas.length + 1}">${diaLabel}</td></tr>`;
-            html += `<tr><th style="background:#444; color:#fff">Horário</th>`;
-            turmasFiltradas.forEach(t => html += `<th class="${getCursoInfo(t).class}">${t}</th>`);
+            html += `<table><thead><tr class="day-divider"><td colspan="${turmasFiltradas.length + 1}">${getDiaSemana(dia)} - ${dia}</td></tr>`;
+            html += `<tr><th style="background:#444; color:#fff; width:85px">Horário</th>`;
+            turmasFiltradas.forEach(t => html += `<th class="${getCursoInfo(t).cl}">${t}</th>`);
             html += `</tr></thead><tbody>`;
 
             dias[dia].forEach(row => {
@@ -174,12 +143,12 @@
                 turmasFiltradas.forEach(tNome => {
                     const idx = dadosGlobais[0].indexOf(tNome);
                     const conteudo = row[idx] || "-";
-                    const cursoClass = (conteudo !== "-" && !isInt) ? getCursoInfo(tNome).class : "";
-                    html += `<td class="aula-cell ${cursoClass}">${conteudo}</td>`;
+                    const cl = (conteudo !== "-" && !isInt) ? getCursoInfo(tNome).cl : "";
+                    html += `<td class="aula-cell ${cl}">${conteudo}</td>`;
                 });
                 html += `</tr>`;
             });
-            html += `</tbody></table>`;
+            html += `</tbody></table><br>`;
         });
         container.innerHTML = html;
         filtrarProfessor();
@@ -187,13 +156,19 @@
 
     function filtrarProfessor() {
         const termo = document.getElementById('searchProf').value.toUpperCase();
-        document.querySelectorAll('.aula-cell').forEach(c => {
+        const cells = document.getElementsByClassName('aula-cell');
+        // Otimização: processamento direto para evitar lag
+        for (let i = 0; i < cells.length; i++) {
+            const c = cells[i];
             c.classList.remove('highlight', 'opaco');
             if (termo !== "") {
-                if (c.innerText.toUpperCase().includes(termo) && c.innerText !== "-") c.classList.add('highlight');
-                else c.classList.add('opaco');
+                if (c.innerText.toUpperCase().indexOf(termo) > -1 && c.innerText !== "-") {
+                    c.classList.add('highlight');
+                } else {
+                    c.classList.add('opaco');
+                }
             }
-        });
+        }
     }
 
     function exportarPDF() {
@@ -203,29 +178,22 @@
         const diasObj = semanasAgrupadas[sem].dias;
         const termo = document.getElementById('searchProf').value.toUpperCase();
         const datasArr = Object.keys(diasObj);
-        const periodo = `${datasArr[0]} a ${datasArr[datasArr.length-1]}`;
+        const mod = document.getElementById('selectModalidade').value;
 
         datasArr.forEach((dia, idx) => {
-            // Lógica para 2 dias por folha
-            if (idx > 0 && idx % 2 === 0) pdf.addPage();
-            const yOffset = (idx % 2 === 0) ? 0 : 100; // Define se começa no topo ou no meio da folha
-
+            if (idx > 0) pdf.addPage();
             const pageWidth = pdf.internal.pageSize.getWidth();
             
-            // CABEÇALHO (Apenas na primeira tabela da página)
-            if (idx % 2 === 0) {
-                pdf.setFontSize(8);
-                pdf.setFont(undefined, 'bold');
-                pdf.text("INSTITUTO FEDERAL DE EDUCAÇÃO, CIÊNCIA E TECNOLOGIA - CAMPUS CACOAL", pageWidth/2, 10, { align: 'center' });
-                pdf.setFontSize(7);
-                pdf.setFont(undefined, 'normal');
-                pdf.text(`HORÁRIO SEMANAL - SEMANA DE ${periodo}`, pageWidth/2, 14, { align: 'center' });
-            }
-
-            pdf.setFontSize(9);
+            pdf.setFontSize(8);
             pdf.setFont(undefined, 'bold');
+            pdf.text("INSTITUTO FEDERAL DE EDUCAÇÃO, CIÊNCIA E TECNOLOGIA - CAMPUS CACOAL", pageWidth/2, 10, { align: 'center' });
+            pdf.setFontSize(7);
+            pdf.setFont(undefined, 'normal');
+            pdf.text(`MODALIDADE: ${mod} | SEMANA DE ${sem}`, pageWidth/2, 14, { align: 'center' });
+
+            pdf.setFontSize(10);
             pdf.setTextColor(46, 125, 50);
-            pdf.text(`${getDiaSemana(dia)} - ${dia}`, 7, 22 + yOffset);
+            pdf.text(`${getDiaSemana(dia)} - ${dia}`, 7, 22);
 
             const tableBody = diasObj[dia].map(row => {
                 const line = [row[1]];
@@ -238,24 +206,24 @@
                 return line;
             });
 
+            // Ajuste dinâmico de fonte para caber na folha
+            let fontSize = turmasFiltradas.length > 8 ? 4.5 : 6;
+
             pdf.autoTable({
                 head: [[ 'Horário', ...turmasFiltradas ]],
                 body: tableBody,
-                startY: 25 + yOffset,
-                margin: { left: 5, right: 5 },
+                startY: 25,
+                margin: { left: 1, right: 1, top: 25, bottom: 15 },
                 theme: 'grid',
-                styles: { fontSize: 4.8, halign: 'center', cellPadding: 0.4, minCellHeight: 3 },
-                headStyles: { fillColor: [46, 125, 50], textColor: [255, 255, 255], fontStyle: 'bold' },
+                styles: { fontSize: fontSize, halign: 'center', cellPadding: 0.5, overflow: 'linebreak' },
+                headStyles: { fillColor: [46, 125, 50], fontStyle: 'bold' },
                 didParseCell: function(data) {
                     if (data.section === 'head' && data.column.index > 0) {
                         data.cell.styles.fillColor = getCursoInfo(turmasFiltradas[data.column.index - 1]).rgb;
                         data.cell.styles.textColor = [0,0,0];
                     }
-                    if (data.section === 'body' && data.column.index > 0) {
-                        const cellText = data.cell.text[0];
-                        if (cellText && cellText !== "-" && !cellText.toUpperCase().includes("INTERVALO")) {
-                            data.cell.styles.fillColor = getCursoInfo(turmasFiltradas[data.column.index - 1]).rgb;
-                        }
+                    if (data.section === 'body' && data.column.index > 0 && data.cell.text[0] !== "-") {
+                        data.cell.styles.fillColor = getCursoInfo(turmasFiltradas[data.column.index - 1]).rgb;
                     }
                     if (data.section === 'body' && termo !== "" && data.cell.text[0].toUpperCase().includes(termo)) {
                         data.cell.styles.fillColor = [251, 192, 45];
@@ -263,15 +231,13 @@
                 }
             });
 
-            // RODAPÉ (Na última página ou fim da folha)
-            if (idx === datasArr.length - 1 || (idx + 1) % 2 === 0) {
-                pdf.setFontSize(6);
-                pdf.setTextColor(150);
-                pdf.text("dape.cacoal@ifro.edu.br | Rodovia BR-364, KM 228, Lote 2-A, Cacoal/RO", pageWidth/2, 205, { align: 'center' });
-            }
+            const footerY = pdf.internal.pageSize.getHeight() - 5;
+            pdf.setFontSize(6);
+            pdf.setTextColor(150);
+            pdf.text("dape.cacoal@ifro.edu.br | Telefone: (69) 3443-9501", pageWidth/2, footerY, { align: 'center' });
         });
 
-        pdf.save(`Horario_Compacto_IFRO_${sem.replace(/\//g,'-')}.pdf`);
+        pdf.save(`Horario_${mod}_${sem.replace(/\//g,'-')}.pdf`);
     }
 
     window.onload = init;
