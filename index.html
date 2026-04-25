@@ -3,62 +3,61 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Horários IFRO - Cacoal</title>
+    <title>Horários IFRO - Cacoal (Compacto)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
+        /* Redução global de fonte para caber mais dados */
+        body { font-size: 12px; }
         .table-grade { table-layout: fixed; width: 100%; border-collapse: separate; border-spacing: 0; }
         .dia-header-sticky { position: sticky; top: 0; z-index: 30; }
-        .turmas-header-sticky { position: sticky; top: 48px; z-index: 20; background-color: #f9fafb; }
-        .aula-card { border-l-4 border-green-600 p-2 mb-1 bg-green-50 rounded shadow-sm text-[10px] leading-tight; }
+        .turmas-header-sticky { position: sticky; top: 38px; z-index: 20; background-color: #f9fafb; }
+        
+        /* Cartão de aula ultra-compacto */
+        .aula-card { 
+            border-l-2 border-green-600;
+            padding: 2px 4px;
+            margin-bottom: 2px;
+            background-color: #f0fdf4;
+            border-radius: 2px;
+            line-height: 1.1;
+        }
+        .nome-disciplina { font-weight: 700; font-size: 9px; color: #166534; display: block; }
+        .nome-professor { font-size: 8px; color: #1d4ed8; display: block; margin-top: 1px; }
+
         .loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.9); display: none; justify-content: center; align-items: center; z-index: 100; flex-direction: column; }
+        
+        /* Ajuste de colunas de horário */
+        .col-horario { width: 70px; font-size: 9px; }
     </style>
 </head>
-<body class="bg-gray-100 min-h-screen p-4">
+<body class="bg-gray-100 min-h-screen p-2">
 
     <div id="loading" class="loading-overlay">
-        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-green-700 mb-4"></div>
-        <p class="text-green-800 font-bold">Sincronizando dados da planilha...</p>
+        <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-green-700 mb-2"></div>
+        <p class="text-green-800 font-bold text-xs">Sincronizando...</p>
     </div>
 
-    <div class="max-w-7xl mx-auto bg-white p-6 rounded-xl shadow-md mb-8">
-        <div class="flex justify-between items-center mb-6">
-            <h1 class="text-2xl font-bold text-green-800 flex items-center gap-2">
-                📅 Grade de Horários Semanais
+    <div class="max-w-full mx-auto bg-white p-4 rounded-lg shadow-sm mb-4">
+        <div class="flex flex-wrap justify-between items-center gap-4">
+            <h1 class="text-lg font-bold text-green-800 flex items-center gap-2">
+                📅 Grade Semanal IFRO
             </h1>
-            <button onclick="carregarDadosPlanilha()" class="bg-green-700 text-white px-6 py-2 rounded-lg hover:bg-green-800 transition shadow-md">
-                🔄 Sincronizar Dados
-            </button>
-        </div>
-        
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div>
-                <label class="block text-sm font-semibold text-gray-600 mb-1">Escolha a Semana</label>
-                <input type="week" id="weekInputGeral" onchange="renderizarTudo()" 
-                       class="w-full rounded-lg border-gray-300 shadow-sm focus:border-green-500 p-2.5 border">
-            </div>
-            
-            <div>
-                <label class="block text-sm font-semibold text-gray-600 mb-1">Nível do Curso</label>
-                <select id="nivelSelect" onchange="renderizarTudo()" 
-                        class="w-full rounded-lg border-gray-300 shadow-sm focus:border-green-500 p-2.5 border">
-                    <option value="tecnico">Técnico Integrado</option>
-                    <option value="superior">Superior / Noturno</option>
+            <div class="flex gap-2">
+                <input type="week" id="weekInputGeral" onchange="renderizarTudo()" class="rounded border-gray-300 p-1 text-xs border">
+                <select id="nivelSelect" onchange="renderizarTudo()" class="rounded border-gray-300 p-1 text-xs border">
+                    <option value="tecnico">Técnico</option>
+                    <option value="superior">Superior</option>
                 </select>
-            </div>
-
-            <div>
-                <label class="block text-sm font-semibold text-gray-600 mb-1">Filtrar Docente</label>
-                <input type="text" id="buscaGeral" oninput="renderizarTudo()" placeholder="Nome do professor..."
-                       class="w-full rounded-lg border-gray-300 shadow-sm focus:border-green-500 p-2.5 border">
+                <input type="text" id="buscaGeral" oninput="renderizarTudo()" placeholder="Professor..." class="rounded border-gray-300 p-1 text-xs border">
+                <button onclick="carregarDadosPlanilha()" class="bg-green-700 text-white px-3 py-1 rounded text-xs hover:bg-green-800">
+                    Sincronizar
+                </button>
             </div>
         </div>
     </div>
 
-    <div id="gradeGeralRender" class="max-w-full overflow-x-hidden space-y-12">
-        <div class="text-center py-20 text-gray-400 border-2 border-dashed border-gray-200 rounded-xl">
-            Selecione uma semana e clique em sincronizar.
+    <div id="gradeGeralRender" class="space-y-6">
         </div>
-    </div>
 
     <script>
         const SHEET_ID = '1j33kiPqwtzZNuvkBgYDaIiXZvVMY_J0qWAtRfYGdnD8';
@@ -90,23 +89,18 @@
                 const csvText = await response.text();
                 parsearPlanilha(csvText);
                 renderizarTudo();
-            } catch (error) {
-                alert("Erro ao carregar dados.");
-            } finally {
-                document.getElementById('loading').style.display = 'none';
-            }
+            } catch (e) { alert("Erro ao carregar dados."); }
+            finally { document.getElementById('loading').style.display = 'none'; }
         }
 
         function parsearPlanilha(csv) {
             const linhas = csv.split('\n').map(l => l.split(','));
             const newData = {};
 
-            // Ignora linhas 2 a 100
             for (let i = 100; i < linhas.length; i++) {
                 let [dataStr, hora, turma, disc, prof] = linhas[i];
                 if (!dataStr || !turma || dataStr.trim() === "") continue;
 
-                // Normaliza Data para String YYYY-MM-DD
                 const partes = dataStr.includes('/') ? dataStr.split('/') : dataStr.split('-');
                 const d = partes[0].trim().padStart(2, '0');
                 const m = partes[1].trim().padStart(2, '0');
@@ -115,16 +109,13 @@
                 const dataKey = `${a}-${m}-${d}`;
 
                 turma = turma.trim().replace(/"/g, '');
-                if (!newData[turma]) newData[turma] = { name: turma, discs: {} };
+                if (!newData[turma]) newData[turma] = { name: turma, lessons: [] };
                 
-                const discName = disc.replace(/"/g, '').trim();
-                if (!newData[turma].discs[discName]) {
-                    newData[turma].discs[discName] = { name: discName, sch: [] };
-                }
-
-                newData[turma].discs[discName].sch.push({
+                newData[turma].lessons.push({
                     dataKey: dataKey,
-                    time: hora.trim(),
+                    // Normalização do horário para comparação (remove espaços extras)
+                    time: hora.trim().replace(/\s+/g, ''), 
+                    disc: disc.replace(/"/g, '').trim(),
                     prof: prof?.replace(/"/g, '').trim() || "A Definir"
                 });
             }
@@ -136,7 +127,7 @@
             if (!weekVal) return;
 
             const [ano, semana] = weekVal.split("-W").map(Number);
-            const dataSegunda = getMondayOfSelectedWeek(semana, ano);
+            const dataSegunda = getMonday(semana, ano);
             const nivel = document.getElementById("nivelSelect").value;
             const busca = document.getElementById("buscaGeral").value.toLowerCase();
             const render = document.getElementById("gradeGeralRender");
@@ -152,29 +143,25 @@
             for (let i = 0; i < 6; i++) {
                 const diaLoop = new Date(dataSegunda);
                 diaLoop.setDate(dataSegunda.getDate() + i);
-                
-                // Formata data do loop para bater com a dataKey da planilha
                 const d = String(diaLoop.getDate()).padStart(2, '0');
                 const m = String(diaLoop.getMonth() + 1).padStart(2, '0');
-                const a = diaLoop.getFullYear();
-                const dataRef = `${a}-${m}-${d}`;
+                const dataRef = `${diaLoop.getFullYear()}-${m}-${d}`;
 
                 html += `
-                <div class="bg-white rounded-xl shadow-lg border border-gray-200 mb-10 overflow-hidden">
-                    <div class="dia-header-sticky bg-green-800 text-white p-4 font-bold flex justify-between items-center">
-                        <span>${diasNome[i]}</span>
-                        <span class="bg-green-600 px-3 py-1 rounded text-sm">${d}/${m}/${a}</span>
+                <div class="bg-white rounded shadow-sm border border-gray-200 overflow-hidden">
+                    <div class="dia-header-sticky bg-green-800 text-white p-2 font-bold flex justify-between items-center text-xs">
+                        <span>${diasNome[i]} (${d}/${m})</span>
                     </div>
                     <div class="overflow-x-auto">
                         <table class="table-grade">
                             <thead>
                                 <tr class="turmas-header-sticky">
-                                    <th class="p-3 border-b border-r w-24 text-[10px] text-gray-400 bg-gray-50">HORÁRIO</th>
-                                    ${turmasFiltradas.map(t => `<th class="p-3 border-b border-r text-[11px] text-gray-700 text-center uppercase font-bold">${dataStore[t].name}</th>`).join("")}
+                                    <th class="p-1 border-b border-r col-horario text-gray-400 bg-gray-50">Horário</th>
+                                    ${turmasFiltradas.map(t => `<th class="p-1 border-b border-r text-[10px] text-center uppercase truncate">${dataStore[t].name}</th>`).join("")}
                                 </tr>
                             </thead>
                             <tbody>
-                                ${gerarCorpo(turmasFiltradas, dataRef, busca, nivel)}
+                                ${gerarLinhas(turmasFiltradas, dataRef, busca, nivel)}
                             </tbody>
                         </table>
                     </div>
@@ -183,39 +170,40 @@
             render.innerHTML = html;
         }
 
-        function gerarCorpo(turmas, dataRef, busca, nivel) {
-            const slots = nivel === "tecnico" 
-                ? GABARITO.filter(s => s.h.split(" - ")[0] < "18:20") 
-                : GABARITO;
+        function gerarLinhas(turmas, dataRef, busca, nivel) {
+            const slots = nivel === "tecnico" ? GABARITO.filter(s => s.h < "18:20") : GABARITO;
 
             return slots.map(slot => {
                 if (slot.t === "intervalo") {
-                    return `<tr class="bg-gray-50/50"><td class="p-2 border-b border-r text-center font-mono text-[9px] text-gray-400">${slot.h}</td><td colspan="${turmas.length}" class="p-2 border-b text-center text-[9px] uppercase font-bold text-gray-300 tracking-widest">${slot.l}</td></tr>`;
+                    return `<tr class="bg-gray-50"><td class="p-1 border-b border-r text-center font-mono text-[8px] text-gray-400">${slot.h}</td><td colspan="${turmas.length}" class="p-1 border-b text-center text-[8px] font-bold text-gray-300 italic uppercase">${slot.l}</td></tr>`;
                 }
 
-                const horaRef = slot.h.split(" - ")[0];
+                // Normaliza o horário do gabarito para comparação
+                const hGabarito = slot.h.split(" - ")[0].trim().replace(/\s+/g, '');
 
                 return `<tr>
-                    <td class="p-3 border-b border-r bg-gray-50 font-mono text-[10px] font-bold text-center text-gray-500">${slot.h}</td>
+                    <td class="p-1 border-b border-r bg-gray-50 font-mono text-[9px] font-bold text-center text-gray-500">${slot.h}</td>
                     ${turmas.map(tId => {
                         let aulasHtml = "";
-                        Object.values(dataStore[tId].discs).forEach(d => {
-                            d.sch.forEach(a => {
-                                // Comparação de String pura: "2026-02-16" === "2026-02-16"
-                                if (a.dataKey === dataRef && a.time.startsWith(horaRef)) {
-                                    if (!busca || a.prof.toLowerCase().includes(busca)) {
-                                        aulasHtml += `<div class="aula-card"><strong>${d.name}</strong><div class="text-blue-600 font-semibold mt-1">${a.prof}</div></div>`;
-                                    }
+                        dataStore[tId].lessons.forEach(aula => {
+                            // CORREÇÃO: Verifica se a aula na planilha começa com o mesmo horário do gabarito
+                            if (aula.dataKey === dataRef && aula.time.includes(hGabarito)) {
+                                if (!busca || aula.prof.toLowerCase().includes(busca)) {
+                                    aulasHtml += `
+                                    <div class="aula-card">
+                                        <span class="nome-disciplina">${aula.disc}</span>
+                                        <span class="nome-professor">${aula.prof}</span>
+                                    </div>`;
                                 }
-                            });
+                            }
                         });
-                        return `<td class="p-1 border-b border-r align-top min-h-[60px]">${aulasHtml}</td>`;
+                        return `<td class="p-1 border-b border-r align-top min-h-[40px]">${aulasHtml}</td>`;
                     }).join("")}
                 </tr>`;
             }).join("");
         }
 
-        function getMondayOfSelectedWeek(w, y) {
+        function getMonday(w, y) {
             const simple = new Date(y, 0, 1 + (w - 1) * 7);
             const dow = simple.getDay();
             const ISOweekStart = simple;
