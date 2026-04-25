@@ -8,28 +8,62 @@
     
     <style>
         :root { --primary: #2e7d32; --bg: #f4f7f6; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding: 0; overflow-x: hidden; }
         
-        .header-sticky { position: sticky; top: 0; z-index: 1000; background: var(--bg); padding: 10px 15px; }
+        .header-sticky { position: sticky; top: 0; z-index: 2000; background: var(--bg); padding: 10px 15px; }
         .controls-card { background: white; padding: 15px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; align-items: center; }
         
         select, .search-box, .btn-pdf { padding: 8px; border-radius: 6px; border: 1px solid #ddd; font-size: 13px; outline: none; }
         .search-box { width: 220px; border: 2px solid var(--primary); }
         .btn-pdf { background: #d32f2f; color: white; border: none; cursor: pointer; font-weight: bold; }
 
-        .week-container { padding: 15px; }
-        .table-responsive { width: 100%; overflow-x: auto; background: white; border-radius: 8px; margin-bottom: 30px; }
-
-        table { width: 100%; border-collapse: collapse; font-size: 10px; table-layout: fixed; }
-        th, td { border: 1px solid #bbb; padding: 6px; text-align: center; word-wrap: break-word; white-space: normal; overflow: hidden; }
+        .week-container { padding: 15px; width: 100%; box-sizing: border-box; }
         
+        /* Container de Rolagem */
+        .table-responsive { 
+            width: 100%; 
+            overflow-x: auto; 
+            background: white; 
+            border-radius: 8px; 
+            border: 1px solid #ccc;
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 10px; table-layout: fixed; }
+        th, td { border: 0.5px solid #bbb; padding: 8px; text-align: center; word-wrap: break-word; white-space: normal; }
+
+        /* Fixação da Coluna de Horário */
+        .time-col { 
+            position: sticky; 
+            left: 0; 
+            z-index: 100; 
+            background: #f1f3f4 !important; 
+            font-weight: bold; 
+            width: 85px; 
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+        }
+
+        /* Fixação do Cabeçalho do Dia */
+        .day-divider { 
+            background: var(--primary); 
+            color: white; 
+            font-weight: bold; 
+            font-size: 12px; 
+            position: sticky;
+            left: 0;
+            z-index: 150;
+        }
+
+        .header-row th { background: #444; color: #fff; position: sticky; top: 0; z-index: 10; }
+        .header-row th.time-col { z-index: 110; }
+
+        /* Cores dos Cursos */
         .c-agroec { background-color: #e8f5e9 !important; } .c-agropec { background-color: #e3f2fd !important; }
         .c-info { background-color: #fff8e1 !important; } .c-geo { background-color: #f3e5f5 !important; }
         .c-mat { background-color: #e0f7fa !important; } .c-agroneg { background-color: #efebe9 !important; }
         .c-zoo { background-color: #fce4ec !important; } .c-agron { background-color: #f1f8e9 !important; }
 
-        .day-divider { background: var(--primary); color: white; font-weight: bold; font-size: 12px; }
-        .time-col { font-weight: bold; width: 85px; background: #f1f3f4; }
         .highlight { background-color: #fbc02d !important; font-weight: bold; border: 2px solid #000; }
         .opaco { opacity: 0.1; }
         .intervalo { background: #f9f9f9; color: #aaa; font-style: italic; }
@@ -50,7 +84,7 @@
 </div>
 
 <div class="week-container">
-    <div class="table-responsive" id="tabelaHorario"></div>
+    <div id="tabelaHorario"></div>
 </div>
 
 <script>
@@ -63,7 +97,6 @@
     let turmasDaPlanilha = [];
     let semanasAgrupadas = {};
 
-    // Função para tratar CSV respeitando vírgulas dentro de aspas
     function parseCSV(text) {
         const lines = text.split(/\r?\n/);
         return lines.map(line => {
@@ -72,14 +105,11 @@
             let inQuotes = false;
             for (let i = 0; i < line.length; i++) {
                 char = line[i];
-                if (char === '"') {
-                    inQuotes = !inQuotes;
-                } else if (char === ',' && !inQuotes) {
+                if (char === '"') inQuotes = !inQuotes;
+                else if (char === ',' && !inQuotes) {
                     result.push(current.trim());
                     current = '';
-                } else {
-                    current += char;
-                }
+                } else current += char;
             }
             result.push(current.trim());
             return result;
@@ -114,8 +144,6 @@
     function processarDados() {
         semanasAgrupadas = {};
         if (dadosGlobais.length === 0) return;
-        
-        // Remove aspas extras que o parser pode ter deixado e limpa turmas
         turmasDaPlanilha = dadosGlobais[0].slice(2).filter(t => t !== "").map(t => t.replace(/^"|"$/g, ''));
 
         let ultimaData = "";
@@ -124,13 +152,11 @@
             if (row[0] && row[0] !== "" && row[0] !== "-") ultimaData = row[0];
             row[0] = ultimaData;
             if (!row[0]) continue;
-
             const parts = row[0].split('/');
             if(parts.length < 3) continue;
             const dObj = new Date(parts[2], parts[1]-1, parts[0]);
             const diff = dObj.getDate() - dObj.getDay() + (dObj.getDay() === 0 ? -6 : 1);
             const segunda = new Date(dObj.setDate(diff)).toLocaleDateString('pt-BR');
-
             if (!semanasAgrupadas[segunda]) semanasAgrupadas[segunda] = { dias: {} };
             if (!semanasAgrupadas[segunda].dias[row[0]]) semanasAgrupadas[segunda].dias[row[0]] = [];
             semanasAgrupadas[segunda].dias[row[0]].push(row);
@@ -139,17 +165,15 @@
         const select = document.getElementById('selectSemana');
         select.innerHTML = "";
         const sortedWeeks = Object.keys(semanasAgrupadas).sort((a,b) => a.split('/').reverse().join('').localeCompare(b.split('/').reverse().join('')));
-        sortedWeeks.forEach(s => {
-            select.innerHTML += `<option value="${s}">Semana de ${s}</option>`;
-        });
+        sortedWeeks.forEach(s => select.innerHTML += `<option value="${s}">Semana de ${s}</option>`);
         renderizarTabela();
     }
 
     function getTurmasAtivasNaSemana(diasDaSemana) {
         return turmasDaPlanilha.filter(tNome => {
             const idx = dadosGlobais[0].indexOf(tNome);
-            return Object.values(diasDaSemana).some(diaArray => 
-                diaArray.some(row => row[idx] && row[idx] !== "-" && !row[1].toUpperCase().includes("INTERVALO"))
+            return Object.values(diasDaSemana).some(diaArr => 
+                diaArr.some(row => row[idx] && row[idx] !== "-" && !row[1].toUpperCase().includes("INTERVALO"))
             );
         });
     }
@@ -165,10 +189,11 @@
         Object.keys(dias).forEach(dia => {
             const p = dia.split('/');
             const dObj = new Date(p[2], p[1]-1, p[0]);
-            const diasSemana = ["DOMINGO", "SEGUNDA-FEIRA", "TERÇA-FEIRA", "QUARTA-FEIRA", "QUINTA-FEIRA", "SEXTA-FEIRA", "SÁBADO"];
+            const diasS = ["DOMINGO", "SEGUNDA-FEIRA", "TERÇA-FEIRA", "QUARTA-FEIRA", "QUINTA-FEIRA", "SEXTA-FEIRA", "SÁBADO"];
             
-            html += `<table><thead><tr class="day-divider"><td colspan="${turmasAtivas.length + 1}">${diasSemana[dObj.getDay()]} - ${dia}</td></tr>`;
-            html += `<tr><th style="background:#444; color:#fff; width:85px">Horário</th>`;
+            html += `<div class="table-responsive"><table><thead>`;
+            html += `<tr class="day-divider"><td colspan="${turmasAtivas.length + 1}">${diasS[dObj.getDay()]} - ${dia}</td></tr>`;
+            html += `<tr class="header-row"><th class="time-col">Horário</th>`;
             turmasAtivas.forEach(t => html += `<th class="${getCursoInfo(t).cl}">${t}</th>`);
             html += `</tr></thead><tbody>`;
 
@@ -183,7 +208,7 @@
                 });
                 html += `</tr>`;
             });
-            html += `</tbody></table><br>`;
+            html += `</tbody></table></div>`;
         });
         container.innerHTML = html;
         filtrarProfessor();
@@ -214,7 +239,6 @@
         Object.keys(diasObj).forEach((dia, idx) => {
             if (idx > 0) pdf.addPage();
             const pageWidth = pdf.internal.pageSize.getWidth();
-            
             pdf.setFontSize(8); pdf.setFont(undefined, 'bold');
             pdf.text("INSTITUTO FEDERAL DE EDUCAÇÃO, CIÊNCIA E TECNOLOGIA - CAMPUS CACOAL", pageWidth/2, 10, { align: 'center' });
             pdf.setFontSize(7); pdf.setFont(undefined, 'normal');
