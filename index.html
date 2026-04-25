@@ -2,7 +2,7 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Sistema de Horários IFRO - Completo</title>
+    <title>Sistema de Horários IFRO - Fluxo Contínuo</title>
     <style>
         :root { --primary: #2e7d32; --secondary: #fbc02d; --bg: #f4f7f6; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding: 15px; }
@@ -17,14 +17,14 @@
 
         .table-wrapper { overflow-x: auto; }
         table { width: 100%; border-collapse: collapse; min-width: 1400px; font-size: 11px; table-layout: fixed; }
-        th, td { border: 1px solid #eee; padding: 8px; text-align: center; overflow: hidden; word-wrap: break-word; }
+        th, td { border: 1px solid #eee; padding: 8px; text-align: center; word-wrap: break-word; }
         
-        th { background: var(--primary); color: white; position: sticky; top: 0; height: 45px; }
+        th { background: var(--primary); color: white; position: sticky; top: 0; height: 45px; z-index: 10; }
         .day-divider { background: #e8f5e9; font-weight: bold; color: var(--primary); text-align: center; font-size: 14px; height: 35px; }
-        .time-col { font-weight: bold; width: 100px; background: #fafafa; color: #555; }
+        .time-col { font-weight: bold; width: 120px; background: #fafafa; color: #555; }
         
-        .aula-cell { height: 50px; transition: 0.2s; }
-        .highlight { background-color: var(--secondary) !important; font-weight: bold; color: #000; transform: scale(1.02); }
+        .aula-cell { height: 50px; }
+        .highlight { background-color: var(--secondary) !important; font-weight: bold; color: #000; }
         .intervalo { background: #f1f3f4; color: #777; font-style: italic; font-weight: bold; }
         .empty { color: #ddd; }
     </style>
@@ -65,47 +65,51 @@
         try {
             const response = await fetch(url);
             const csv = await response.text();
-            // Limpeza básica de aspas do CSV
-            dadosGlobais = csv.split('\n').map(r => r.split(',').map(cell => cell.replace(/"/g, '')));
+            dadosGlobais = csv.split('\n').map(r => r.split(',').map(cell => cell.replace(/"/g, '').trim()));
             processarDados();
         } catch (e) {
-            document.getElementById('tituloSemana').textContent = "Erro ao carregar dados da planilha.";
+            document.getElementById('tituloSemana').textContent = "Erro ao carregar dados.";
         }
     }
 
-    // Converte string DD/MM/AAAA para objeto Date
     function strToDate(s) {
         const p = s.split('/');
         return new Date(p[2], p[1] - 1, p[0]);
     }
 
-    // Obtém a segunda-feira daquela data para agrupar semanas
-    function getMonday(dateStr) {
-        const d = strToDate(dateStr);
+    function getMonday(dateObj) {
+        const d = new Date(dateObj);
         const day = d.getDay();
         const diff = d.getDate() - day + (day === 0 ? -6 : 1);
-        const monday = new Date(d.setDate(diff));
-        return monday;
+        return new Date(d.setDate(diff));
     }
 
     function processarDados() {
         semanasAgrupadas = {};
-        turmasGlobais = dadosGlobais[0].slice(2).filter(t => t.trim() !== "");
+        turmasGlobais = dadosGlobais[0].slice(2).filter(t => t !== "");
+
+        let ultimoDiaEncontrado = "";
+        let ultimaDataEncontrada = "";
 
         for (let i = 1; i < dadosGlobais.length; i++) {
-            const row = dadosGlobais[i];
-            if (!row[0] || row[0].trim() === "") continue;
+            const row = [...dadosGlobais[i]]; // Copia a linha
+            let dataNaCelula = row[0];
 
-            const dataObj = strToDate(row[0].trim());
-            const segundaObj = getMonday(row[0].trim());
+            // LÓGICA DE PERSISTÊNCIA: Se a célula da data estiver vazia, usa a última encontrada
+            if (dataNaCelula === "" || dataNaCelula === "-") {
+                row[0] = ultimaDataEncontrada;
+            } else {
+                ultimaDataEncontrada = dataNaCelula;
+            }
+
+            if (!row[0]) continue;
+
+            const dataObj = strToDate(row[0]);
+            const segundaObj = getMonday(dataObj);
             const segundaStr = segundaObj.toLocaleDateString('pt-BR');
 
             if (!semanasAgrupadas[segundaStr]) {
-                semanasAgrupadas[segundaStr] = { 
-                    label: segundaStr, 
-                    date: segundaObj, 
-                    rows: [] 
-                };
+                semanasAgrupadas[segundaStr] = { label: segundaStr, date: segundaObj, rows: [] };
             }
             semanasAgrupadas[segundaStr].rows.push(row);
         }
@@ -113,7 +117,6 @@
         const selectSemana = document.getElementById('selectSemana');
         selectSemana.innerHTML = "";
 
-        // Ordenação Cronológica das semanas (Mês crescente)
         const semanasOrdenadas = Object.values(semanasAgrupadas).sort((a, b) => a.date - b.date);
 
         semanasOrdenadas.forEach(s => {
@@ -138,25 +141,24 @@
         turmasGlobais.forEach(t => html += `<th>${t}</th>`);
         html += `</tr></thead><tbody>`;
 
-        let diaAtual = "";
+        let diaAtualParaExibicao = "";
 
         dadosSemana.forEach(row => {
-            const dataRow = row[0].trim();
-            const horaRow = row[1].trim();
+            const dataRow = row[0];
+            const horaRow = row[1];
 
-            // Divisor de Dia (Aparece uma vez a cada mudança de data na coluna A)
-            if (dataRow !== diaAtual) {
-                diaAtual = dataRow;
-                html += `<tr class="day-divider"><td colspan="${turmasGlobais.length + 1}">${diaAtual}</td></tr>`;
+            // Só cria o divisor visual quando a data realmente muda
+            if (dataRow !== diaAtualParaExibicao) {
+                diaAtualParaExibicao = dataRow;
+                html += `<tr class="day-divider"><td colspan="${turmasGlobais.length + 1}">${dataRow}</td></tr>`;
             }
 
             const isIntervalo = horaRow.toUpperCase().includes("INTERVALO");
             html += `<tr class="${isIntervalo ? 'intervalo' : ''}">`;
             html += `<td class="time-col">${horaRow}</td>`;
 
-            // Preenche as aulas de todas as turmas para este horário específico
             for (let j = 2; j < (turmasGlobais.length + 2); j++) {
-                const conteudo = row[j] ? row[j].trim() : "";
+                const conteudo = row[j] || "";
                 const exibicao = (conteudo === "" || conteudo === "-") ? '<span class="empty">-</span>' : conteudo;
                 html += `<td class="aula-cell">${exibicao}</td>`;
             }
