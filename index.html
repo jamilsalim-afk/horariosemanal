@@ -2,185 +2,116 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Horário Semanal de Aulas</title>
+    <title>Horário Dinâmico IFRO</title>
     <style>
-        :root {
-            --primary-color: #2c3e50;
-            --accent-color: #3498db;
-            --bg-color: #f4f7f6;
-            --card-bg: #ffffff;
-            --text-color: #333;
-        }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f4f7f6; padding: 20px; }
+        .container { max-width: 100%; margin: auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        h2 { color: #2e7d32; text-align: center; margin-bottom: 25px; }
+        
+        .controls { display: flex; justify-content: center; margin-bottom: 20px; gap: 10px; }
+        input { padding: 12px; width: 350px; border: 2px solid #2e7d32; border-radius: 25px; outline: none; }
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            margin: 0;
-            padding: 20px;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        header {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-
-        .search-container {
-            margin-bottom: 30px;
-            text-align: center;
-        }
-
-        #teacherSearch {
-            padding: 12px 20px;
-            width: 100%;
-            max-width: 400px;
-            border-radius: 25px;
-            border: 1px solid #ddd;
-            font-size: 16px;
-            outline: none;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-
-        .week-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 20px;
-        }
-
-        .day-column {
-            background: var(--card-bg);
-            border-radius: 8px;
-            padding: 15px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-        }
-
-        .day-header {
-            background-color: var(--primary-color);
-            color: white;
-            padding: 10px;
-            border-radius: 5px;
-            text-align: center;
-            margin-bottom: 15px;
-            font-weight: bold;
-        }
-
-        .class-card {
-            border-left: 4px solid var(--accent-color);
-            background: #f9f9f9;
-            padding: 10px;
-            margin-bottom: 10px;
-            font-size: 0.9em;
-            transition: transform 0.2s;
-        }
-
-        .class-card:hover {
-            transform: scale(1.02);
-        }
-
-        .time { font-weight: bold; color: var(--primary-color); }
-        .subject { display: block; margin: 5px 0; font-weight: 600; }
-        .teacher { color: #666; font-style: italic; }
-        .room { font-size: 0.8em; color: var(--accent-color); float: right; }
-
-        .hidden { display: none; }
+        .table-wrapper { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; min-width: 800px; }
+        th, td { border: 1px solid #dee2e6; padding: 12px; text-align: center; font-size: 13px; }
+        th { background-color: #2e7d32; color: white; text-transform: uppercase; letter-spacing: 1px; }
+        
+        .dia-semana { background-color: #e8f5e9; font-weight: bold; color: #2e7d32; font-size: 15px; }
+        .horario-col { background-color: #f8f9fa; font-weight: bold; width: 120px; }
+        .highlight { background-color: #fbc02d !important; font-weight: bold; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <header>
-        <h1>Horários de Aula</h1>
-        <p id="week-range">Carregando período...</p>
-    </header>
-
-    <div class="search-container">
-        <input type="text" id="teacherSearch" placeholder="Pesquisar por nome do professor..." onkeyup="filterTeachers()">
+    <h2>Quadro de Horários Integrado</h2>
+    
+    <div class="controls">
+        <input type="text" id="filtro" placeholder="🔍 Pesquisar por Professor..." onkeyup="buscarProfessor()">
     </div>
 
-    <div class="week-grid" id="schedule-grid">
-        </div>
+    <div class="table-wrapper">
+        <table id="tabelaHorario">
+            <thead>
+                <tr id="headerTurmas">
+                    <th>Horário / Dia</th>
+                    </tr>
+            </thead>
+            <tbody id="corpoTabela">
+                </tbody>
+        </table>
+    </div>
 </div>
 
 <script>
-    // URL da sua planilha em formato CSV
-    const sheetId = '1j33kiPqwtzZNuvkBgYDaIiXZvVMY_J0qWAtRfYGdnD8';
+    // URL DE EXPORTAÇÃO CSV DA SUA PLANILHA
+    const sheetID = '1j33kiPqwtzZNuvkBgYDaIiXZvVMY_J0qWAtRfYGdnD8';
     const gid = '1357770092';
-    const csvUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&gid=${gid}`;
+    const url = `https://docs.google.com/spreadsheets/d/${sheetID}/export?format=csv&gid=${gid}`;
 
-    async function fetchData() {
+    async function carregarDados() {
         try {
-            const response = await fetch(csvUrl);
+            const response = await fetch(url);
             const data = await response.text();
-            processData(data);
+            renderizarTabela(data);
         } catch (error) {
-            console.error("Erro ao carregar dados:", error);
-            document.getElementById('schedule-grid').innerHTML = "Erro ao carregar a planilha. Verifique se ela está pública.";
+            console.error("Erro ao ler a planilha:", error);
         }
     }
 
-    function processData(csvData) {
-        const rows = csvData.split('\n').map(row => row.split(','));
-        const grid = document.getElementById('schedule-grid');
-        grid.innerHTML = '';
+    function renderizarTabela(csv) {
+        const linhas = csv.split('\n').map(row => row.split(','));
+        const cabecalhoTurmas = document.getElementById('headerTurmas');
+        const corpoTabela = document.getElementById('corpoTabela');
 
-        const days = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta"];
+        // 1. Identificar Turmas Únicas (assumindo que a coluna de turmas é a 5ª)
+        const turmas = [...new Set(linhas.slice(1).map(l => l[4]))].filter(t => t);
+        turmas.forEach(turma => {
+            let th = document.createElement('th');
+            th.textContent = turma;
+            cabecalhoTurmas.appendChild(th);
+        });
+
+        // 2. Agrupar por Dia e Horário
+        const dias = ["SEGUNDA-FEIRA", "TERÇA-FEIRA", "QUARTA-FEIRA", "QUINTA-FEIRA", "SEXTA-FEIRA", "SÁBADO"];
         
-        // Estrutura para organizar os dias
-        const schedule = { "Segunda": [], "Terça": [], "Quarta": [], "Quinta": [], "Sexta": [] };
+        dias.forEach(dia => {
+            // Linha divisória do dia
+            let trDia = document.createElement('tr');
+            trDia.className = 'dia-semana';
+            trDia.innerHTML = `<td colspan="${turmas.length + 1}">${dia}</td>`;
+            corpoTabela.appendChild(trDia);
 
-        // Pula o cabeçalho e processa linhas
-        // Ajuste os índices [0, 1, 2...] conforme a ordem das colunas na sua planilha real
-        for (let i = 1; i < rows.length; i++) {
-            const [dia, horario, materia, professor, turma, sala] = rows[i];
-            if (schedule[dia]) {
-                schedule[dia].push({ horario, materia, professor, turma, sala });
-            }
-        }
+            // Filtrar horários únicos para este dia
+            const horariosNoDia = [...new Set(linhas.filter(l => l[0] === dia).map(l => l[1]))].sort();
 
-        days.forEach(day => {
-            const dayDiv = document.createElement('div');
-            dayDiv.className = 'day-column';
-            dayDiv.innerHTML = `<div class="day-header">${day}</div>`;
+            horariosNoDia.forEach(hora => {
+                let tr = document.createElement('tr');
+                tr.innerHTML = `<td class="horario-col">${hora}</td>`;
 
-            schedule[day].forEach(item => {
-                const card = document.createElement('div');
-                card.className = 'class-card';
-                card.setAttribute('data-teacher', item.professor.toLowerCase());
-                card.innerHTML = `
-                    <span class="room">${item.sala || ''}</span>
-                    <span class="time">${item.horario}</span>
-                    <span class="subject">${item.materia} - ${item.turma}</span>
-                    <span class="teacher">${item.professor}</span>
-                `;
-                dayDiv.appendChild(card);
+                turmas.forEach(turma => {
+                    const aula = linhas.find(l => l[0] === dia && l[1] === hora && l[4] === turma);
+                    tr.innerHTML += `<td class="celula-aula">${aula ? aula[2] + '<br><small>' + aula[3] + '</small>' : '-'}</td>`;
+                });
+                corpoTabela.appendChild(tr);
             });
-
-            grid.appendChild(dayDiv);
         });
     }
 
-    function filterTeachers() {
-        const input = document.getElementById('teacherSearch').value.toLowerCase();
-        const cards = document.querySelectorAll('.class-card');
-
-        cards.forEach(card => {
-            const teacherName = card.getAttribute('data-teacher');
-            if (teacherName.includes(input)) {
-                card.classList.remove('hidden');
+    function buscarProfessor() {
+        let busca = document.getElementById('filtro').value.toUpperCase();
+        let celulas = document.querySelectorAll('.celula-aula');
+        
+        celulas.forEach(c => {
+            if (busca !== "" && c.innerText.toUpperCase().includes(busca)) {
+                c.classList.add('highlight');
             } else {
-                card.classList.add('hidden');
+                c.classList.remove('highlight');
             }
         });
     }
 
-    // Inicializa a busca dos dados
-    fetchData();
+    window.onload = carregarDados;
 </script>
 
 </body>
