@@ -19,21 +19,27 @@
 
         .week-container { padding: 15px; width: 100%; box-sizing: border-box; }
         
-        /* Container de Rolagem */
         .table-responsive { 
             width: 100%; 
             overflow-x: auto; 
             background: white; 
             border-radius: 8px; 
-            border: 1px solid #ccc;
+            border: 1px solid black;
             margin-bottom: 30px;
             position: relative;
         }
 
-        table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 10px; table-layout: fixed; }
-        th, td { border: 0.5px solid #bbb; padding: 8px; text-align: center; word-wrap: break-word; white-space: normal; }
+        table { width: 100%; border-collapse: collapse; font-size: 10px; table-layout: fixed; }
+        th, td { 
+            border: 1px solid black; 
+            padding: 8px; 
+            text-align: center; 
+            vertical-align: middle; /* Centralização vertical */
+            word-wrap: break-word; 
+            white-space: normal; 
+            height: 45px; /* Altura mínima para ajudar na centralização */
+        }
 
-        /* Fixação da Coluna de Horário */
         .time-col { 
             position: sticky; 
             left: 0; 
@@ -44,7 +50,6 @@
             box-shadow: 2px 0 5px rgba(0,0,0,0.1);
         }
 
-        /* Fixação do Cabeçalho do Dia */
         .day-divider { 
             background: var(--primary); 
             color: white; 
@@ -55,18 +60,27 @@
             z-index: 150;
         }
 
-        .header-row th { background: #444; color: #fff; position: sticky; top: 0; z-index: 10; }
-        .header-row th.time-col { z-index: 110; }
+        .header-row th { color: #000; position: sticky; top: 0; z-index: 10; }
+        .header-row th.time-col { z-index: 110; background: #444 !important; color: #fff; }
 
-        /* Cores dos Cursos */
-        .c-agroec { background-color: #e8f5e9 !important; } .c-agropec { background-color: #e3f2fd !important; }
-        .c-info { background-color: #fff8e1 !important; } .c-geo { background-color: #f3e5f5 !important; }
-        .c-mat { background-color: #e0f7fa !important; } .c-agroneg { background-color: #efebe9 !important; }
-        .c-zoo { background-color: #fce4ec !important; } .c-agron { background-color: #f1f8e9 !important; }
+        /* Cores Originais dos Cursos */
+        .c-agroec { background-color: #90ee90 !important; } 
+        .c-agropec { background-color: #87ceeb !important; }
+        .c-info { background-color: #ffeb3b !important; } 
+        .c-geo { background-color: #dda0dd !important; }
+        .c-mat { background-color: #00ffff !important; } 
+        .c-agroneg { background-color: #deb887 !important; }
+        .c-zoo { background-color: #ffc0cb !important; } 
+        .c-agron { background-color: #7cfc00 !important; }
 
-        .highlight { background-color: #fbc02d !important; font-weight: bold; border: 2px solid #000; }
+        /* Estilos de Célula Especiais */
+        .intervalo { background-color: #e0e0e0 !important; color: #333; font-weight: bold; }
+        .almoco-jantar { background-color: #bdbdbd !important; color: black; font-weight: bold; text-transform: uppercase; }
+        .aula-extra { background-color: #b3e5fc !important; } /* [+] Azul claro */
+        .aula-asterisco { background-color: #616161 !important; color: white !important; } /* * Cinza Escuro */
+
+        .highlight { background-color: #fbc02d !important; font-weight: bold; border: 2px solid #000; color: black !important; }
         .opaco { opacity: 0.1; }
-        .intervalo { background: #f9f9f9; color: #aaa; font-style: italic; }
     </style>
 </head>
 <body>
@@ -119,7 +133,6 @@
     async function init() {
         const mod = document.getElementById('selectModalidade').value;
         const url = `https://docs.google.com/spreadsheets/d/${SHEETS[mod].id}/export?format=csv&gid=${SHEETS[mod].gid}`;
-        
         try {
             const response = await fetch(url);
             const csvText = await response.text();
@@ -130,14 +143,14 @@
 
     function getCursoInfo(t) {
         t = t.toUpperCase();
-        if (t.includes("AGROEC")) return { cl: "c-agroec", rgb: [232, 245, 233] };
-        if (t.includes("AGROPEC")) return { cl: "c-agropec", rgb: [227, 242, 253] };
-        if (t.includes("INFO")) return { cl: "c-info", rgb: [255, 248, 225] };
-        if (t.includes("GEO")) return { cl: "c-geo", rgb: [243, 229, 245] };
-        if (t.includes("MAT")) return { cl: "c-mat", rgb: [224, 247, 250] };
-        if (t.includes("AGRONEG")) return { cl: "c-agroneg", rgb: [239, 235, 233] };
-        if (t.includes("ZOO")) return { cl: "c-zoo", rgb: [252, 228, 236] };
-        if (t.includes("AGRON")) return { cl: "c-agron", rgb: [241, 248, 233] };
+        if (t.includes("AGROEC")) return { cl: "c-agroec", rgb: [144, 238, 144] };
+        if (t.includes("AGROPEC")) return { cl: "c-agropec", rgb: [135, 206, 235] };
+        if (t.includes("INFO")) return { cl: "c-info", rgb: [255, 235, 59] };
+        if (t.includes("GEO")) return { cl: "c-geo", rgb: [221, 160, 221] };
+        if (t.includes("MAT")) return { cl: "c-mat", rgb: [0, 255, 255] };
+        if (t.includes("AGRONEG")) return { cl: "c-agroneg", rgb: [222, 184, 135] };
+        if (t.includes("ZOO")) return { cl: "c-zoo", rgb: [255, 192, 203] };
+        if (t.includes("AGRON")) return { cl: "c-agron", rgb: [124, 252, 0] };
         return { cl: "", rgb: [255, 255, 255] };
     }
 
@@ -161,7 +174,6 @@
             if (!semanasAgrupadas[segunda].dias[row[0]]) semanasAgrupadas[segunda].dias[row[0]] = [];
             semanasAgrupadas[segunda].dias[row[0]].push(row);
         }
-
         const select = document.getElementById('selectSemana');
         select.innerHTML = "";
         const sortedWeeks = Object.keys(semanasAgrupadas).sort((a,b) => a.split('/').reverse().join('').localeCompare(b.split('/').reverse().join('')));
@@ -197,14 +209,33 @@
             turmasAtivas.forEach(t => html += `<th class="${getCursoInfo(t).cl}">${t}</th>`);
             html += `</tr></thead><tbody>`;
 
-            dias[dia].forEach(row => {
-                const isInt = row[1].toUpperCase().includes("INTERVALO");
-                html += `<tr class="${isInt ? 'intervalo' : ''}"><td class="time-col">${row[1]}</td>`;
+            dias[dia].forEach((row, rowIndex) => {
+                const horario = row[1];
+                let rowClass = "";
+                let rowTextOverride = null;
+
+                // Regras de Almoço e Jantar
+                if (horario === "" || horario === "-") {
+                    const prevRow = dias[dia][rowIndex-1] ? dias[dia][rowIndex-1][1] : "";
+                    if (prevRow.includes("12:00")) { rowClass = "almoco-jantar"; rowTextOverride = "ALMOÇO"; }
+                    else if (prevRow.includes("18:20")) { rowClass = "almoco-jantar"; rowTextOverride = "JANTAR"; }
+                }
+                
+                if (horario.toUpperCase().includes("INTERVALO")) rowClass = "intervalo";
+
+                html += `<tr class="${rowClass}"><td class="time-col">${rowTextOverride || horario}</td>`;
                 turmasAtivas.forEach(tNome => {
                     const idx = dadosGlobais[0].indexOf(tNome);
-                    const conteudo = (row[idx] || "-").replace(/^"|"$/g, '');
-                    const cl = (conteudo !== "-" && !isInt) ? getCursoInfo(tNome).cl : "";
-                    html += `<td class="aula-cell ${cl}">${conteudo}</td>`;
+                    let conteudo = (row[idx] || "-").replace(/^"|"$/g, '');
+                    
+                    let cellClass = "aula-cell";
+                    if (rowClass === "") {
+                        if (conteudo.endsWith("[+]")) cellClass += " aula-extra";
+                        if (conteudo.endsWith("*")) cellClass += " aula-asterisco";
+                        if (conteudo !== "-") cellClass += " " + getCursoInfo(tNome).cl;
+                    }
+
+                    html += `<td class="${cellClass}">${rowTextOverride ? "" : conteudo}</td>`;
                 });
                 html += `</tr>`;
             });
@@ -220,7 +251,7 @@
         for (let i = 0; i < cells.length; i++) {
             const c = cells[i];
             c.classList.remove('highlight', 'opaco');
-            if (termo !== "" && c.innerText !== "-") {
+            if (termo !== "" && c.innerText !== "-" && c.innerText !== "") {
                 if (c.innerText.toUpperCase().indexOf(termo) > -1) c.classList.add('highlight');
                 else c.classList.add('opaco');
             }
@@ -241,22 +272,28 @@
             const pageWidth = pdf.internal.pageSize.getWidth();
             pdf.setFontSize(8); pdf.setFont(undefined, 'bold');
             pdf.text("INSTITUTO FEDERAL DE EDUCAÇÃO, CIÊNCIA E TECNOLOGIA - CAMPUS CACOAL", pageWidth/2, 10, { align: 'center' });
-            pdf.setFontSize(7); pdf.setFont(undefined, 'normal');
             pdf.text(`MODALIDADE: ${mod} | SEMANA DE ${sem}`, pageWidth/2, 14, { align: 'center' });
 
             const p = dia.split('/');
             const dObj = new Date(p[2], p[1]-1, p[0]);
             const diasS = ["DOMINGO", "SEGUNDA-FEIRA", "TERÇA-FEIRA", "QUARTA-FEIRA", "QUINTA-FEIRA", "SEXTA-FEIRA", "SÁBADO"];
-
             pdf.setFontSize(10); pdf.setTextColor(46, 125, 50);
             pdf.text(`${diasS[dObj.getDay()]} - ${dia}`, 7, 22);
 
-            const tableBody = diasObj[dia].map(row => {
-                const line = [row[1]];
+            const tableBody = diasObj[dia].map((row, rIdx) => {
+                const horario = row[1];
+                let hText = horario;
+                if (horario === "" || horario === "-") {
+                    const prev = diasObj[dia][rIdx-1] ? diasObj[dia][rIdx-1][1] : "";
+                    if (prev.includes("12:00")) hText = "ALMOÇO";
+                    else if (prev.includes("18:20")) hText = "JANTAR";
+                }
+                const line = [hText];
                 turmasAtivas.forEach(tNome => {
                     const originalIdx = dadosGlobais[0].indexOf(tNome);
                     let val = (row[originalIdx] || "-").replace(/^"|"$/g, '');
-                    if (termo !== "" && !val.toUpperCase().includes(termo)) val = "";
+                    if (hText === "ALMOÇO" || hText === "JANTAR") val = "";
+                    if (termo !== "" && !val.toUpperCase().includes(termo) && val !== "") val = "";
                     line.push(val);
                 });
                 return line;
@@ -266,29 +303,36 @@
                 head: [[ 'Horário', ...turmasAtivas ]],
                 body: tableBody,
                 startY: 25,
-                margin: { left: 5, right: 5 },
+                margin: { left: 1, right: 1 },
                 theme: 'grid',
-                styles: { fontSize: turmasAtivas.length > 10 ? 4.5 : 5.5, halign: 'center', cellPadding: 0.5, overflow: 'linebreak' },
-                headStyles: { fillColor: [46, 125, 50] },
+                styles: { fontSize: turmasAtivas.length > 10 ? 4.5 : 5.5, halign: 'center', valign: 'middle', cellPadding: 0.5, lineColor: [0,0,0] },
+                headStyles: { fillColor: [46, 125, 50], textColor: [255,255,255] },
                 didParseCell: function(data) {
+                    const cellText = data.cell.text[0];
                     if (data.section === 'head' && data.column.index > 0) {
                         data.cell.styles.fillColor = getCursoInfo(turmasAtivas[data.column.index - 1]).rgb;
                         data.cell.styles.textColor = [0,0,0];
                     }
-                    if (data.section === 'body' && data.column.index > 0 && data.cell.text[0] !== "-") {
-                        data.cell.styles.fillColor = getCursoInfo(turmasAtivas[data.column.index - 1]).rgb;
-                    }
-                    if (data.section === 'body' && termo !== "" && data.cell.text[0].toUpperCase().includes(termo)) {
-                        data.cell.styles.fillColor = [251, 192, 45];
+                    if (data.section === 'body') {
+                        if (cellText === "ALMOÇO" || cellText === "JANTAR") data.cell.styles.fillColor = [189, 189, 189];
+                        if (cellText.toUpperCase().includes("INTERVALO")) data.cell.styles.fillColor = [224, 224, 224];
+                        
+                        if (data.column.index > 0 && cellText !== "-" && cellText !== "") {
+                            if (cellText.endsWith("[+]")) data.cell.styles.fillColor = [179, 229, 252];
+                            else if (cellText.endsWith("*")) { data.cell.styles.fillColor = [97, 97, 97]; data.cell.styles.textColor = [255,255,255]; }
+                            else data.cell.styles.fillColor = getCursoInfo(turmasAtivas[data.column.index - 1]).rgb;
+                        }
+                        if (termo !== "" && cellText.toUpperCase().includes(termo)) {
+                            data.cell.styles.fillColor = [251, 192, 45];
+                            data.cell.styles.textColor = [0,0,0];
+                        }
                     }
                 }
             });
         });
-        pdf.save(`Horario_${mod}_${sem.replace(/\//g,'-')}.pdf`);
+        pdf.save(`Horario_IFRO_${sem.replace(/\//g,'-')}.pdf`);
     }
-
     window.onload = init;
 </script>
-
 </body>
 </html>
