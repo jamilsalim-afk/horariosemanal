@@ -3,14 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema de Horários IFRO - Integrado e Superior</title>
+    <title>Horários IFRO - Cacoal</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         .table-grade { table-layout: fixed; width: 100%; border-collapse: separate; border-spacing: 0; }
         .dia-header-sticky { position: sticky; top: 0; z-index: 30; }
         .turmas-header-sticky { position: sticky; top: 48px; z-index: 20; background-color: #f9fafb; }
         .aula-card { border-l-4 border-green-600 p-2 mb-1 bg-green-50 rounded shadow-sm text-[10px] leading-tight; }
-        .intervalo-row td { font-size: 9px; color: #94a3b8; font-style: italic; letter-spacing: 0.05em; }
         .loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.9); display: none; justify-content: center; align-items: center; z-index: 100; flex-direction: column; }
     </style>
 </head>
@@ -24,32 +23,32 @@
     <div class="max-w-7xl mx-auto bg-white p-6 rounded-xl shadow-md mb-8">
         <div class="flex justify-between items-center mb-6">
             <h1 class="text-2xl font-bold text-green-800 flex items-center gap-2">
-                📅 Publicador de Horários Semanais
+                📅 Grade de Horários Semanais
             </h1>
-            <button onclick="carregarDadosPlanilha()" class="bg-green-700 text-white px-6 py-2 rounded-lg hover:bg-green-800 transition shadow-md flex items-center gap-2">
-                <span>🔄</span> Atualizar Dados
+            <button onclick="carregarDadosPlanilha()" class="bg-green-700 text-white px-6 py-2 rounded-lg hover:bg-green-800 transition shadow-md">
+                🔄 Sincronizar Dados
             </button>
         </div>
         
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div>
-                <label class="block text-sm font-semibold text-gray-600 mb-1">Semana de Referência</label>
+                <label class="block text-sm font-semibold text-gray-600 mb-1">Escolha a Semana</label>
                 <input type="week" id="weekInputGeral" onchange="renderizarTudo()" 
                        class="w-full rounded-lg border-gray-300 shadow-sm focus:border-green-500 p-2.5 border">
             </div>
             
             <div>
-                <label class="block text-sm font-semibold text-gray-600 mb-1">Nível / Modalidade</label>
+                <label class="block text-sm font-semibold text-gray-600 mb-1">Nível do Curso</label>
                 <select id="nivelSelect" onchange="renderizarTudo()" 
                         class="w-full rounded-lg border-gray-300 shadow-sm focus:border-green-500 p-2.5 border">
-                    <option value="tecnico">Ensino Técnico (Matutino/Vespertino)</option>
-                    <option value="superior">Ensino Superior / Noturno</option>
+                    <option value="tecnico">Técnico Integrado</option>
+                    <option value="superior">Superior / Noturno</option>
                 </select>
             </div>
 
             <div>
-                <label class="block text-sm font-semibold text-gray-600 mb-1">Busca Rápida</label>
-                <input type="text" id="buscaGeral" oninput="renderizarTudo()" placeholder="Filtrar por professor..."
+                <label class="block text-sm font-semibold text-gray-600 mb-1">Filtrar Docente</label>
+                <input type="text" id="buscaGeral" oninput="renderizarTudo()" placeholder="Nome do professor..."
                        class="w-full rounded-lg border-gray-300 shadow-sm focus:border-green-500 p-2.5 border">
             </div>
         </div>
@@ -57,7 +56,7 @@
 
     <div id="gradeGeralRender" class="max-w-full overflow-x-hidden space-y-12">
         <div class="text-center py-20 text-gray-400 border-2 border-dashed border-gray-200 rounded-xl">
-            Clique em "Atualizar Dados" para carregar as informações da planilha do Google.
+            Selecione uma semana e clique em sincronizar.
         </div>
     </div>
 
@@ -92,7 +91,7 @@
                 parsearPlanilha(csvText);
                 renderizarTudo();
             } catch (error) {
-                alert("Erro ao conectar com a planilha. Verifique se ela está pública.");
+                alert("Erro ao carregar dados.");
             } finally {
                 document.getElementById('loading').style.display = 'none';
             }
@@ -102,23 +101,29 @@
             const linhas = csv.split('\n').map(l => l.split(','));
             const newData = {};
 
-            // Ignora linhas 1 a 100 (Índice 0 a 99)
+            // Ignora linhas 2 a 100
             for (let i = 100; i < linhas.length; i++) {
-                let [data, hora, turma, disc, prof] = linhas[i];
-                if (!data || !turma || data.trim() === "") continue;
+                let [dataStr, hora, turma, disc, prof] = linhas[i];
+                if (!dataStr || !turma || dataStr.trim() === "") continue;
 
-                turma = turma.trim();
+                // Normaliza Data para String YYYY-MM-DD
+                const partes = dataStr.includes('/') ? dataStr.split('/') : dataStr.split('-');
+                const d = partes[0].trim().padStart(2, '0');
+                const m = partes[1].trim().padStart(2, '0');
+                let a = partes[2].trim();
+                if(a.length === 2) a = "20" + a;
+                const dataKey = `${a}-${m}-${d}`;
+
+                turma = turma.trim().replace(/"/g, '');
                 if (!newData[turma]) newData[turma] = { name: turma, discs: {} };
                 
-                if (!newData[turma].discs[disc]) {
-                    newData[turma].discs[disc] = { name: disc, sch: [] };
+                const discName = disc.replace(/"/g, '').trim();
+                if (!newData[turma].discs[discName]) {
+                    newData[turma].discs[discName] = { name: discName, sch: [] };
                 }
 
-                const [d, m, a] = data.includes('/') ? data.split('/') : data.split('-');
-                const dtObj = new Date(a, m - 1, d);
-
-                newData[turma].discs[disc].sch.push({
-                    dtObj: dtObj.toISOString(),
+                newData[turma].discs[discName].sch.push({
+                    dataKey: dataKey,
                     time: hora.trim(),
                     prof: prof?.replace(/"/g, '').trim() || "A Definir"
                 });
@@ -128,15 +133,14 @@
 
         function renderizarTudo() {
             const weekVal = document.getElementById("weekInputGeral").value;
-            const render = document.getElementById("gradeGeralRender");
             if (!weekVal) return;
 
             const [ano, semana] = weekVal.split("-W").map(Number);
-            const start = getStartOfWeek(semana, ano);
+            const dataSegunda = getMondayOfSelectedWeek(semana, ano);
             const nivel = document.getElementById("nivelSelect").value;
             const busca = document.getElementById("buscaGeral").value.toLowerCase();
+            const render = document.getElementById("gradeGeralRender");
 
-            // Identificação de turmas (Superior contém nomes específicos ou IDs)
             const turmasFiltradas = Object.keys(dataStore).filter(tId => {
                 const ehSup = /ads|pos|super|gestao/i.test(tId);
                 return nivel === "superior" ? ehSup : !ehSup;
@@ -146,26 +150,31 @@
             const diasNome = ["SEGUNDA", "TERÇA", "QUARTA", "QUINTA", "SEXTA", "SÁBADO"];
 
             for (let i = 0; i < 6; i++) {
-                const diaAtual = new Date(start);
-                diaAtual.setDate(start.getDate() + i);
-                diaAtual.setHours(0,0,0,0);
+                const diaLoop = new Date(dataSegunda);
+                diaLoop.setDate(dataSegunda.getDate() + i);
+                
+                // Formata data do loop para bater com a dataKey da planilha
+                const d = String(diaLoop.getDate()).padStart(2, '0');
+                const m = String(diaLoop.getMonth() + 1).padStart(2, '0');
+                const a = diaLoop.getFullYear();
+                const dataRef = `${a}-${m}-${d}`;
 
                 html += `
-                <div class="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
-                    <div class="dia-header-sticky bg-green-800 text-white p-4 font-bold flex justify-between items-center shadow-md">
-                        <span class="tracking-wide">${diasNome[i]}</span>
-                        <span class="bg-green-600 px-3 py-1 rounded text-sm">${diaAtual.toLocaleDateString("pt-BR")}</span>
+                <div class="bg-white rounded-xl shadow-lg border border-gray-200 mb-10 overflow-hidden">
+                    <div class="dia-header-sticky bg-green-800 text-white p-4 font-bold flex justify-between items-center">
+                        <span>${diasNome[i]}</span>
+                        <span class="bg-green-600 px-3 py-1 rounded text-sm">${d}/${m}/${a}</span>
                     </div>
                     <div class="overflow-x-auto">
                         <table class="table-grade">
                             <thead>
                                 <tr class="turmas-header-sticky">
-                                    <th class="p-3 border-b border-r w-24 text-[10px] text-gray-400 font-bold bg-gray-50">HORÁRIO</th>
-                                    ${turmasFiltradas.map(t => `<th class="p-3 border-b border-r text-xs text-gray-700 text-center uppercase">${dataStore[t].name}</th>`).join("")}
+                                    <th class="p-3 border-b border-r w-24 text-[10px] text-gray-400 bg-gray-50">HORÁRIO</th>
+                                    ${turmasFiltradas.map(t => `<th class="p-3 border-b border-r text-[11px] text-gray-700 text-center uppercase font-bold">${dataStore[t].name}</th>`).join("")}
                                 </tr>
                             </thead>
                             <tbody>
-                                ${gerarLinhasCorpo(turmasFiltradas, diaAtual, busca, nivel)}
+                                ${gerarCorpo(turmasFiltradas, dataRef, busca, nivel)}
                             </tbody>
                         </table>
                     </div>
@@ -174,52 +183,45 @@
             render.innerHTML = html;
         }
 
-        function gerarLinhasCorpo(turmas, dia, busca, nivel) {
-            // Filtra os horários do gabarito: se for Técnico, corta antes das 18:20
+        function gerarCorpo(turmas, dataRef, busca, nivel) {
             const slots = nivel === "tecnico" 
                 ? GABARITO.filter(s => s.h.split(" - ")[0] < "18:20") 
                 : GABARITO;
 
             return slots.map(slot => {
                 if (slot.t === "intervalo") {
-                    return `
-                    <tr class="intervalo-row bg-gray-50/50">
-                        <td class="p-2 border-b border-r text-center font-mono text-[9px] text-gray-400">${slot.h}</td>
-                        <td colspan="${turmas.length}" class="p-2 border-b text-center uppercase font-bold tracking-widest text-gray-300">
-                            ${slot.l}
-                        </td>
-                    </tr>`;
+                    return `<tr class="bg-gray-50/50"><td class="p-2 border-b border-r text-center font-mono text-[9px] text-gray-400">${slot.h}</td><td colspan="${turmas.length}" class="p-2 border-b text-center text-[9px] uppercase font-bold text-gray-300 tracking-widest">${slot.l}</td></tr>`;
                 }
 
                 const horaRef = slot.h.split(" - ")[0];
 
-                return `
-                <tr>
-                    <td class="p-3 border-b border-r bg-gray-50 font-mono text-[10px] font-bold text-center text-gray-600">${slot.h}</td>
+                return `<tr>
+                    <td class="p-3 border-b border-r bg-gray-50 font-mono text-[10px] font-bold text-center text-gray-500">${slot.h}</td>
                     ${turmas.map(tId => {
-                        let aulas = "";
+                        let aulasHtml = "";
                         Object.values(dataStore[tId].discs).forEach(d => {
                             d.sch.forEach(a => {
-                                const aData = new Date(a.dtObj);
-                                if (aData.getTime() === dia.getTime() && a.time.startsWith(horaRef)) {
+                                // Comparação de String pura: "2026-02-16" === "2026-02-16"
+                                if (a.dataKey === dataRef && a.time.startsWith(horaRef)) {
                                     if (!busca || a.prof.toLowerCase().includes(busca)) {
-                                        aulas += `<div class="aula-card"><strong>${d.name}</strong><div class="text-blue-600 font-semibold mt-1">${a.prof}</div></div>`;
+                                        aulasHtml += `<div class="aula-card"><strong>${d.name}</strong><div class="text-blue-600 font-semibold mt-1">${a.prof}</div></div>`;
                                     }
                                 }
                             });
                         });
-                        return `<td class="p-2 border-b border-r align-top min-h-[60px]">${aulas}</td>`;
+                        return `<td class="p-1 border-b border-r align-top min-h-[60px]">${aulasHtml}</td>`;
                     }).join("")}
                 </tr>`;
             }).join("");
         }
 
-        function getStartOfWeek(w, y) {
-            const d = (1 + (w - 1) * 7);
-            const date = new Date(y, 0, d);
-            const day = date.getDay();
-            const diff = date.getDate() - day + (day === 0 ? -6 : 1);
-            return new Date(date.setDate(diff));
+        function getMondayOfSelectedWeek(w, y) {
+            const simple = new Date(y, 0, 1 + (w - 1) * 7);
+            const dow = simple.getDay();
+            const ISOweekStart = simple;
+            if (dow <= 4) ISOweekStart.setDate(simple.getDate() - simple.getDay() + 1);
+            else ISOweekStart.setDate(simple.getDate() + 8 - simple.getDay());
+            return ISOweekStart;
         }
     </script>
 </body>
