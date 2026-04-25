@@ -2,54 +2,58 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Sistema de Horários IFRO - Fluxo Contínuo</title>
+    <title>Sistema de Horários IFRO - Premium</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    
     <style>
-        :root { --primary: #2e7d32; --secondary: #fbc02d; --bg: #f4f7f6; }
+        :root { --primary: #2e7d32; --bg: #f4f7f6; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding: 15px; }
         
         .controls-card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 20px; display: flex; flex-wrap: wrap; gap: 15px; justify-content: center; align-items: center; }
-        select, .search-box { padding: 10px; border-radius: 8px; border: 1px solid #ddd; font-size: 14px; outline: none; }
-        select { min-width: 220px; cursor: pointer; }
+        select, .search-box, .btn-pdf { padding: 10px; border-radius: 8px; border: 1px solid #ddd; font-size: 14px; outline: none; }
         .search-box { width: 250px; border: 2px solid var(--primary); }
+        
+        .btn-pdf { background: #d32f2f; color: white; border: none; cursor: pointer; font-weight: bold; transition: 0.3s; }
+        .btn-pdf:hover { background: #b71c1c; }
 
         .week-container { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        h2 { color: var(--primary); text-align: center; margin-top: 0; text-transform: uppercase; }
-
-        .table-wrapper { overflow-x: auto; }
+        
         table { width: 100%; border-collapse: collapse; min-width: 1400px; font-size: 11px; table-layout: fixed; }
-        th, td { border: 1px solid #eee; padding: 8px; text-align: center; word-wrap: break-word; }
+        th, td { border: 1px solid #ccc; padding: 6px; text-align: center; word-wrap: break-word; }
         
-        th { background: var(--primary); color: white; position: sticky; top: 0; height: 45px; z-index: 10; }
-        .day-divider { background: #e8f5e9; font-weight: bold; color: var(--primary); text-align: center; font-size: 14px; height: 35px; }
-        .time-col { font-weight: bold; width: 120px; background: #fafafa; color: #555; }
+        /* Cores dos Cabeçalhos das Turmas */
+        .header-agroec { background-color: #c8e6c9 !important; color: #1b5e20; } /* Verde */
+        .header-agropec { background-color: #bbdefb !important; color: #0d47a1; } /* Azul */
+        .header-info { background-color: #ffecb3 !important; color: #ff6f00; }    /* Laranja/Amarelo */
+        .header-default { background-color: #f5f5f5; color: #333; }
+
+        .day-divider { background: var(--primary); color: white; font-weight: bold; font-size: 14px; height: 35px; }
+        .time-col { font-weight: bold; width: 100px; background: #f1f3f4; }
         
-        .aula-cell { height: 50px; }
-        .highlight { background-color: var(--secondary) !important; font-weight: bold; color: #000; }
-        .intervalo { background: #f1f3f4; color: #777; font-style: italic; font-weight: bold; }
-        .empty { color: #ddd; }
+        .aula-cell { height: 45px; }
+        .highlight { background-color: #fbc02d !important; font-weight: bold; color: #000; border: 2px solid #000; }
+        .opaco { opacity: 0.2; } /* Para o efeito no PDF */
+        
+        .intervalo { background: #eee; color: #666; font-style: italic; }
     </style>
 </head>
 <body>
 
 <div class="controls-card">
-    <div>
-        <label>Modalidade: </label>
-        <select id="selectModalidade" onchange="processarDados()">
-            <option value="INTEGRADO">ENSINO INTEGRADO</option>
-            <option value="SUPERIOR 1">SUPERIOR 1</option>
-            <option value="SUPERIOR 2">SUPERIOR 2</option>
-        </select>
-    </div>
-    <div>
-        <label>Semana: </label>
-        <select id="selectSemana" onchange="renderizarTabela()"></select>
-    </div>
-    <input type="text" id="searchProf" class="search-box" placeholder="🔍 Filtrar Professor ou Disciplina..." onkeyup="filtrarProfessor()">
+    <select id="selectModalidade" onchange="processarDados()">
+        <option value="INTEGRADO">ENSINO INTEGRADO</option>
+        <option value="SUPERIOR 1">SUPERIOR 1</option>
+        <option value="SUPERIOR 2">SUPERIOR 2</option>
+    </select>
+    <select id="selectSemana" onchange="renderizarTabela()"></select>
+    <input type="text" id="searchProf" class="search-box" placeholder="🔍 Nome do Professor..." onkeyup="filtrarProfessor()">
+    <button class="btn-pdf" onclick="exportarPDF()">📄 Exportar PDF</button>
 </div>
 
-<div class="week-container">
-    <h2 id="tituloSemana">Carregando horários...</h2>
-    <div id="tabelaHorario" class="table-wrapper"></div>
+<div class="week-container" id="areaPrint">
+    <h2 id="tituloSemana" style="text-align:center; color: var(--primary);">Carregando...</h2>
+    <div id="tabelaHorario"></div>
 </div>
 
 <script>
@@ -65,119 +69,125 @@
         try {
             const response = await fetch(url);
             const csv = await response.text();
-            dadosGlobais = csv.split('\n').map(r => r.split(',').map(cell => cell.replace(/"/g, '').trim()));
+            dadosGlobais = csv.split('\n').map(r => r.split(',').map(c => c.replace(/"/g, '').trim()));
             processarDados();
-        } catch (e) {
-            document.getElementById('tituloSemana').textContent = "Erro ao carregar dados.";
-        }
+        } catch (e) { alert("Erro ao carregar dados."); }
     }
 
-    function strToDate(s) {
-        const p = s.split('/');
-        return new Date(p[2], p[1] - 1, p[0]);
-    }
-
-    function getMonday(dateObj) {
-        const d = new Date(dateObj);
-        const day = d.getDay();
-        const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+    function getMonday(dateStr) {
+        const p = dateStr.split('/');
+        const d = new Date(p[2], p[1]-1, p[0]);
+        const diff = d.getDate() - d.getDay() + (d.getDay() === 0 ? -6 : 1);
         return new Date(d.setDate(diff));
+    }
+
+    function getTurmaClass(turma) {
+        const t = turma.toUpperCase();
+        if (t.includes("AGROEC")) return "header-agroec";
+        if (t.includes("AGROPEC")) return "header-agropec";
+        if (t.includes("INFO")) return "header-info";
+        return "header-default";
     }
 
     function processarDados() {
         semanasAgrupadas = {};
         turmasGlobais = dadosGlobais[0].slice(2).filter(t => t !== "");
-
-        let ultimoDiaEncontrado = "";
-        let ultimaDataEncontrada = "";
+        let ultimaData = "";
 
         for (let i = 1; i < dadosGlobais.length; i++) {
-            const row = [...dadosGlobais[i]]; // Copia a linha
-            let dataNaCelula = row[0];
-
-            // LÓGICA DE PERSISTÊNCIA: Se a célula da data estiver vazia, usa a última encontrada
-            if (dataNaCelula === "" || dataNaCelula === "-") {
-                row[0] = ultimaDataEncontrada;
-            } else {
-                ultimaDataEncontrada = dataNaCelula;
-            }
-
+            const row = [...dadosGlobais[i]];
+            if (row[0] !== "" && row[0] !== "-") ultimaData = row[0];
+            row[0] = ultimaData;
             if (!row[0]) continue;
 
-            const dataObj = strToDate(row[0]);
-            const segundaObj = getMonday(dataObj);
-            const segundaStr = segundaObj.toLocaleDateString('pt-BR');
-
-            if (!semanasAgrupadas[segundaStr]) {
-                semanasAgrupadas[segundaStr] = { label: segundaStr, date: segundaObj, rows: [] };
+            const segunda = getMonday(row[0]).toLocaleDateString('pt-BR');
+            if (!semanasAgrupadas[segunda]) {
+                semanasAgrupadas[segunda] = { date: getMonday(row[0]), rows: [] };
             }
-            semanasAgrupadas[segundaStr].rows.push(row);
+            semanasAgrupadas[segunda].rows.push(row);
         }
 
-        const selectSemana = document.getElementById('selectSemana');
-        selectSemana.innerHTML = "";
-
-        const semanasOrdenadas = Object.values(semanasAgrupadas).sort((a, b) => a.date - b.date);
-
-        semanasOrdenadas.forEach(s => {
-            let opt = document.createElement('option');
-            opt.value = s.label;
-            opt.textContent = `Semana de ${s.label}`;
-            selectSemana.appendChild(opt);
+        const select = document.getElementById('selectSemana');
+        select.innerHTML = "";
+        Object.values(semanasAgrupadas).sort((a,b)=>a.date-b.date).forEach(s => {
+            let label = s.rows[0][0].split('/')[1]; // Simplificação para ordenação visual
+            select.innerHTML += `<option value="${s.rows[0][0].split('/')[0]}/${label}">Semana de ${s.rows[0][0]}</option>`;
         });
-
         renderizarTabela();
     }
 
+    function gerarCabecalhoTurmas() {
+        let html = `<tr><th style="width:100px; background:#444">Horário</th>`;
+        turmasGlobais.forEach(t => {
+            html += `<th class="${getTurmaClass(t)}">${t}</th>`;
+        });
+        html += `</tr>`;
+        return html;
+    }
+
     function renderizarTabela() {
-        const semanaAlvo = document.getElementById('selectSemana').value;
-        if(!semanaAlvo) return;
-        
-        const dadosSemana = semanasAgrupadas[semanaAlvo].rows;
+        const semanaKey = document.getElementById('selectSemana').selectedOptions[0].text.replace("Semana de ", "");
+        const segundaKey = getMonday(semanaKey).toLocaleDateString('pt-BR');
+        const dados = semanasAgrupadas[segundaKey].rows;
         const container = document.getElementById('tabelaHorario');
-        document.getElementById('tituloSemana').textContent = `Horário Completo - Semana ${semanaAlvo}`;
+        document.getElementById('tituloSemana').textContent = `QUADRO DE HORÁRIOS - SEMANA DE ${segundaKey}`;
 
-        let html = `<table><thead><tr><th style="width:120px">Horário</th>`;
-        turmasGlobais.forEach(t => html += `<th>${t}</th>`);
-        html += `</tr></thead><tbody>`;
+        let html = `<table><thead>${gerarCabecalhoTurmas()}</thead><tbody>`;
+        let diaAtual = "";
 
-        let diaAtualParaExibicao = "";
-
-        dadosSemana.forEach(row => {
-            const dataRow = row[0];
-            const horaRow = row[1];
-
-            // Só cria o divisor visual quando a data realmente muda
-            if (dataRow !== diaAtualParaExibicao) {
-                diaAtualParaExibicao = dataRow;
-                html += `<tr class="day-divider"><td colspan="${turmasGlobais.length + 1}">${dataRow}</td></tr>`;
+        dados.forEach(row => {
+            if (row[0] !== diaAtual) {
+                diaAtual = row[0];
+                html += `<tr class="day-divider"><td colspan="${turmasGlobais.length + 1}">${diaAtual}</td></tr>`;
+                html += gerarCabecalhoTurmas(); // REPLICA O TÍTULO DAS TURMAS A CADA DIA
             }
 
-            const isIntervalo = horaRow.toUpperCase().includes("INTERVALO");
+            const isIntervalo = row[1].toUpperCase().includes("INTERVALO");
             html += `<tr class="${isIntervalo ? 'intervalo' : ''}">`;
-            html += `<td class="time-col">${horaRow}</td>`;
+            html += `<td class="time-col">${row[1]}</td>`;
 
             for (let j = 2; j < (turmasGlobais.length + 2); j++) {
-                const conteudo = row[j] || "";
-                const exibicao = (conteudo === "" || conteudo === "-") ? '<span class="empty">-</span>' : conteudo;
-                html += `<td class="aula-cell">${exibicao}</td>`;
+                html += `<td class="aula-cell">${row[j] || "-"}</td>`;
             }
             html += `</tr>`;
         });
 
         html += `</tbody></table>`;
         container.innerHTML = html;
+        filtrarProfessor(); // Reaplica o filtro se houver algo escrito
     }
 
     function filtrarProfessor() {
         const termo = document.getElementById('searchProf').value.toUpperCase();
-        document.querySelectorAll('.aula-cell').forEach(c => {
+        const cells = document.querySelectorAll('.aula-cell');
+        
+        cells.forEach(c => {
+            c.classList.remove('highlight', 'opaco');
             const texto = c.innerText.toUpperCase();
-            if (termo !== "" && texto.includes(termo) && texto !== "-") {
-                c.classList.add('highlight');
-            } else {
-                c.classList.remove('highlight');
+            if (termo !== "") {
+                if (texto.includes(termo) && texto !== "-") {
+                    c.classList.add('highlight');
+                } else {
+                    c.classList.add('opaco');
+                }
             }
+        });
+    }
+
+    async function exportarPDF() {
+        const { jsPDF } = window.jspdf;
+        const element = document.getElementById('areaPrint');
+        
+        // Ajuste temporário para o PDF caber na folha (escala)
+        html2canvas(element, { scale: 2 }).then(canvas => {
+            const imgData = canvas.toDataURL('image/png');
+            const pdf = new jsPDF('l', 'mm', 'a4'); // Paisagem para horários
+            const imgProps = pdf.getImageProperties(imgData);
+            const pdfWidth = pdf.internal.pageSize.getWidth();
+            const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+            
+            pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+            pdf.save(`Horario_IFRO_${document.getElementById('selectSemana').value}.pdf`);
         });
     }
 
