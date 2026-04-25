@@ -3,215 +3,223 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gerador de Grade Semanal - IFRO</title>
+    <title>Sistema de Horários IFRO - Integrado e Superior</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* Estilos específicos para a Grade Matricial */
-        .table-grade {
-            table-layout: fixed;
-            width: 100%;
-            border-collapse: separate;
-            border-spacing: 0;
-        }
-
-        /* Fixar o nome do Dia */
-        .dia-header-sticky {
-            position: sticky;
-            top: 0;
-            z-index: 30;
-        }
-
-        /* Fixar o cabeçalho das turmas (abaixo do dia) */
-        .turmas-header-sticky {
-            position: sticky;
-            top: 48px; /* Ajuste conforme a altura do .dia-header-sticky */
-            z-index: 20;
-            background-color: #f9fafb;
-            box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1);
-        }
-
-        .aula-card {
-            transition: transform 0.1s ease;
-        }
-
-        .aula-card:hover {
-            transform: scale(1.02);
-        }
-
-        /* Estilização da barra de rolagem para grades largas */
-        .overflow-x-auto::-webkit-scrollbar {
-            height: 8px;
-        }
-        .overflow-x-auto::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 4px;
-        }
+        .table-grade { table-layout: fixed; width: 100%; border-collapse: separate; border-spacing: 0; }
+        .dia-header-sticky { position: sticky; top: 0; z-index: 30; }
+        .turmas-header-sticky { position: sticky; top: 48px; z-index: 20; background-color: #f9fafb; }
+        .aula-card { border-l-4 border-green-600 p-2 mb-1 bg-green-50 rounded shadow-sm text-[10px] leading-tight; }
+        .intervalo-row td { font-size: 9px; color: #94a3b8; font-style: italic; letter-spacing: 0.05em; }
+        .loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.9); display: none; justify-content: center; align-items: center; z-index: 100; flex-direction: column; }
     </style>
 </head>
 <body class="bg-gray-100 min-h-screen p-4">
 
+    <div id="loading" class="loading-overlay">
+        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-green-700 mb-4"></div>
+        <p class="text-green-800 font-bold">Sincronizando dados da planilha...</p>
+    </div>
+
     <div class="max-w-7xl mx-auto bg-white p-6 rounded-xl shadow-md mb-8">
-        <h1 class="text-2xl font-bold text-green-800 mb-6 flex items-center gap-2">
-            📅 Gerador de Horários Semanais
-        </h1>
+        <div class="flex justify-between items-center mb-6">
+            <h1 class="text-2xl font-bold text-green-800 flex items-center gap-2">
+                📅 Publicador de Horários Semanais
+            </h1>
+            <button onclick="carregarDadosPlanilha()" class="bg-green-700 text-white px-6 py-2 rounded-lg hover:bg-green-800 transition shadow-md flex items-center gap-2">
+                <span>🔄</span> Atualizar Dados
+            </button>
+        </div>
         
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div>
-                <label class="block text-sm font-medium text-gray-700">Semana</label>
-                <input type="week" id="weekInputGeral" onchange="gerarGradeSemanal()" 
-                       class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 p-2 border">
+                <label class="block text-sm font-semibold text-gray-600 mb-1">Semana de Referência</label>
+                <input type="week" id="weekInputGeral" onchange="renderizarTudo()" 
+                       class="w-full rounded-lg border-gray-300 shadow-sm focus:border-green-500 p-2.5 border">
             </div>
             
             <div>
-                <label class="block text-sm font-medium text-gray-700">Nível</label>
-                <select id="nivelSelect" onchange="gerarGradeSemanal()" 
-                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 p-2 border">
-                    <option value="tecnico">Técnico Integrado</option>
-                    <option value="superior">Ensino Superior</option>
+                <label class="block text-sm font-semibold text-gray-600 mb-1">Nível / Modalidade</label>
+                <select id="nivelSelect" onchange="renderizarTudo()" 
+                        class="w-full rounded-lg border-gray-300 shadow-sm focus:border-green-500 p-2.5 border">
+                    <option value="tecnico">Ensino Técnico (Matutino/Vespertino)</option>
+                    <option value="superior">Ensino Superior / Noturno</option>
                 </select>
             </div>
 
             <div>
-                <label class="block text-sm font-medium text-gray-700">Filtrar Professor</label>
-                <input type="text" id="buscaGeral" oninput="gerarGradeSemanal()" placeholder="Nome do docente..."
-                       class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 p-2 border">
-            </div>
-
-            <div class="flex items-end">
-                <button onclick="window.print()" class="bg-gray-800 text-white px-4 py-2 rounded-md hover:bg-gray-700 transition w-full">
-                    Print / PDF
-                </button>
+                <label class="block text-sm font-semibold text-gray-600 mb-1">Busca Rápida</label>
+                <input type="text" id="buscaGeral" oninput="renderizarTudo()" placeholder="Filtrar por professor..."
+                       class="w-full rounded-lg border-gray-300 shadow-sm focus:border-green-500 p-2.5 border">
             </div>
         </div>
     </div>
 
-    <div id="gradeGeralRender" class="max-w-[100vw] overflow-x-hidden">
-        <div class="text-center py-20 text-gray-400">
-            <p>Selecione uma semana para visualizar a grade.</p>
+    <div id="gradeGeralRender" class="max-w-full overflow-x-hidden space-y-12">
+        <div class="text-center py-20 text-gray-400 border-2 border-dashed border-gray-200 rounded-xl">
+            Clique em "Atualizar Dados" para carregar as informações da planilha do Google.
         </div>
     </div>
 
     <script>
-        // MOCK DE DADOS (Para teste, substitua pelo seu dataStore real)
-        // const dataStore = { ... }; 
-        // const GABARITO = [ ... ];
+        const SHEET_ID = '1j33kiPqwtzZNuvkBgYDaIiXZvVMY_J0qWAtRfYGdnD8';
+        const GID = '1589791808';
+        const CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${GID}`;
 
-        /**
-         * Função principal de geração da grade
-         */
-        function gerarGradeSemanal() {
-            const weekInput = document.getElementById("weekInputGeral");
-            const nivelInput = document.getElementById("nivelSelect");
-            const buscaInput = document.getElementById("buscaGeral");
+        let dataStore = {};
+
+        const GABARITO = [
+            { h: "07:30 - 08:20", t: "aula" }, { h: "08:20 - 09:10", t: "aula" },
+            { h: "09:10 - 09:30", t: "intervalo", l: "INTERVALO MATUTINO" },
+            { h: "09:30 - 10:20", t: "aula" }, { h: "10:20 - 11:10", t: "aula" },
+            { h: "11:10 - 12:00", t: "aula" },
+            { h: "12:00 - 13:50", t: "intervalo", l: "ALMOÇO" },
+            { h: "13:50 - 14:40", t: "aula" }, { h: "14:40 - 15:30", t: "aula" },
+            { h: "15:30 - 15:50", t: "intervalo", l: "INTERVALO VESPERTINO" },
+            { h: "15:50 - 16:40", t: "aula" }, { h: "16:40 - 17:30", t: "aula" },
+            { h: "17:30 - 18:20", t: "aula" },
+            { h: "18:20 - 19:00", t: "intervalo", l: "JANTAR" },
+            { h: "19:00 - 19:50", t: "aula" }, { h: "19:50 - 20:40", t: "aula" },
+            { h: "20:40 - 20:50", t: "intervalo", l: "INTERVALO NOTURNO" },
+            { h: "20:50 - 21:40", t: "aula" }, { h: "21:40 - 22:30", t: "aula" }
+        ];
+
+        async function carregarDadosPlanilha() {
+            document.getElementById('loading').style.display = 'flex';
+            try {
+                const response = await fetch(CSV_URL);
+                const csvText = await response.text();
+                parsearPlanilha(csvText);
+                renderizarTudo();
+            } catch (error) {
+                alert("Erro ao conectar com a planilha. Verifique se ela está pública.");
+            } finally {
+                document.getElementById('loading').style.display = 'none';
+            }
+        }
+
+        function parsearPlanilha(csv) {
+            const linhas = csv.split('\n').map(l => l.split(','));
+            const newData = {};
+
+            // Ignora linhas 1 a 100 (Índice 0 a 99)
+            for (let i = 100; i < linhas.length; i++) {
+                let [data, hora, turma, disc, prof] = linhas[i];
+                if (!data || !turma || data.trim() === "") continue;
+
+                turma = turma.trim();
+                if (!newData[turma]) newData[turma] = { name: turma, discs: {} };
+                
+                if (!newData[turma].discs[disc]) {
+                    newData[turma].discs[disc] = { name: disc, sch: [] };
+                }
+
+                const [d, m, a] = data.includes('/') ? data.split('/') : data.split('-');
+                const dtObj = new Date(a, m - 1, d);
+
+                newData[turma].discs[disc].sch.push({
+                    dtObj: dtObj.toISOString(),
+                    time: hora.trim(),
+                    prof: prof?.replace(/"/g, '').trim() || "A Definir"
+                });
+            }
+            dataStore = newData;
+        }
+
+        function renderizarTudo() {
+            const weekVal = document.getElementById("weekInputGeral").value;
             const render = document.getElementById("gradeGeralRender");
+            if (!weekVal) return;
 
-            if (!weekInput.value) return;
-
-            // Lógica de Datas
-            const [ano, semana] = weekInput.value.split("-W").map(Number);
+            const [ano, semana] = weekVal.split("-W").map(Number);
             const start = getStartOfWeek(semana, ano);
-            const nivel = nivelInput.value;
-            const buscaProf = (buscaInput.value || "").toLowerCase();
+            const nivel = document.getElementById("nivelSelect").value;
+            const busca = document.getElementById("buscaGeral").value.toLowerCase();
 
-            // Filtragem
-            const horarios = nivel === "tecnico" 
-                ? GABARITO.filter(s => s.h.split(" - ")[0] < "18:20") 
-                : GABARITO;
-
-            const turmas = Object.keys(dataStore).filter(id => {
-                const ehSup = typeof turmaEhSuperior === "function" ? turmaEhSuperior(id) : false;
+            // Identificação de turmas (Superior contém nomes específicos ou IDs)
+            const turmasFiltradas = Object.keys(dataStore).filter(tId => {
+                const ehSup = /ads|pos|super|gestao/i.test(tId);
                 return nivel === "superior" ? ehSup : !ehSup;
             }).sort();
 
             let html = "";
-            const diasLabel = ["SEGUNDA", "TERÇA", "QUARTA", "QUINTA", "SEXTA", "SÁBADO"];
+            const diasNome = ["SEGUNDA", "TERÇA", "QUARTA", "QUINTA", "SEXTA", "SÁBADO"];
 
             for (let i = 0; i < 6; i++) {
-                const dataDia = new Date(start);
-                dataDia.setDate(start.getDate() + i);
-                dataDia.setHours(0,0,0,0);
+                const diaAtual = new Date(start);
+                diaAtual.setDate(start.getDate() + i);
+                diaAtual.setHours(0,0,0,0);
 
                 html += `
-                <div class="mb-10 bg-white rounded-lg shadow-sm overflow-hidden border border-gray-200">
-                    <div class="dia-header-sticky bg-green-700 text-white p-3 font-bold flex justify-between items-center shadow-md">
-                        <span>${diasLabel[i]}</span>
-                        <span class="text-green-100 text-sm">${dataDia.toLocaleDateString("pt-BR")}</span>
+                <div class="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
+                    <div class="dia-header-sticky bg-green-800 text-white p-4 font-bold flex justify-between items-center shadow-md">
+                        <span class="tracking-wide">${diasNome[i]}</span>
+                        <span class="bg-green-600 px-3 py-1 rounded text-sm">${diaAtual.toLocaleDateString("pt-BR")}</span>
                     </div>
-                    
                     <div class="overflow-x-auto">
                         <table class="table-grade">
                             <thead>
                                 <tr class="turmas-header-sticky">
-                                    <th class="p-2 border-b border-r w-20 text-[10px] text-gray-400 bg-gray-50">HORA</th>
-                                    ${turmas.map(tId => `<th class="p-2 border-b border-r text-sm text-gray-700 min-w-[150px] font-bold text-center">${dataStore[tId].name}</th>`).join("")}
+                                    <th class="p-3 border-b border-r w-24 text-[10px] text-gray-400 font-bold bg-gray-50">HORÁRIO</th>
+                                    ${turmasFiltradas.map(t => `<th class="p-3 border-b border-r text-xs text-gray-700 text-center uppercase">${dataStore[t].name}</th>`).join("")}
                                 </tr>
                             </thead>
                             <tbody>
-                                ${renderizarLinhas(horarios, turmas, dataDia, buscaProf)}
+                                ${gerarLinhasCorpo(turmasFiltradas, diaAtual, busca, nivel)}
                             </tbody>
                         </table>
                     </div>
                 </div>`;
             }
-
             render.innerHTML = html;
         }
 
-        function renderizarLinhas(horarios, turmas, dataDia, busca) {
-            return horarios.map(slot => {
+        function gerarLinhasCorpo(turmas, dia, busca, nivel) {
+            // Filtra os horários do gabarito: se for Técnico, corta antes das 18:20
+            const slots = nivel === "tecnico" 
+                ? GABARITO.filter(s => s.h.split(" - ")[0] < "18:20") 
+                : GABARITO;
+
+            return slots.map(slot => {
                 if (slot.t === "intervalo") {
                     return `
-                    <tr class="bg-gray-50">
-                        <td class="p-1 border-b border-r text-center text-[9px] text-gray-400">${slot.h}</td>
-                        <td colspan="${turmas.length}" class="p-1 border-b text-center text-[10px] uppercase tracking-tighter text-gray-400 italic">
-                            ${slot.l || "Intervalo"}
+                    <tr class="intervalo-row bg-gray-50/50">
+                        <td class="p-2 border-b border-r text-center font-mono text-[9px] text-gray-400">${slot.h}</td>
+                        <td colspan="${turmas.length}" class="p-2 border-b text-center uppercase font-bold tracking-widest text-gray-300">
+                            ${slot.l}
                         </td>
                     </tr>`;
                 }
 
-                const horaSlot = slot.h.split(" - ")[0].substring(0, 5).padStart(5, "0");
+                const horaRef = slot.h.split(" - ")[0];
 
                 return `
                 <tr>
-                    <td class="p-2 border-b border-r bg-gray-50 font-mono text-[10px] font-bold text-center text-gray-600">${slot.h}</td>
+                    <td class="p-3 border-b border-r bg-gray-50 font-mono text-[10px] font-bold text-center text-gray-600">${slot.h}</td>
                     ${turmas.map(tId => {
                         let aulas = "";
-                        const discs = dataStore[tId].discs || {};
-
-                        Object.values(discs).forEach(d => {
-                            (d.sch || []).forEach(a => {
-                                const dtAula = new Date(a.dtObj);
-                                dtAula.setHours(0,0,0,0);
-                                const hAula = (a.time || "").split(" - ")[0].substring(0,5).padStart(5,"0");
-
-                                if (dtAula.getTime() === dataDia.getTime() && hAula === horaSlot) {
-                                    const prof = a.prof || "";
-                                    if (!busca || prof.toLowerCase().includes(busca)) {
-                                        aulas += `
-                                        <div class="aula-card border-l-4 border-green-600 p-2 mb-1 bg-green-50 rounded shadow-sm">
-                                            <div class="font-bold text-[10px] leading-tight text-gray-800">${d.name}</div>
-                                            <div class="text-[9px] text-blue-700 mt-1">${prof}</div>
-                                        </div>`;
+                        Object.values(dataStore[tId].discs).forEach(d => {
+                            d.sch.forEach(a => {
+                                const aData = new Date(a.dtObj);
+                                if (aData.getTime() === dia.getTime() && a.time.startsWith(horaRef)) {
+                                    if (!busca || a.prof.toLowerCase().includes(busca)) {
+                                        aulas += `<div class="aula-card"><strong>${d.name}</strong><div class="text-blue-600 font-semibold mt-1">${a.prof}</div></div>`;
                                     }
                                 }
                             });
                         });
-                        return `<td class="p-1 border-b border-r align-top min-h-[60px]">${aulas}</td>`;
+                        return `<td class="p-2 border-b border-r align-top min-h-[60px]">${aulas}</td>`;
                     }).join("")}
                 </tr>`;
             }).join("");
         }
 
-        // Funções Auxiliares Necessárias
         function getStartOfWeek(w, y) {
             const d = (1 + (w - 1) * 7);
-            return new Date(y, 0, d);
-        }
-
-        function turmaEhSuperior(tId) {
-            // Lógica simples: se começa com 1, 2 ou 3 costuma ser integrado. 
-            // Ajuste conforme seu padrão de IDs.
-            return tId.toLowerCase().includes("ads") || tId.toLowerCase().includes("pos"); 
+            const date = new Date(y, 0, d);
+            const day = date.getDay();
+            const diff = date.getDate() - day + (day === 0 ? -6 : 1);
+            return new Date(date.setDate(diff));
         }
     </script>
 </body>
