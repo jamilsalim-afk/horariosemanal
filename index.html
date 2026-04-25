@@ -125,66 +125,52 @@ function montar(table) {
   const container = document.getElementById("container");
   container.innerHTML = "";
 
-  const horarios = table.rows.map(r => r.c[0]?.v);
+  const bloco = document.createElement("div");
+  bloco.className = "bloco";
 
-  // 🔥 TURMAS DINÂMICAS (colunas da planilha)
+  const tabela = document.createElement("table");
+
   const turmas = table.cols.slice(1).map(c => c.label);
+  const horarios = table.rows;
 
-  // 🔥 AGRUPA AUTOMATICAMENTE POR CURSO
-  const cursos = agruparCursos(turmas);
+  // 🔥 CABEÇALHO (turmas)
+  let thead = "<tr><th>Horário</th>";
 
-  Object.keys(cursos).forEach(curso => {
-
-    const bloco = document.createElement("div");
-    bloco.className = "bloco";
-
-    const titulo = document.createElement("h3");
-    titulo.textContent = curso;
-
-    const tabela = document.createElement("table");
-
-    let thead = "<tr><th>Horário</th>";
-
-    cursos[curso].forEach(turma => {
-      thead += `<th>${turma}</th>`;
-    });
-
-    thead += "</tr>";
-
-    let tbody = "";
-
-    table.rows.forEach((row, rowIndex) => {
-
-      const horario = row.c[0] ? row.c[0].v : "";
-
-      tbody += `<tr>`;
-      tbody += `<td class="horario">${horario}</td>`;
-
-      cursos[curso].forEach((turma, turmaIndex) => {
-
-        // 🔥 pega posição real da turma na planilha
-        const colIndex = table.cols.findIndex(c => c.label === turma);
-
-        const cell = row.c[colIndex];
-        const valor = cell ? cell.v : "";
-
-        if (valor) {
-          tbody += `<td data-prof="${valor.toUpperCase()}">${valor}</td>`;
-        } else {
-          tbody += `<td></td>`;
-        }
-      });
-
-      tbody += `</tr>`;
-    });
-
-    tabela.innerHTML = thead + tbody;
-
-    bloco.appendChild(titulo);
-    bloco.appendChild(tabela);
-
-    container.appendChild(bloco);
+  turmas.forEach(t => {
+    thead += `<th>${t}</th>`;
   });
+
+  thead += "</tr>";
+
+  let tbody = "";
+
+  // 🔥 LINHAS
+  horarios.forEach(row => {
+
+    const horario = row.c[0] ? row.c[0].v : "";
+
+    tbody += `<tr>`;
+    tbody += `<td class="horario">${horario}</td>`;
+
+    turmas.forEach((turma, index) => {
+
+      const cell = row.c[index + 1];
+      const valor = cell ? cell.v : "";
+
+      if (valor) {
+        tbody += `<td data-prof="${valor.toUpperCase()}">${valor}</td>`;
+      } else {
+        tbody += `<td></td>`;
+      }
+    });
+
+    tbody += `</tr>`;
+  });
+
+  tabela.innerHTML = thead + tbody;
+
+  bloco.appendChild(tabela);
+  container.appendChild(bloco);
 }
 
 function agruparCursos(turmas) {
