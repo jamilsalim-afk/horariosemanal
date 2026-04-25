@@ -18,12 +18,11 @@
         .btn-pdf { background: #d32f2f; color: white; border: none; cursor: pointer; font-weight: bold; }
 
         .week-container { padding: 15px; }
-        .table-responsive { width: 100%; overflow-x: auto; background: white; border-radius: 8px; }
+        .table-responsive { width: 100%; overflow-x: auto; background: white; border-radius: 8px; margin-bottom: 30px; }
 
         table { width: 100%; border-collapse: collapse; font-size: 10px; table-layout: fixed; }
-        th, td { border: 1px solid #bbb; padding: 6px; text-align: center; overflow: hidden; word-wrap: break-word; white-space: normal; }
+        th, td { border: 1px solid #bbb; padding: 6px; text-align: center; word-wrap: break-word; white-space: normal; overflow: hidden; }
         
-        /* Cores */
         .c-agroec { background-color: #e8f5e9 !important; } .c-agropec { background-color: #e3f2fd !important; }
         .c-info { background-color: #fff8e1 !important; } .c-geo { background-color: #f3e5f5 !important; }
         .c-mat { background-color: #e0f7fa !important; } .c-agroneg { background-color: #efebe9 !important; }
@@ -33,7 +32,7 @@
         .time-col { font-weight: bold; width: 85px; background: #f1f3f4; }
         .highlight { background-color: #fbc02d !important; font-weight: bold; border: 2px solid #000; }
         .opaco { opacity: 0.1; }
-        .intervalo { background: #f9f9f9; height: 15px; color: #aaa; font-style: italic; }
+        .intervalo { background: #f9f9f9; color: #aaa; font-style: italic; }
     </style>
 </head>
 <body>
@@ -46,7 +45,7 @@
         </select>
         <select id="selectSemana" onchange="renderizarTabela()"></select>
         <input type="text" id="searchProf" class="search-box" placeholder="🔍 Buscar Professor..." onkeyup="filtrarProfessor()">
-        <button class="btn-pdf" onclick="exportarPDF()">📄 PDF (1 Dia/Folha)</button>
+        <button class="btn-pdf" onclick="exportarPDF()">📄 PDF Oficial</button>
     </div>
 </div>
 
@@ -61,7 +60,7 @@
     };
 
     let dadosGlobais = [];
-    let turmasFiltradas = [];
+    let turmasDaPlanilha = [];
     let semanasAgrupadas = {};
 
     async function init() {
@@ -73,13 +72,7 @@
             const csv = await response.text();
             dadosGlobais = csv.split('\n').map(r => r.split(',').map(c => c.replace(/"/g, '').trim()));
             processarDados();
-        } catch (e) { alert("Erro ao carregar dados da planilha."); }
-    }
-
-    function getDiaSemana(dataStr) {
-        const parts = dataStr.split('/');
-        const d = new Date(parts[2], parts[1]-1, parts[0]);
-        return ["DOMINGO", "SEGUNDA-FEIRA", "TERÇA-FEIRA", "QUARTA-FEIRA", "QUINTA-FEIRA", "SEXTA-FEIRA", "SÁBADO"][d.getDay()];
+        } catch (e) { alert("Erro ao carregar dados."); }
     }
 
     function getCursoInfo(t) {
@@ -97,8 +90,7 @@
 
     function processarDados() {
         semanasAgrupadas = {};
-        const mod = document.getElementById('selectModalidade').value;
-        turmasFiltradas = dadosGlobais[0].slice(2).filter(t => t !== "");
+        turmasDaPlanilha = dadosGlobais[0].slice(2).filter(t => t !== "");
 
         let ultimaData = "";
         for (let i = 1; i < dadosGlobais.length; i++) {
@@ -125,22 +117,39 @@
         renderizarTabela();
     }
 
+    function getTurmasAtivasNaSemana(diasDaSemana) {
+        // Varre todos os dias daquela semana específica
+        return turmasDaPlanilha.filter(tNome => {
+            const idx = dadosGlobais[0].indexOf(tNome);
+            return Object.values(diasDaSemana).some(diaArray => 
+                diaArray.some(row => row[idx] && row[idx] !== "-" && !row[1].toUpperCase().includes("INTERVALO"))
+            );
+        });
+    }
+
     function renderizarTabela() {
         const sem = document.getElementById('selectSemana').value;
         const dias = semanasAgrupadas[sem].dias;
         const container = document.getElementById('tabelaHorario');
+        
+        // Identifica quem tem aula em pelo menos UM dia desta semana
+        const turmasAtivas = getTurmasAtivasNaSemana(dias);
+        
         let html = "";
-
         Object.keys(dias).forEach(dia => {
-            html += `<table><thead><tr class="day-divider"><td colspan="${turmasFiltradas.length + 1}">${getDiaSemana(dia)} - ${dia}</td></tr>`;
+            const p = dia.split('/');
+            const dObj = new Date(p[2], p[1]-1, p[0]);
+            const diasSemana = ["DOMINGO", "SEGUNDA-FEIRA", "TERÇA-FEIRA", "QUARTA-FEIRA", "QUINTA-FEIRA", "SEXTA-FEIRA", "SÁBADO"];
+            
+            html += `<table><thead><tr class="day-divider"><td colspan="${turmasAtivas.length + 1}">${diasSemana[dObj.getDay()]} - ${dia}</td></tr>`;
             html += `<tr><th style="background:#444; color:#fff; width:85px">Horário</th>`;
-            turmasFiltradas.forEach(t => html += `<th class="${getCursoInfo(t).cl}">${t}</th>`);
+            turmasAtivas.forEach(t => html += `<th class="${getCursoInfo(t).cl}">${t}</th>`);
             html += `</tr></thead><tbody>`;
 
             dias[dia].forEach(row => {
                 const isInt = row[1].toUpperCase().includes("INTERVALO");
                 html += `<tr class="${isInt ? 'intervalo' : ''}"><td class="time-col">${row[1]}</td>`;
-                turmasFiltradas.forEach(tNome => {
+                turmasAtivas.forEach(tNome => {
                     const idx = dadosGlobais[0].indexOf(tNome);
                     const conteudo = row[idx] || "-";
                     const cl = (conteudo !== "-" && !isInt) ? getCursoInfo(tNome).cl : "";
@@ -157,16 +166,12 @@
     function filtrarProfessor() {
         const termo = document.getElementById('searchProf').value.toUpperCase();
         const cells = document.getElementsByClassName('aula-cell');
-        // Otimização: processamento direto para evitar lag
         for (let i = 0; i < cells.length; i++) {
             const c = cells[i];
             c.classList.remove('highlight', 'opaco');
-            if (termo !== "") {
-                if (c.innerText.toUpperCase().indexOf(termo) > -1 && c.innerText !== "-") {
-                    c.classList.add('highlight');
-                } else {
-                    c.classList.add('opaco');
-                }
+            if (termo !== "" && c.innerText !== "-") {
+                if (c.innerText.toUpperCase().indexOf(termo) > -1) c.classList.add('highlight');
+                else c.classList.add('opaco');
             }
         }
     }
@@ -176,28 +181,29 @@
         const pdf = new jsPDF('l', 'mm', 'a4');
         const sem = document.getElementById('selectSemana').value;
         const diasObj = semanasAgrupadas[sem].dias;
+        const turmasAtivas = getTurmasAtivasNaSemana(diasObj);
         const termo = document.getElementById('searchProf').value.toUpperCase();
-        const datasArr = Object.keys(diasObj);
         const mod = document.getElementById('selectModalidade').value;
 
-        datasArr.forEach((dia, idx) => {
+        Object.keys(diasObj).forEach((dia, idx) => {
             if (idx > 0) pdf.addPage();
             const pageWidth = pdf.internal.pageSize.getWidth();
             
-            pdf.setFontSize(8);
-            pdf.setFont(undefined, 'bold');
+            pdf.setFontSize(8); pdf.setFont(undefined, 'bold');
             pdf.text("INSTITUTO FEDERAL DE EDUCAÇÃO, CIÊNCIA E TECNOLOGIA - CAMPUS CACOAL", pageWidth/2, 10, { align: 'center' });
-            pdf.setFontSize(7);
-            pdf.setFont(undefined, 'normal');
+            pdf.setFontSize(7); pdf.setFont(undefined, 'normal');
             pdf.text(`MODALIDADE: ${mod} | SEMANA DE ${sem}`, pageWidth/2, 14, { align: 'center' });
 
-            pdf.setFontSize(10);
-            pdf.setTextColor(46, 125, 50);
-            pdf.text(`${getDiaSemana(dia)} - ${dia}`, 7, 22);
+            const p = dia.split('/');
+            const dObj = new Date(p[2], p[1]-1, p[0]);
+            const diasS = ["DOMINGO", "SEGUNDA-FEIRA", "TERÇA-FEIRA", "QUARTA-FEIRA", "QUINTA-FEIRA", "SEXTA-FEIRA", "SÁBADO"];
+
+            pdf.setFontSize(10); pdf.setTextColor(46, 125, 50);
+            pdf.text(`${diasS[dObj.getDay()]} - ${dia}`, 7, 22);
 
             const tableBody = diasObj[dia].map(row => {
                 const line = [row[1]];
-                turmasFiltradas.forEach(tNome => {
+                turmasAtivas.forEach(tNome => {
                     const originalIdx = dadosGlobais[0].indexOf(tNome);
                     let val = row[originalIdx] || "-";
                     if (termo !== "" && !val.toUpperCase().includes(termo)) val = "";
@@ -206,37 +212,28 @@
                 return line;
             });
 
-            // Ajuste dinâmico de fonte para caber na folha
-            let fontSize = turmasFiltradas.length > 8 ? 4.5 : 6;
-
             pdf.autoTable({
-                head: [[ 'Horário', ...turmasFiltradas ]],
+                head: [[ 'Horário', ...turmasAtivas ]],
                 body: tableBody,
                 startY: 25,
-                margin: { left: 1, right: 1, top: 25, bottom: 15 },
+                margin: { left: 5, right: 5 },
                 theme: 'grid',
-                styles: { fontSize: fontSize, halign: 'center', cellPadding: 0.5, overflow: 'linebreak' },
-                headStyles: { fillColor: [46, 125, 50], fontStyle: 'bold' },
+                styles: { fontSize: turmasAtivas.length > 10 ? 4.5 : 5.5, halign: 'center', cellPadding: 0.5 },
+                headStyles: { fillColor: [46, 125, 50] },
                 didParseCell: function(data) {
                     if (data.section === 'head' && data.column.index > 0) {
-                        data.cell.styles.fillColor = getCursoInfo(turmasFiltradas[data.column.index - 1]).rgb;
+                        data.cell.styles.fillColor = getCursoInfo(turmasAtivas[data.column.index - 1]).rgb;
                         data.cell.styles.textColor = [0,0,0];
                     }
                     if (data.section === 'body' && data.column.index > 0 && data.cell.text[0] !== "-") {
-                        data.cell.styles.fillColor = getCursoInfo(turmasFiltradas[data.column.index - 1]).rgb;
+                        data.cell.styles.fillColor = getCursoInfo(turmasAtivas[data.column.index - 1]).rgb;
                     }
                     if (data.section === 'body' && termo !== "" && data.cell.text[0].toUpperCase().includes(termo)) {
                         data.cell.styles.fillColor = [251, 192, 45];
                     }
                 }
             });
-
-            const footerY = pdf.internal.pageSize.getHeight() - 5;
-            pdf.setFontSize(6);
-            pdf.setTextColor(150);
-            pdf.text("dape.cacoal@ifro.edu.br | Telefone: (69) 3443-9501", pageWidth/2, footerY, { align: 'center' });
         });
-
         pdf.save(`Horario_${mod}_${sem.replace(/\//g,'-')}.pdf`);
     }
 
