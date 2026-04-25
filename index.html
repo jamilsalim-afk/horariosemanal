@@ -3,61 +3,58 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Horários IFRO - Cacoal (Compacto)</title>
+    <title>Grade IFRO - Cacoal</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* Redução global de fonte para caber mais dados */
-        body { font-size: 12px; }
-        .table-grade { table-layout: fixed; width: 100%; border-collapse: separate; border-spacing: 0; }
-        .dia-header-sticky { position: sticky; top: 0; z-index: 30; }
-        .turmas-header-sticky { position: sticky; top: 38px; z-index: 20; background-color: #f9fafb; }
+        /* Estilo ultra-compacto para maximizar espaço */
+        body { font-size: 11px; font-family: sans-serif; }
+        .table-grade { table-layout: fixed; width: 100%; border-collapse: collapse; }
+        .dia-header-sticky { position: sticky; top: 0; z-index: 30; background: #166534; color: white; padding: 4px; font-weight: bold; text-align: center; }
+        .turmas-header-sticky { position: sticky; top: 22px; z-index: 20; background: #f3f4f6; }
         
-        /* Cartão de aula ultra-compacto */
         .aula-card { 
-            border-l-2 border-green-600;
-            padding: 2px 4px;
-            margin-bottom: 2px;
+            border-left: 2px solid #166534;
+            padding: 1px 3px;
+            margin-bottom: 1px;
             background-color: #f0fdf4;
             border-radius: 2px;
             line-height: 1.1;
+            overflow: hidden;
         }
-        .nome-disciplina { font-weight: 700; font-size: 9px; color: #166534; display: block; }
-        .nome-professor { font-size: 8px; color: #1d4ed8; display: block; margin-top: 1px; }
+        .nome-disciplina { font-weight: 800; font-size: 8.5px; color: #14532d; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .nome-professor { font-size: 7.5px; color: #1d4ed8; display: block; }
 
-        .loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.9); display: none; justify-content: center; align-items: center; z-index: 100; flex-direction: column; }
-        
-        /* Ajuste de colunas de horário */
-        .col-horario { width: 70px; font-size: 9px; }
+        .loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.8); display: none; justify-content: center; align-items: center; z-index: 100; }
+        .col-horario { width: 60px; font-size: 8px; text-align: center; font-weight: bold; color: #4b5563; }
+        th { border: 1px solid #e5e7eb; }
+        td { border: 1px solid #e5e7eb; vertical-align: top; height: 35px; }
     </style>
 </head>
-<body class="bg-gray-100 min-h-screen p-2">
+<body class="bg-gray-50 p-1">
 
     <div id="loading" class="loading-overlay">
-        <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-green-700 mb-2"></div>
-        <p class="text-green-800 font-bold text-xs">Sincronizando...</p>
+        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-green-700"></div>
     </div>
 
-    <div class="max-w-full mx-auto bg-white p-4 rounded-lg shadow-sm mb-4">
-        <div class="flex flex-wrap justify-between items-center gap-4">
-            <h1 class="text-lg font-bold text-green-800 flex items-center gap-2">
-                📅 Grade Semanal IFRO
-            </h1>
-            <div class="flex gap-2">
-                <input type="week" id="weekInputGeral" onchange="renderizarTudo()" class="rounded border-gray-300 p-1 text-xs border">
-                <select id="nivelSelect" onchange="renderizarTudo()" class="rounded border-gray-300 p-1 text-xs border">
-                    <option value="tecnico">Técnico</option>
-                    <option value="superior">Superior</option>
-                </select>
-                <input type="text" id="buscaGeral" oninput="renderizarTudo()" placeholder="Professor..." class="rounded border-gray-300 p-1 text-xs border">
-                <button onclick="carregarDadosPlanilha()" class="bg-green-700 text-white px-3 py-1 rounded text-xs hover:bg-green-800">
-                    Sincronizar
-                </button>
-            </div>
+    <div class="bg-white p-3 rounded shadow-sm mb-4 flex flex-wrap gap-3 items-end">
+        <div>
+            <label class="block text-[10px] font-bold text-gray-500 uppercase">Semana</label>
+            <input type="week" id="weekInputGeral" onchange="renderizarTudo()" class="border rounded p-1 text-[11px]">
         </div>
+        <div>
+            <label class="block text-[10px] font-bold text-gray-500 uppercase">Nível</label>
+            <select id="nivelSelect" onchange="renderizarTudo()" class="border rounded p-1 text-[11px]">
+                <option value="tecnico">Técnico Integrado</option>
+                <option value="superior">Superior / Noturno</option>
+            </select>
+        </div>
+        <input type="text" id="buscaGeral" oninput="renderizarTudo()" placeholder="Filtrar Professor..." class="border rounded p-1 text-[11px] flex-grow">
+        <button onclick="carregarDadosPlanilha()" class="bg-green-700 text-white px-4 py-1 rounded text-[11px] font-bold hover:bg-green-800 transition">
+            Sincronizar Planilha
+        </button>
     </div>
 
-    <div id="gradeGeralRender" class="space-y-6">
-        </div>
+    <div id="gradeGeralRender" class="space-y-8"></div>
 
     <script>
         const SHEET_ID = '1j33kiPqwtzZNuvkBgYDaIiXZvVMY_J0qWAtRfYGdnD8';
@@ -67,19 +64,25 @@
         let dataStore = {};
 
         const GABARITO = [
-            { h: "07:30 - 08:20", t: "aula" }, { h: "08:20 - 09:10", t: "aula" },
-            { h: "09:10 - 09:30", t: "intervalo", l: "INTERVALO MATUTINO" },
-            { h: "09:30 - 10:20", t: "aula" }, { h: "10:20 - 11:10", t: "aula" },
-            { h: "11:10 - 12:00", t: "aula" },
-            { h: "12:00 - 13:50", t: "intervalo", l: "ALMOÇO" },
-            { h: "13:50 - 14:40", t: "aula" }, { h: "14:40 - 15:30", t: "aula" },
-            { h: "15:30 - 15:50", t: "intervalo", l: "INTERVALO VESPERTINO" },
-            { h: "15:50 - 16:40", t: "aula" }, { h: "16:40 - 17:30", t: "aula" },
-            { h: "17:30 - 18:20", t: "aula" },
-            { h: "18:20 - 19:00", t: "intervalo", l: "JANTAR" },
-            { h: "19:00 - 19:50", t: "aula" }, { h: "19:50 - 20:40", t: "aula" },
-            { h: "20:40 - 20:50", t: "intervalo", l: "INTERVALO NOTURNO" },
-            { h: "20:50 - 21:40", t: "aula" }, { h: "21:40 - 22:30", t: "aula" }
+            { h: "07:30", full: "07:30 - 08:20", t: "aula" }, 
+            { h: "08:20", full: "08:20 - 09:10", t: "aula" },
+            { h: "09:10", full: "09:10 - 09:30", t: "intervalo", l: "INTERVALO" },
+            { h: "09:30", full: "09:30 - 10:20", t: "aula" }, 
+            { h: "10:20", full: "10:20 - 11:10", t: "aula" },
+            { h: "11:10", full: "11:10 - 12:00", t: "aula" },
+            { h: "12:00", full: "12:00 - 13:50", t: "intervalo", l: "ALMOÇO" },
+            { h: "13:50", full: "13:50 - 14:40", t: "aula" }, 
+            { h: "14:40", full: "14:40 - 15:30", t: "aula" },
+            { h: "15:30", full: "15:30 - 15:50", t: "intervalo", l: "INTERVALO" },
+            { h: "15:50", full: "15:50 - 16:40", t: "aula" }, 
+            { h: "16:40", full: "16:40 - 17:30", t: "aula" },
+            { h: "17:30", full: "17:30 - 18:20", t: "aula" },
+            { h: "18:20", full: "18:20 - 19:00", t: "intervalo", l: "JANTAR" },
+            { h: "19:00", full: "19:00 - 19:50", t: "aula" }, 
+            { h: "19:50", full: "19:50 - 20:40", t: "aula" },
+            { h: "20:40", full: "20:40 - 20:50", t: "intervalo", l: "INTERVALO" },
+            { h: "20:50", full: "20:50 - 21:40", t: "aula" }, 
+            { h: "21:40", full: "21:40 - 22:30", t: "aula" }
         ];
 
         async function carregarDadosPlanilha() {
@@ -89,7 +92,7 @@
                 const csvText = await response.text();
                 parsearPlanilha(csvText);
                 renderizarTudo();
-            } catch (e) { alert("Erro ao carregar dados."); }
+            } catch (e) { alert("Erro ao acessar a planilha. Verifique se ela está pública."); }
             finally { document.getElementById('loading').style.display = 'none'; }
         }
 
@@ -97,10 +100,12 @@
             const linhas = csv.split('\n').map(l => l.split(','));
             const newData = {};
 
+            // Começa da linha 101 (índice 100) conforme solicitado
             for (let i = 100; i < linhas.length; i++) {
-                let [dataStr, hora, turma, disc, prof] = linhas[i];
-                if (!dataStr || !turma || dataStr.trim() === "") continue;
+                let [dataStr, horaStr, turmaStr, discStr, profStr] = linhas[i];
+                if (!dataStr || !turmaStr || dataStr.trim() === "") continue;
 
+                // Normalização da Data (YYYY-MM-DD)
                 const partes = dataStr.includes('/') ? dataStr.split('/') : dataStr.split('-');
                 const d = partes[0].trim().padStart(2, '0');
                 const m = partes[1].trim().padStart(2, '0');
@@ -108,15 +113,15 @@
                 if(a.length === 2) a = "20" + a;
                 const dataKey = `${a}-${m}-${d}`;
 
-                turma = turma.trim().replace(/"/g, '');
-                if (!newData[turma]) newData[turma] = { name: turma, lessons: [] };
+                const turma = turmaStr.trim().replace(/"/g, '');
+                if (!newData[turma]) newData[turma] = { lessons: [] };
                 
                 newData[turma].lessons.push({
                     dataKey: dataKey,
-                    // Normalização do horário para comparação (remove espaços extras)
-                    time: hora.trim().replace(/\s+/g, ''), 
-                    disc: disc.replace(/"/g, '').trim(),
-                    prof: prof?.replace(/"/g, '').trim() || "A Definir"
+                    // Remove espaços para facilitar a busca (ex: "07:30-08:20")
+                    time: horaStr.trim().replace(/\s+/g, ''), 
+                    disc: discStr.replace(/"/g, '').trim(),
+                    prof: profStr?.replace(/"/g, '').trim() || "A Definir"
                 });
             }
             dataStore = newData;
@@ -148,16 +153,14 @@
                 const dataRef = `${diaLoop.getFullYear()}-${m}-${d}`;
 
                 html += `
-                <div class="bg-white rounded shadow-sm border border-gray-200 overflow-hidden">
-                    <div class="dia-header-sticky bg-green-800 text-white p-2 font-bold flex justify-between items-center text-xs">
-                        <span>${diasNome[i]} (${d}/${m})</span>
-                    </div>
+                <div class="bg-white shadow overflow-hidden rounded border border-gray-300">
+                    <div class="dia-header-sticky uppercase">${diasNome[i]} - ${d}/${m}</div>
                     <div class="overflow-x-auto">
                         <table class="table-grade">
                             <thead>
                                 <tr class="turmas-header-sticky">
-                                    <th class="p-1 border-b border-r col-horario text-gray-400 bg-gray-50">Horário</th>
-                                    ${turmasFiltradas.map(t => `<th class="p-1 border-b border-r text-[10px] text-center uppercase truncate">${dataStore[t].name}</th>`).join("")}
+                                    <th class="col-horario bg-gray-100">Horário</th>
+                                    ${turmasFiltradas.map(t => `<th class="p-1 text-[9px] uppercase truncate">${t}</th>`).join("")}
                                 </tr>
                             </thead>
                             <tbody>
@@ -171,23 +174,21 @@
         }
 
         function gerarLinhas(turmas, dataRef, busca, nivel) {
+            // Filtra horários: se for técnico, para antes das 18:20
             const slots = nivel === "tecnico" ? GABARITO.filter(s => s.h < "18:20") : GABARITO;
 
             return slots.map(slot => {
                 if (slot.t === "intervalo") {
-                    return `<tr class="bg-gray-50"><td class="p-1 border-b border-r text-center font-mono text-[8px] text-gray-400">${slot.h}</td><td colspan="${turmas.length}" class="p-1 border-b text-center text-[8px] font-bold text-gray-300 italic uppercase">${slot.l}</td></tr>`;
+                    return `<tr class="bg-gray-50"><td class="col-horario">${slot.full}</td><td colspan="${turmas.length}" class="text-center text-[8px] font-bold text-gray-400 italic uppercase">${slot.l}</td></tr>`;
                 }
 
-                // Normaliza o horário do gabarito para comparação
-                const hGabarito = slot.h.split(" - ")[0].trim().replace(/\s+/g, '');
-
                 return `<tr>
-                    <td class="p-1 border-b border-r bg-gray-50 font-mono text-[9px] font-bold text-center text-gray-500">${slot.h}</td>
+                    <td class="col-horario bg-gray-50">${slot.full}</td>
                     ${turmas.map(tId => {
                         let aulasHtml = "";
                         dataStore[tId].lessons.forEach(aula => {
-                            // CORREÇÃO: Verifica se a aula na planilha começa com o mesmo horário do gabarito
-                            if (aula.dataKey === dataRef && aula.time.includes(hGabarito)) {
+                            // CONDIÇÃO MELHORADA: Se a data bate E o horário do gabarito (ex: 07:30) existe na string da planilha
+                            if (aula.dataKey === dataRef && aula.time.includes(slot.h)) {
                                 if (!busca || aula.prof.toLowerCase().includes(busca)) {
                                     aulasHtml += `
                                     <div class="aula-card">
@@ -197,7 +198,7 @@
                                 }
                             }
                         });
-                        return `<td class="p-1 border-b border-r align-top min-h-[40px]">${aulasHtml}</td>`;
+                        return `<td class="p-0.5">${aulasHtml}</td>`;
                     }).join("")}
                 </tr>`;
             }).join("");
