@@ -3,132 +3,216 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Horário IFRO - Integrado</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
+    <title>Gerador de Grade Semanal - IFRO</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        :root { --verde: #32a041; --bg-dia: #f2f2f2; --bg-intervalo: #fce4ec; }
-        body { font-family: 'Arial Narrow', Arial, sans-serif; margin: 5px; }
-        .no-print { display: flex; gap: 10px; padding: 10px; background: #f8f9fa; border-bottom: 2px solid var(--verde); margin-bottom: 10px; }
-        button { background: var(--verde); color: white; border: none; padding: 8px 15px; cursor: pointer; font-weight: bold; border-radius: 4px; }
-        .header-tabela { text-align: center; font-weight: bold; font-size: 13px; margin-bottom: 5px; color: #1b5e20; text-transform: uppercase; }
-        
-        table { width: 100%; border-collapse: collapse; table-layout: fixed; border: 1.5px solid #000; }
-        th, td { border: 1px solid #000; padding: 1px !important; text-align: center; font-size: 8px; height: 15px; overflow: hidden; }
-        th { background-color: var(--verde) !important; color: white !important; font-size: 9px; }
-        
-        /* Escrita Vertical para as colunas de DIA */
-        .coluna-dia { 
-            writing-mode: vertical-rl; 
-            transform: rotate(180deg); 
-            background: var(--bg-dia) !important; 
-            font-weight: bold; 
-            width: 22px !important;
-            white-space: nowrap;
-            text-transform: uppercase;
+        /* Estilos específicos para a Grade Matricial */
+        .table-grade {
+            table-layout: fixed;
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
         }
-        .horario-cell { width: 65px !important; font-weight: bold; }
-        .intervalo { background-color: var(--bg-intervalo) !important; font-weight: bold; color: #880e4f; }
-        .destaque { background-color: #ffff00 !important; font-weight: bold; color: #000 !important; }
-        .opaco { opacity: 0.15; filter: grayscale(1); }
-        @media print { .no-print { display: none; } }
+
+        /* Fixar o nome do Dia */
+        .dia-header-sticky {
+            position: sticky;
+            top: 0;
+            z-index: 30;
+        }
+
+        /* Fixar o cabeçalho das turmas (abaixo do dia) */
+        .turmas-header-sticky {
+            position: sticky;
+            top: 48px; /* Ajuste conforme a altura do .dia-header-sticky */
+            z-index: 20;
+            background-color: #f9fafb;
+            box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .aula-card {
+            transition: transform 0.1s ease;
+        }
+
+        .aula-card:hover {
+            transform: scale(1.02);
+        }
+
+        /* Estilização da barra de rolagem para grades largas */
+        .overflow-x-auto::-webkit-scrollbar {
+            height: 8px;
+        }
+        .overflow-x-auto::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
     </style>
 </head>
-<body>
+<body class="bg-gray-100 min-h-screen p-4">
 
-<div class="no-print">
-    <select id="semana" onchange="carregarDados()">
-        <option value="">Selecione a Semana</option>
-        <option value="1579045633">09.02 a 13.02</option>
-        <option value="491689833">16.02 a 20.02</option>
-    </select>
-    <button onclick="gerarPDF()">Baixar PDF A4 (Mesclado)</button>
-</div>
-
-<div id="tituloDinamico" class="header-tabela"></div>
-<table id="tabelaHorario"></table>
-
-<script>
-    const SPREADSHEET_ID = "1j33kiPqwtzZNuvkBgYDaIiXZvVMY_J0qWAtRfYGdnD8";
-
-    async function carregarDados() {
-        const gid = document.getElementById('semana').value;
-        if(!gid) return;
-        const url = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:csv&gid=${gid}`;
+    <div class="max-w-7xl mx-auto bg-white p-6 rounded-xl shadow-md mb-8">
+        <h1 class="text-2xl font-bold text-green-800 mb-6 flex items-center gap-2">
+            📅 Gerador de Horários Semanais
+        </h1>
         
-        try {
-            const res = await fetch(url);
-            const csv = await res.text();
-            // Limpeza inicial: remove aspas e espaços extras das células
-            const dados = csv.split('\n').map(r => r.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.replace(/^"|"$/g, '').trim()));
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Semana</label>
+                <input type="week" id="weekInputGeral" onchange="gerarGradeSemanal()" 
+                       class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 p-2 border">
+            </div>
             
-            // Corte: Linha 5 a 88 (indices 4-87), Coluna A a U (indices 0-20)
-            const subset = dados.slice(4, 87).map(r => r.slice(0, 21));
-            renderizar(subset);
-            document.getElementById('tituloDinamico').innerText = "HORÁRIO INTEGRADO - " + document.getElementById('semana').selectedOptions[0].text;
-        } catch(e) { alert("Erro ao carregar dados."); }
-    }
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Nível</label>
+                <select id="nivelSelect" onchange="gerarGradeSemanal()" 
+                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 p-2 border">
+                    <option value="tecnico">Técnico Integrado</option>
+                    <option value="superior">Ensino Superior</option>
+                </select>
+            </div>
 
-    function renderizar(dados) {
-        const tabela = document.getElementById('tabelaHorario');
-        tabela.innerHTML = "";
-        
-        // Criar estrutura da tabela
-        dados.forEach((row, i) => {
-            const tr = document.createElement('tr');
-            row.forEach((cell, j) => {
-                const el = document.createElement(i === 0 ? 'th' : 'td');
-                el.innerText = cell;
-                if ([0, 5, 13].includes(j)) el.className = 'coluna-dia';
-                if ([1, 6, 14].includes(j)) el.className = 'horario-cell';
-                if (cell.toUpperCase().includes("INTERVALO")) el.className = 'intervalo';
-                tr.appendChild(el);
-            });
-            tabela.appendChild(tr);
-        });
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Filtrar Professor</label>
+                <input type="text" id="buscaGeral" oninput="gerarGradeSemanal()" placeholder="Nome do docente..."
+                       class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 p-2 border">
+            </div>
 
-        // MESCLAGEM AGRESSIVA
-        [0, 5, 13].forEach(colIdx => {
-            let celulaMestre = null;
-            for (let i = 1; i < tabela.rows.length; i++) {
-                let celulaAtual = tabela.rows[i].cells[colIdx];
-                // Compara limpando tudo que não é letra/número para garantir igualdade
-                let txtAtual = celulaAtual.innerText.replace(/[^a-zA-Z0-9]/g, '');
-                let txtMestre = celulaMestre ? celulaMestre.innerText.replace(/[^a-zA-Z0-9]/g, '') : "";
+            <div class="flex items-end">
+                <button onclick="window.print()" class="bg-gray-800 text-white px-4 py-2 rounded-md hover:bg-gray-700 transition w-full">
+                    Print / PDF
+                </button>
+            </div>
+        </div>
+    </div>
 
-                if (celulaMestre && txtAtual === txtMestre && txtAtual !== "") {
-                    celulaAtual.style.display = "none";
-                    celulaMestre.rowSpan = (celulaMestre.rowSpan || 1) + 1;
-                    celulaMestre.style.verticalAlign = "middle";
-                } else {
-                    celulaMestre = celulaAtual;
-                }
+    <div id="gradeGeralRender" class="max-w-[100vw] overflow-x-hidden">
+        <div class="text-center py-20 text-gray-400">
+            <p>Selecione uma semana para visualizar a grade.</p>
+        </div>
+    </div>
+
+    <script>
+        // MOCK DE DADOS (Para teste, substitua pelo seu dataStore real)
+        // const dataStore = { ... }; 
+        // const GABARITO = [ ... ];
+
+        /**
+         * Função principal de geração da grade
+         */
+        function gerarGradeSemanal() {
+            const weekInput = document.getElementById("weekInputGeral");
+            const nivelInput = document.getElementById("nivelSelect");
+            const buscaInput = document.getElementById("buscaGeral");
+            const render = document.getElementById("gradeGeralRender");
+
+            if (!weekInput.value) return;
+
+            // Lógica de Datas
+            const [ano, semana] = weekInput.value.split("-W").map(Number);
+            const start = getStartOfWeek(semana, ano);
+            const nivel = nivelInput.value;
+            const buscaProf = (buscaInput.value || "").toLowerCase();
+
+            // Filtragem
+            const horarios = nivel === "tecnico" 
+                ? GABARITO.filter(s => s.h.split(" - ")[0] < "18:20") 
+                : GABARITO;
+
+            const turmas = Object.keys(dataStore).filter(id => {
+                const ehSup = typeof turmaEhSuperior === "function" ? turmaEhSuperior(id) : false;
+                return nivel === "superior" ? ehSup : !ehSup;
+            }).sort();
+
+            let html = "";
+            const diasLabel = ["SEGUNDA", "TERÇA", "QUARTA", "QUINTA", "SEXTA", "SÁBADO"];
+
+            for (let i = 0; i < 6; i++) {
+                const dataDia = new Date(start);
+                dataDia.setDate(start.getDate() + i);
+                dataDia.setHours(0,0,0,0);
+
+                html += `
+                <div class="mb-10 bg-white rounded-lg shadow-sm overflow-hidden border border-gray-200">
+                    <div class="dia-header-sticky bg-green-700 text-white p-3 font-bold flex justify-between items-center shadow-md">
+                        <span>${diasLabel[i]}</span>
+                        <span class="text-green-100 text-sm">${dataDia.toLocaleDateString("pt-BR")}</span>
+                    </div>
+                    
+                    <div class="overflow-x-auto">
+                        <table class="table-grade">
+                            <thead>
+                                <tr class="turmas-header-sticky">
+                                    <th class="p-2 border-b border-r w-20 text-[10px] text-gray-400 bg-gray-50">HORA</th>
+                                    ${turmas.map(tId => `<th class="p-2 border-b border-r text-sm text-gray-700 min-w-[150px] font-bold text-center">${dataStore[tId].name}</th>`).join("")}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${renderizarLinhas(horarios, turmas, dataDia, buscaProf)}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>`;
             }
-        });
-    }
 
-    function gerarPDF() {
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF({ orientation: 'l', unit: 'mm', format: 'a4' });
-        
-        doc.autoTable({
-            html: '#tabelaHorario',
-            styles: { fontSize: 5.2, cellPadding: 0.2, lineColor: 0, lineWidth: 0.05, halign: 'center', valign: 'middle' },
-            headStyles: { fillColor: [50, 160, 65], textColor: 255 },
-            margin: { top: 10, left: 3, right: 3 },
-            columnStyles: { 
-                0: { cellWidth: 7 }, 5: { cellWidth: 7 }, 13: { cellWidth: 7 },
-                1: { cellWidth: 15 }, 6: { cellWidth: 15 }, 14: { cellWidth: 15 }
-            },
-            didParseCell: function(data) {
-                // Aplica cor de intervalo no PDF
-                if (data.cell.text[0] && data.cell.text[0].includes("INTERVALO")) {
-                    data.cell.styles.fillColor = [252, 228, 236];
+            render.innerHTML = html;
+        }
+
+        function renderizarLinhas(horarios, turmas, dataDia, busca) {
+            return horarios.map(slot => {
+                if (slot.t === "intervalo") {
+                    return `
+                    <tr class="bg-gray-50">
+                        <td class="p-1 border-b border-r text-center text-[9px] text-gray-400">${slot.h}</td>
+                        <td colspan="${turmas.length}" class="p-1 border-b text-center text-[10px] uppercase tracking-tighter text-gray-400 italic">
+                            ${slot.l || "Intervalo"}
+                        </td>
+                    </tr>`;
                 }
-            }
-        });
-        doc.save("HORARIO_INTEGRADO_MESCLADO.pdf");
-    }
-</script>
+
+                const horaSlot = slot.h.split(" - ")[0].substring(0, 5).padStart(5, "0");
+
+                return `
+                <tr>
+                    <td class="p-2 border-b border-r bg-gray-50 font-mono text-[10px] font-bold text-center text-gray-600">${slot.h}</td>
+                    ${turmas.map(tId => {
+                        let aulas = "";
+                        const discs = dataStore[tId].discs || {};
+
+                        Object.values(discs).forEach(d => {
+                            (d.sch || []).forEach(a => {
+                                const dtAula = new Date(a.dtObj);
+                                dtAula.setHours(0,0,0,0);
+                                const hAula = (a.time || "").split(" - ")[0].substring(0,5).padStart(5,"0");
+
+                                if (dtAula.getTime() === dataDia.getTime() && hAula === horaSlot) {
+                                    const prof = a.prof || "";
+                                    if (!busca || prof.toLowerCase().includes(busca)) {
+                                        aulas += `
+                                        <div class="aula-card border-l-4 border-green-600 p-2 mb-1 bg-green-50 rounded shadow-sm">
+                                            <div class="font-bold text-[10px] leading-tight text-gray-800">${d.name}</div>
+                                            <div class="text-[9px] text-blue-700 mt-1">${prof}</div>
+                                        </div>`;
+                                    }
+                                }
+                            });
+                        });
+                        return `<td class="p-1 border-b border-r align-top min-h-[60px]">${aulas}</td>`;
+                    }).join("")}
+                </tr>`;
+            }).join("");
+        }
+
+        // Funções Auxiliares Necessárias
+        function getStartOfWeek(w, y) {
+            const d = (1 + (w - 1) * 7);
+            return new Date(y, 0, d);
+        }
+
+        function turmaEhSuperior(tId) {
+            // Lógica simples: se começa com 1, 2 ou 3 costuma ser integrado. 
+            // Ajuste conforme seu padrão de IDs.
+            return tId.toLowerCase().includes("ads") || tId.toLowerCase().includes("pos"); 
+        }
+    </script>
 </body>
 </html>
