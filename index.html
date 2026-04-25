@@ -2,54 +2,85 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Sistema de Horários IFRO - Oficial DAPE</title>
+    <title>Sistema de Horários IFRO - DAPE</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
     
     <style>
         :root { --primary: #2e7d32; --bg: #f4f7f6; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding: 10px; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding: 0; }
         
-        .controls-card { background: white; padding: 15px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 15px; display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; align-items: center; }
+        /* Menu Fixo no Topo */
+        .header-sticky {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            background: var(--bg);
+            padding: 10px 15px;
+        }
+
+        .controls-card { 
+            background: white; 
+            padding: 15px; 
+            border-radius: 12px; 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1); 
+            display: flex; 
+            flex-wrap: wrap; 
+            gap: 10px; 
+            justify-content: center; 
+            align-items: center; 
+        }
+
         select, .search-box, .btn-pdf { padding: 8px; border-radius: 6px; border: 1px solid #ddd; font-size: 13px; outline: none; }
-        .search-box { width: 220px; border: 2px solid var(--primary); }
+        .search-box { width: 200px; border: 2px solid var(--primary); }
         .btn-pdf { background: #d32f2f; color: white; border: none; cursor: pointer; font-weight: bold; }
 
-        .week-container { background: white; padding: 15px; border-radius: 8px; }
-        table { width: 100%; border-collapse: collapse; font-size: 9px; table-layout: fixed; margin-bottom: 20px; }
-        th, td { border: 1px solid #bbb; padding: 4px; text-align: center; word-wrap: break-word; }
-        
-        /* Cores de Fundo por Curso */
-        .c-agroec { background-color: #e8f5e9 !important; color: #1b5e20; }
-        .c-agropec { background-color: #e3f2fd !important; color: #0d47a1; }
-        .c-info { background-color: #fff8e1 !important; color: #ff6f00; }
-        .c-geo { background-color: #f3e5f5 !important; color: #4a148c; }
-        .c-mat { background-color: #e0f7fa !important; color: #006064; }
-        .c-agroneg { background-color: #efebe9 !important; color: #3e2723; }
-        .c-zoo { background-color: #fce4ec !important; color: #880e4f; }
-        .c-agron { background-color: #f1f8e9 !important; color: #33691e; }
+        /* Container de Tabela com Scroll para Mobile */
+        .week-container { padding: 15px; }
+        .table-responsive { 
+            width: 100%; 
+            overflow-x: auto; 
+            background: white; 
+            border-radius: 8px; 
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
 
-        .day-divider { background: var(--primary); color: white; font-weight: bold; font-size: 12px; }
-        .time-col { font-weight: bold; width: 80px; background: #f1f3f4; }
-        .highlight { background-color: #fbc02d !important; font-weight: bold; border: 1.5px solid #000; }
+        table { width: 100%; border-collapse: collapse; font-size: 9px; min-width: 1200px; }
+        th, td { border: 1px solid #bbb; padding: 4px; text-align: center; white-space: nowrap; }
+        
+        /* Cores de Fundo */
+        .c-agroec { background-color: #e8f5e9 !important; }
+        .c-agropec { background-color: #e3f2fd !important; }
+        .c-info { background-color: #fff8e1 !important; }
+        .c-geo { background-color: #f3e5f5 !important; }
+        .c-mat { background-color: #e0f7fa !important; }
+        .c-agroneg { background-color: #efebe9 !important; }
+        .c-zoo { background-color: #fce4ec !important; }
+        .c-agron { background-color: #f1f8e9 !important; }
+
+        .day-divider { background: var(--primary); color: white; font-weight: bold; font-size: 11px; position: sticky; left: 0; }
+        .time-col { font-weight: bold; width: 80px; background: #f1f3f4; position: sticky; left: 0; z-index: 5; }
+        .highlight { background-color: #fbc02d !important; font-weight: bold; border: 2px solid #000; }
         .opaco { opacity: 0.1; }
-        .intervalo { background: #f9f9f9; height: 10px; font-size: 8px; color: #aaa; }
+        .intervalo { background: #f9f9f9; color: #aaa; font-style: italic; }
     </style>
 </head>
 <body>
 
-<div class="controls-card">
-    <select id="selectModalidade" onchange="processarDados()">
-        <option value="INTEGRADO">ENSINO INTEGRADO</option>
-        <option value="SUPERIOR">ENSINO SUPERIOR</option>
-    </select>
-    <select id="selectSemana" onchange="renderizarTabela()"></select>
-    <input type="text" id="searchProf" class="search-box" placeholder="🔍 Filtrar Professor..." onkeyup="filtrarProfessor()">
-    <button class="btn-pdf" onclick="exportarPDF()">📄 Gerar PDF Oficial</button>
+<div class="header-sticky">
+    <div class="controls-card">
+        <select id="selectModalidade" onchange="processarDados()">
+            <option value="INTEGRADO">ENSINO INTEGRADO</option>
+            <option value="SUPERIOR">ENSINO SUPERIOR</option>
+        </select>
+        <select id="selectSemana" onchange="renderizarTabela()"></select>
+        <input type="text" id="searchProf" class="search-box" placeholder="🔍 Filtrar Professor..." onkeyup="filtrarProfessor()">
+        <button class="btn-pdf" onclick="exportarPDF()">📄 PDF (2 Dias/Pág.)</button>
+    </div>
 </div>
 
 <div class="week-container">
-    <div id="tabelaHorario"></div>
+    <div class="table-responsive" id="tabelaHorario"></div>
 </div>
 
 <script>
@@ -68,6 +99,13 @@
             dadosGlobais = csv.split('\n').map(r => r.split(',').map(c => c.replace(/"/g, '').trim()));
             processarDados();
         } catch (e) { console.error(e); }
+    }
+
+    function getDiaSemana(dataStr) {
+        const parts = dataStr.split('/');
+        const d = new Date(parts[2], parts[1]-1, parts[0]);
+        const dias = ["DOMINGO", "SEGUNDA-FEIRA", "TERÇA-FEIRA", "QUARTA-FEIRA", "QUINTA-FEIRA", "SEXTA-FEIRA", "SÁBADO"];
+        return dias[d.getDay()];
     }
 
     function getCursoInfo(t) {
@@ -124,7 +162,8 @@
         let html = "";
 
         Object.keys(dias).forEach(dia => {
-            html += `<table><thead><tr class="day-divider"><td colspan="${turmasFiltradas.length + 1}">${dia}</td></tr>`;
+            const diaLabel = `${getDiaSemana(dia)} - ${dia}`;
+            html += `<table><thead><tr class="day-divider"><td colspan="${turmasFiltradas.length + 1}">${diaLabel}</td></tr>`;
             html += `<tr><th style="background:#444; color:#fff">Horário</th>`;
             turmasFiltradas.forEach(t => html += `<th class="${getCursoInfo(t).class}">${t}</th>`);
             html += `</tr></thead><tbody>`;
@@ -161,38 +200,34 @@
         const { jsPDF } = window.jspdf;
         const pdf = new jsPDF('l', 'mm', 'a4');
         const sem = document.getElementById('selectSemana').value;
-        const dias = semanasAgrupadas[sem].dias;
+        const diasObj = semanasAgrupadas[sem].dias;
         const termo = document.getElementById('searchProf').value.toUpperCase();
-        const datas = Object.keys(dias);
-        const periodo = `${datas[0]} a ${datas[datas.length-1]}`;
+        const datasArr = Object.keys(diasObj);
+        const periodo = `${datasArr[0]} a ${datasArr[datasArr.length-1]}`;
 
-        datas.forEach((dia, idx) => {
-            if (idx > 0) pdf.addPage();
-            
-            // Margens e Dimensões
+        datasArr.forEach((dia, idx) => {
+            // Lógica para 2 dias por folha
+            if (idx > 0 && idx % 2 === 0) pdf.addPage();
+            const yOffset = (idx % 2 === 0) ? 0 : 100; // Define se começa no topo ou no meio da folha
+
             const pageWidth = pdf.internal.pageSize.getWidth();
-            const pageHeight = pdf.internal.pageSize.getHeight();
+            
+            // CABEÇALHO (Apenas na primeira tabela da página)
+            if (idx % 2 === 0) {
+                pdf.setFontSize(8);
+                pdf.setFont(undefined, 'bold');
+                pdf.text("INSTITUTO FEDERAL DE EDUCAÇÃO, CIÊNCIA E TECNOLOGIA - CAMPUS CACOAL", pageWidth/2, 10, { align: 'center' });
+                pdf.setFontSize(7);
+                pdf.setFont(undefined, 'normal');
+                pdf.text(`HORÁRIO SEMANAL - SEMANA DE ${periodo}`, pageWidth/2, 14, { align: 'center' });
+            }
 
-            // CABEÇALHO OFICIAL
-            pdf.setFontSize(8);
-            pdf.setTextColor(0, 0, 0);
-            pdf.text("INSTITUTO FEDERAL DE EDUCAÇÃO, CIÊNCIA E TECNOLOGIA", pageWidth/2, 10, { align: 'center' });
-            pdf.text("CAMPUS CACOAL", pageWidth/2, 14, { align: 'center' });
-            pdf.text("DEPARTAMENTO DE APOIO AO ENSINO", pageWidth/2, 18, { align: 'center' });
+            pdf.setFontSize(9);
             pdf.setFont(undefined, 'bold');
-            pdf.text(`HORÁRIO SEMANAL - SEMANA DE ${periodo}`, pageWidth/2, 24, { align: 'center' });
-
-            // Formatação do Dia (DIA DA SEMANA - DATA)
-            const dataParts = dia.split('/');
-            const dateObj = new Date(dataParts[2], dataParts[1]-1, dataParts[0]);
-            const diasSemana = ["DOMINGO", "SEGUNDA-FEIRA", "TERÇA-FEIRA", "QUARTA-FEIRA", "QUINTA-FEIRA", "SEXTA-FEIRA", "SÁBADO"];
-            const diaNome = diasSemana[dateObj.getDay()];
-
-            pdf.setFontSize(10);
             pdf.setTextColor(46, 125, 50);
-            pdf.text(`${diaNome} - ${dia}`, 14, 32);
+            pdf.text(`${getDiaSemana(dia)} - ${dia}`, 7, 22 + yOffset);
 
-            const tableBody = dias[dia].map(row => {
+            const tableBody = diasObj[dia].map(row => {
                 const line = [row[1]];
                 turmasFiltradas.forEach(tNome => {
                     const originalIdx = dadosGlobais[0].indexOf(tNome);
@@ -206,43 +241,37 @@
             pdf.autoTable({
                 head: [[ 'Horário', ...turmasFiltradas ]],
                 body: tableBody,
-                startY: 35,
-                margin: { top: 35, bottom: 20, left: 5, right: 5 },
+                startY: 25 + yOffset,
+                margin: { left: 5, right: 5 },
                 theme: 'grid',
-                styles: { fontSize: 5.5, halign: 'center', cellPadding: 0.5, lineColor: [200, 200, 200], lineWidth: 0.1 },
-                headStyles: { fillColor: [46, 125, 50], textColor: [255, 255, 255], fontSize: 6 },
-                rowPageBreak: 'avoid',
+                styles: { fontSize: 4.8, halign: 'center', cellPadding: 0.4, minCellHeight: 3 },
+                headStyles: { fillColor: [46, 125, 50], textColor: [255, 255, 255], fontStyle: 'bold' },
                 didParseCell: function(data) {
-                    // Pintar colunas das turmas no cabeçalho
                     if (data.section === 'head' && data.column.index > 0) {
                         data.cell.styles.fillColor = getCursoInfo(turmasFiltradas[data.column.index - 1]).rgb;
                         data.cell.styles.textColor = [0,0,0];
                     }
-                    // Pintar células de aula com a cor do curso
                     if (data.section === 'body' && data.column.index > 0) {
                         const cellText = data.cell.text[0];
                         if (cellText && cellText !== "-" && !cellText.toUpperCase().includes("INTERVALO")) {
                             data.cell.styles.fillColor = getCursoInfo(turmasFiltradas[data.column.index - 1]).rgb;
                         }
                     }
-                    // Destaque de Pesquisa
                     if (data.section === 'body' && termo !== "" && data.cell.text[0].toUpperCase().includes(termo)) {
                         data.cell.styles.fillColor = [251, 192, 45];
-                        data.cell.styles.fontStyle = 'bold';
                     }
                 }
             });
 
-            // RODAPÉ OFICIAL
-            pdf.setFontSize(7);
-            pdf.setFont(undefined, 'normal');
-            pdf.setTextColor(100, 100, 100);
-            const footerY = pageHeight - 10;
-            pdf.text("Rodovia BR-364, KM 228, Lote 2-A, Zona Rural, Cacoal/RO - Telefone: (69) 3443-9501", pageWidth/2, footerY, { align: 'center' });
-            pdf.text("E-mail: dape.cacoal@ifro.edu.br", pageWidth/2, footerY + 4, { align: 'center' });
+            // RODAPÉ (Na última página ou fim da folha)
+            if (idx === datasArr.length - 1 || (idx + 1) % 2 === 0) {
+                pdf.setFontSize(6);
+                pdf.setTextColor(150);
+                pdf.text("dape.cacoal@ifro.edu.br | Rodovia BR-364, KM 228, Lote 2-A, Cacoal/RO", pageWidth/2, 205, { align: 'center' });
+            }
         });
 
-        pdf.save(`Horario_Oficial_IFRO_${sem.replace(/\//g,'-')}.pdf`);
+        pdf.save(`Horario_Compacto_IFRO_${sem.replace(/\//g,'-')}.pdf`);
     }
 
     window.onload = init;
