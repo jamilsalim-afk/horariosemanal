@@ -2,7 +2,7 @@
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
-<title>Sistema de Horários IFRO - DAPE</title>
+<title>Consulta de Horários Semanais - IFRO</title>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
@@ -65,18 +65,18 @@ th,td { border:1px solid #bbb; padding:6px; text-align:center; vertical-align:mi
 
 <div class="ifro-header">
 <div class="ifro-header-content">
-<div class="ifro-linha1">INSTITUTO FEDERAL DE RONDÔNIA</div>
+<div class="ifro-linha1">INSTITUTO FEDERAL DE EDUCAÇÃO, CIÊNCIA E TECNOLOGIA DE RONDÔNIA - IFRO</div>
 <div class="ifro-linha2">CAMPUS CACOAL</div>
 <div class="ifro-linha3">DEPARTAMENTO DE APOIO AO ENSINO</div>
-<div class="ifro-linha4">HORÁRIOS SEMANAIS 2026</div>
+<div class="ifro-linha4">HORÁRIOS SEMANAIS - 2026</div>
 </div>
 </div>
 
 <div class="header-sticky">
 <div class="controls-card">
 <select id="selectModalidade" onchange="init()">
-<option value="INTEGRADO">ENSINO INTEGRADO</option>
-<option value="SUPERIOR">ENSINO SUPERIOR</option>
+<option value="INTEGRADO">CURSOS TÉCNICOS INTEGRADOS</option>
+<option value="SUPERIOR">CURSOS SUPERIORES</option>
 </select>
 
 <select id="selectSemana" onchange="renderizarTabela()"></select>
@@ -95,7 +95,7 @@ onkeyup="filtrarProfessor()">
 
 <footer class="ifro-footer">
 IFRO - Campus Cacoal<br>
-BR 364 Km 228 - Zona Rural<br>
+BR 364, Km 228, Lote 2-A - Zona Rural<br>
 ☎ (69) 3443-2445 | ✉ dape.cacoal@ifro.edu.br
 </footer>
 
@@ -235,7 +235,7 @@ html+=`<tr class="${isInt?'intervalo':''}"><td class="time-col">${r[1]}</td>`;
 turmasAtivas.forEach(t=>{
 const idx=dadosGlobais[0].indexOf(t);
 let val=(r[idx]||"").trim();
-let extra=val.includes("[+]")||val.includes("*")||val.includes("[R]");
+let extra=val.includes("[+]")||val.includes("*")||val.includes("[R]")||val.includes("INTERVALO");
 html+=`<td class="aula-cell ${getCursoInfo(t).cl} ${extra?'marcacao-extra':''}">${val}</td>`;
 });
 html+=`</tr>`;
