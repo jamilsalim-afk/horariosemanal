@@ -137,6 +137,19 @@ td, th { word-break: break-word; }
   padding:20px;
   text-align:center;
 }
+
+  /* 🔥 FIXAR PRIMEIRA COLUNA (HORÁRIOS) */
+.time-col {
+  position: sticky;
+  left: 0;
+  z-index: 2;
+  background: #f1f3f4; /* mantém cor original */
+}
+
+/* garante que o cabeçalho também fique acima */
+th.time-col {
+  z-index: 3;
+}
 </style>
 </head>
 
