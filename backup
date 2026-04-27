@@ -10,31 +10,82 @@
 <style>
 :root { --primary:#2e7d32; --bg:#f4f7f6; }
 
-body { font-family:'Segoe UI',sans-serif; background:var(--bg); margin:0; }
+body {
+  font-family:'Segoe UI',sans-serif;
+  background:var(--bg);
+  margin:0;
+}
 
 /* CABEÇALHO */
-.ifro-header { position:sticky; top:0; z-index:1100; background:white; border-bottom:4px solid #2e7d32; }
+.ifro-header {
+  position:sticky;
+  top:0;
+  z-index:1100;
+  background:white;
+  border-bottom:4px solid #2e7d32;
+}
 .ifro-header-content { text-align:center; padding:12px; }
-
 .ifro-linha1 { font-size:20px; font-weight:bold; color:#000; }
 .ifro-linha2 { font-size:18px; font-weight:bold; color:#000; }
 .ifro-linha3 { font-size:16px; color:#000; }
 .ifro-linha4 { font-size:17px; font-weight:bold; color:#000; }
 
 /* CONTROLES */
-.header-sticky { position:sticky; top:110px; z-index:1000; background:var(--bg); padding:10px; }
-.controls-card { background:white; padding:15px; border-radius:12px; display:flex; flex-wrap:wrap; gap:10px; justify-content:center; }
-
-select,.search-box,.btn-pdf { padding:12px; font-size:16px; border-radius:6px; }
-.search-box { width:260px; border:2px solid var(--primary); }
-.btn-pdf { background:#d32f2f; color:white; border:none; cursor:pointer; font-weight:bold; }
+.header-sticky {
+  position:sticky;
+  top:110px;
+  z-index:1000;
+  background:var(--bg);
+  padding:9px;
+}
+.controls-card {
+  background:white;
+  padding:15px;
+  border-radius:12px;
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  justify-content:center;
+}
+select,.search-box,.btn-pdf {
+  padding:12px;
+  font-size:14px;
+  border-radius:6px;
+}
+.search-box {
+  width:260px;
+  border:2px solid var(--primary);
+}
+.btn-pdf {
+  background:#d32f2f;
+  color:white;
+  border:none;
+  cursor:pointer;
+  font-weight:bold;
+}
 
 /* TABELA */
-.week-container { padding:15px; }
-.table-responsive { width:100%; overflow-x:auto; background:white; border-radius:8px; }
-
-table { min-width:1400px; width:100%; border-collapse:collapse; font-size:11px; table-layout:fixed; }
-th,td { border:1px solid #bbb; padding:6px; text-align:center; vertical-align:middle; }
+.week-container { padding:14px; }
+.table-responsive {
+  width:100%;
+  overflow-x:auto;
+  background:white;
+  border-radius:8px;
+}
+table {
+  min-width:1400px;
+  width:100%;
+  border-collapse:separate; /* 🔥 ESSENCIAL */
+  border-spacing:0;         /* mantém visual igual */
+  font-size:9px;
+  table-layout:fixed;
+}
+th,td {
+  border:1px solid #bbb;
+  padding:6px;
+  text-align:center;
+  vertical-align:middle;
+}
 
 /* 🔧 CORREÇÃO DE TEXTO */
 td, th { word-break: break-word; }
@@ -50,18 +101,64 @@ td, th { word-break: break-word; }
 .c-zoo { background:#fce4ec !important; }
 .c-agron { background:#f1f8e9 !important; }
 
-.day-divider { background:var(--primary); color:white; font-weight:bold; font-size:15px; }
-.time-col { font-weight:bold; width:85px; background:#f1f3f4; }
+.day-divider {
+  background:var(--primary);
+  color:white;
+  font-weight:bold;
+  font-size:15px;
+}
+
+.time-col {
+  font-weight:bold;
+  width:85px;
+  background:#f1f3f4;
+}
 
 .highlight { background:#fbc02d !important; }
 .opaco { opacity:0.1; }
 
-.intervalo,.marcacao-extra { background:#e0e0e0 !important; font-weight:bold; }
+.intervalo,.marcacao-extra {
+  background:#e0e0e0 !important;
+  font-weight:bold;
+}
 
-.feriado { font-size:40px; text-align:center; font-weight:bold; color:rgba(200,0,0,0.4); height:200px; }
+/* 🔥 ALTERAÇÃO: DOBRO DO TAMANHO */
+.feriado {
+  font-size:120px;
+  text-align:center;
+  font-weight:bold;
+  color:rgba(200,0,0,0.4);
+  height:200px;
+}
 
 /* RODAPÉ */
-.ifro-footer { background:#2e7d32; color:white; padding:20px; text-align:center; }
+.ifro-footer {
+  background:#2e7d32;
+  color:white;
+  padding:20px;
+  text-align:center;
+}
+
+  /* 🔥 FIXAR PRIMEIRA COLUNA (HORÁRIOS) */
+.time-col {
+  position: sticky;
+  left: 0;
+  z-index: 2;
+  background: #f1f3f4; /* mantém cor original */
+}
+
+/* garante que o cabeçalho também fique acima */
+th.time-col {
+  z-index: 3;
+}
+
+  /* 🔥 LINHAS VAZIAS MAIS COMPACTAS */
+tr.linha-vazia td {
+  padding: 2px !important;
+  font-size: 8px !important;
+  height: 10px !important;
+}
+  
 </style>
 </head>
 
@@ -86,8 +183,7 @@ td, th { word-break: break-word; }
 <select id="selectSemana" onchange="renderizarTabela()"></select>
 
 <input type="text" id="searchProf" class="search-box"
-placeholder="🔍 Buscar Professor..."
-onkeyup="filtrarProfessor()">
+placeholder="🔍 Buscar Professor..." onkeyup="filtrarProfessor()">
 
 <button class="btn-pdf" onclick="exportarPDF()">📄 Baixe o PDF da Semana</button>
 </div>
@@ -119,6 +215,39 @@ const FERIADOS=[
 
 function isFeriado(d){return FERIADOS.includes(d);}
 
+/* 🔥 NOVA FUNÇÃO (BUSCA COM HIGHLIGHT) */
+function filtrarProfessor(){
+  const termo = document.getElementById('searchProf').value.toUpperCase();
+  const tabela = document.getElementById('tabelaHorario');
+  const celulas = tabela.getElementsByTagName('td');
+
+  for(let i=0;i<celulas.length;i++){
+    const td = celulas[i];
+    const txt = td.innerText.toUpperCase();
+
+    /* 🔥 IGNORA COLUNA DE HORÁRIO E CABEÇALHO DO DIA */
+    if(
+      td.classList.contains('time-col') ||
+      td.parentElement.classList.contains('day-divider')
+    ){
+      td.classList.remove('opaco');
+      td.classList.remove('highlight');
+      continue;
+    }
+
+    if(termo && txt.includes(termo)){
+      td.classList.add('highlight');
+      td.classList.remove('opaco');
+    } else if(termo){
+      td.classList.remove('highlight');
+      td.classList.add('opaco');
+    } else {
+      td.classList.remove('highlight');
+      td.classList.remove('opaco');
+    }
+  }
+}
+
 function parseCSV(text){
 return text.split(/\r?\n/).map(l=>{
 let r=[],c='',q=false;
@@ -134,6 +263,10 @@ return r;
 }
 
 async function init(){
+
+/* 🔥 LIMPA A BUSCA AO TROCAR MODALIDADE */
+document.getElementById('searchProf').value="";
+
 const mod=document.getElementById('selectModalidade').value;
 const url=`https://docs.google.com/spreadsheets/d/${SHEETS[mod].id}/export?format=csv&gid=${SHEETS[mod].gid}`;
 const res=await fetch(url);
@@ -161,10 +294,25 @@ return new Date(pa[2],pa[1]-1,pa[0]) - new Date(pb[2],pb[1]-1,pb[0]);
 });
 }
 
+function getSemanaAtual(){
+  const hoje = new Date();
+
+  // calcula segunda-feira da semana atual
+  const dia = hoje.getDay(); // 0 = domingo
+  const diff = hoje.getDate() - dia + (dia === 0 ? -6 : 1);
+
+  const segunda = new Date(hoje.setDate(diff));
+
+  const d = String(segunda.getDate()).padStart(2,'0');
+  const m = String(segunda.getMonth()+1).padStart(2,'0');
+  const a = segunda.getFullYear();
+
+  return `${d}/${m}/${a}`;
+}
+  
 function processarDados(){
 semanasAgrupadas={};
 turmasDaPlanilha=dadosGlobais[0].slice(2).filter(t=>t);
-
 let ultima="";
 for(let i=1;i<dadosGlobais.length;i++){
 let r=[...dadosGlobais[i]];
@@ -183,9 +331,16 @@ semanasAgrupadas[seg].dias[r[0]].push(r);
 
 const sel=document.getElementById('selectSemana');
 sel.innerHTML="";
+const semanaAtual = getSemanaAtual();
+
 ordenarDatasBR(Object.keys(semanasAgrupadas)).forEach(s=>{
-sel.innerHTML+=`<option value="${s}">Semana de ${s}</option>`;
+  sel.innerHTML+=`<option value="${s}">Semana de ${s}</option>`;
 });
+
+/* 🔥 SELECIONA SEMANA ATUAL SE EXISTIR */
+if(semanasAgrupadas[semanaAtual]){
+  sel.value = semanaAtual;
+}
 
 renderizarTabela();
 }
@@ -233,13 +388,18 @@ html+=`</tr>`;
 
 dias[dia].forEach(r=>{
 const isInt=r[1].toUpperCase().includes("INTERVALO");
-html+=`<tr class="${isInt?'intervalo':''}"><td class="time-col">${r[1]}</td>`;
+const linhaVazia = r.slice(2).every(v => !v || v.trim()==="");
+
+html+=`<tr class="${isInt?'intervalo':''} ${linhaVazia?'linha-vazia':''}">
+<td class="time-col">${r[1]}</td>`;
+
 turmasAtivas.forEach(t=>{
 const idx=dadosGlobais[0].indexOf(t);
 let val=(r[idx]||"").trim();
 let extra=val.includes("[+]")||val.includes("*")||val.includes("[R]")||val.includes("INTERVALO");
 html+=`<td class="aula-cell ${getCursoInfo(t).cl} ${extra?'marcacao-extra':''}">${val}</td>`;
 });
+
 html+=`</tr>`;
 });
 
@@ -263,24 +423,30 @@ const turmasAtivas=document.getElementById('selectModalidade').value==="SUPERIOR
 const nomes=["DOMINGO","SEGUNDA-FEIRA","TERÇA-FEIRA","QUARTA-FEIRA","QUINTA-FEIRA","SEXTA-FEIRA","SÁBADO"];
 
 Object.keys(diasObj).forEach((dia,i)=>{
+
 if(i>0) pdf.addPage();
 
 const pageWidth=pdf.internal.pageSize.getWidth();
 
-pdf.setFontSize(10);
+pdf.setFontSize(9);
 pdf.text("INSTITUTO FEDERAL DE EDUCAÇÃO, CIÊNCIA E TECNOLOGIA DE RONDÔNIA - IFRO",pageWidth/2,8,{align:'center'});
 pdf.text("CAMPUS CACOAL - Departamento de Apoio ao Ensino - DAPE",pageWidth/2,12,{align:'center'});
 pdf.text(`SEMANA: ${sem}`,pageWidth/2,16,{align:'center'});
 
-/* DIA NO PDF */
+/* 🔥 DIA ESTILIZADO IGUAL HTML */
 const p=dia.split('/');
 const dObj=new Date(p[2],p[1]-1,p[0]);
-pdf.setFontSize(9);
-pdf.text(`${nomes[dObj.getDay()]} - ${dia}`, pageWidth/2, 20, {align:'center'});
+
+pdf.setFontSize(14);
+pdf.setTextColor(46,125,50);
+pdf.setFont(undefined,'bold');
+pdf.text(`${nomes[dObj.getDay()]} - ${dia}`, pageWidth/2, 24, {align:'center'});
+pdf.setTextColor(0,0,0);
+pdf.setFont(undefined,'normal');
 
 /* FERIADO */
 if(isFeriado(dia)){
-pdf.setFontSize(20);
+pdf.setFontSize(60);
 pdf.text("FERIADO", pageWidth/2, 100, {align:'center'});
 return;
 }
@@ -297,18 +463,33 @@ return line;
 pdf.autoTable({
 head:[['Horário',...turmasAtivas]],
 body:body,
-startY:24,
+startY:28,
 theme:'grid',
-headStyles:{ textColor:[0,0,0], fillColor:[255,255,255] },
+
+/* 🔥 CABEÇALHO VERDE */
+headStyles:{
+  textColor:[0,0,0],
+  fillColor:[46,125,50],
+  fontStyle:'bold'
+},
+  
 margin:{ top:22, left:2, right:2, bottom:2 },
 tableWidth:'auto',
-styles:{ fontSize:5, halign:'center', valign:'middle', overflow:'linebreak' },
+styles:{ fontSize:4, halign:'center', valign:'middle', overflow:'linebreak' },
 columnStyles:{ 0:{ cellWidth:18 } },
+
 didParseCell:(data)=>{
 if(data.column.index>0){
 data.cell.styles.fillColor=getCursoInfo(turmasAtivas[data.column.index-1]).rgb;
 }
-const txt = (data.cell.raw||"").toString().toUpperCase();
+const isLinhaVazia = data.row.raw.slice(1).every(v => !v || v.trim()==="");
+
+if(isLinhaVazia){
+  data.cell.styles.minCellHeight = 3;
+  data.cell.styles.fontSize = 4;
+}
+
+const txt=(data.cell.raw||"").toString().toUpperCase();
 if(txt.includes("INTERVALO")||txt.includes("[+]")||txt.includes("*")||txt.includes("[R]")){
 data.cell.styles.fillColor=[224,224,224];
 data.cell.styles.fontStyle='bold';
@@ -318,10 +499,11 @@ data.cell.styles.fontStyle='bold';
 
 pdf.setFontSize(8);
 pdf.text("IFRO - Campus Cacoal | BR 364, Km 228, Lote 2-A | (69) 3443-2445 | dape.cacoal@ifro.edu.br",pageWidth/2,205,{align:'center'});
+
 });
 
-const mod = document.getElementById('selectModalidade').value;
-const semFormatada = sem.replace(/\//g, '-');
+const mod=document.getElementById('selectModalidade').value;
+const semFormatada=sem.replace(/\//g,'-');
 
 pdf.save(`HORÁRIO ${mod} - ${semFormatada}.pdf`);
 }
