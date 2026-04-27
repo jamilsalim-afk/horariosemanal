@@ -9,9 +9,9 @@
 <style>
 :root { --primary:#2e7d32; --bg:#f4f7f6; }
 
-body { font-family:Segoe UI; background:var(--bg); margin:0; }
+body { margin:0; font-family:Segoe UI; background:var(--bg); }
 
-/* HEADER */
+/* HEADER FIXO */
 .ifro-header {
     position:sticky;
     top:0;
@@ -20,39 +20,62 @@ body { font-family:Segoe UI; background:var(--bg); margin:0; }
     border-bottom:4px solid var(--primary);
 }
 
+.header-content { text-align:center; padding:8px; }
+
+.tabs {
+    display:flex;
+    justify-content:center;
+    gap:10px;
+    padding:10px;
+}
+
+.tab-btn {
+    padding:12px 20px;
+    font-size:16px;
+    border:1px solid #ccc;
+    cursor:pointer;
+    background:white;
+    border-radius:6px;
+}
+
+.tab-btn.active {
+    border:2px solid var(--primary);
+    font-weight:bold;
+}
+
 /* CONTROLES FIXOS */
-.controls-fixed {
+.controls {
     position:sticky;
-    top:70px;
+    top:120px;
     z-index:999;
     background:var(--bg);
     padding:10px;
     display:flex;
-    gap:10px;
     justify-content:center;
+    gap:10px;
     flex-wrap:wrap;
 }
 
-/* BOTÕES GRANDES */
-.tab-btn, select, input {
+select, input, button {
     padding:10px;
     font-size:16px;
-    border-radius:6px;
 }
 
 /* TABELA */
+.container { padding:10px; }
+
 table {
     width:100%;
     border-collapse:collapse;
-    background:white;
     margin:15px 0;
+    background:white;
     table-layout:fixed;
 }
 
 th, td {
     border:1px solid #bbb;
     padding:4px;
-    font-size:11px; /* 🔥 menor */
+    font-size:11px;
     text-align:center;
     word-break:break-word;
 }
@@ -65,20 +88,16 @@ th, td {
 
 .time-col {
     background:#eee;
-    font-weight:bold;
     width:70px;
+    font-weight:bold;
 }
 
-.intervalo { background:#e0e0e0; font-weight:bold; }
-.opaco { opacity:0.2; }
-
 /* FOOTER */
-.ifro-footer {
+footer {
     background:#2e7d32;
     color:white;
     text-align:center;
     padding:20px;
-    font-size:12px;
 }
 </style>
 </head>
@@ -86,27 +105,26 @@ th, td {
 <body>
 
 <div class="ifro-header">
-    <div style="text-align:center;padding:10px">
+    <div class="header-content">
         <b style="color:#2e7d32">IFRO - Campus Cacoal</b><br>
         Horários 2026
     </div>
+
+    <div class="tabs">
+        <button class="tab-btn active" onclick="trocarAba('INTEGRADO',this)">INTEGRADO</button>
+        <button class="tab-btn" onclick="trocarAba('SUPERIOR',this)">SUPERIOR</button>
+    </div>
 </div>
 
-<div class="tabs-header" style="display:flex;gap:5px;padding:10px;">
-    <button class="tab-btn active" onclick="trocarAba('INTEGRADO',this)">INTEGRADO</button>
-    <button class="tab-btn" onclick="trocarAba('SUPERIOR',this)">SUPERIOR</button>
-</div>
-
-<div class="controls-fixed">
-    <select id="semana-INTEGRADO"></select>
-    <select id="semana-SUPERIOR" style="display:none"></select>
-    <input id="search" placeholder="Buscar professor">
+<div class="controls">
+    <select id="semana"></select>
+    <input id="busca" placeholder="Buscar professor">
     <button onclick="exportarPDF()">PDF</button>
 </div>
 
-<div id="tabela"></div>
+<div class="container" id="tabela"></div>
 
-<footer class="ifro-footer">
+<footer>
 IFRO - Campus Cacoal<br>
 BR 364 Km 228 | ☎ (69) 3443-2445
 </footer>
@@ -117,20 +135,8 @@ INTEGRADO:{id:'1j33kiPqwtzZNuvkBgYDaIiXZvVMY_J0qWAtRfYGdnD8',gid:'1357770092'},
 SUPERIOR:{id:'14ALXZgFIT68ee9ajuIdG63SpGVm0HyTjwp63-J6vRyg',gid:'669887707'}
 };
 
-let modalidade='INTEGRADO';
+let modo='INTEGRADO';
 let dados=[],turmas=[],semanas={};
-
-const CORES={
-AGROEC:'#e8f5e9',AGROPEC:'#e3f2fd',INFO:'#fff8e1',
-GEO:'#f3e5f5',MAT:'#e0f7fa',AGRONEG:'#efebe9',
-ZOO:'#fce4ec',AGRON:'#f1f8e9'
-};
-
-function cor(t){
-    t=t.toUpperCase();
-    for(let k in CORES) if(t.includes(k)) return CORES[k];
-    return "#fff";
-}
 
 function parseCSV(t){
     let l=[],r=[],c='',q=false;
@@ -146,18 +152,14 @@ function parseCSV(t){
 }
 
 function trocarAba(m,btn){
-    modalidade=m;
+    modo=m;
     document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
     btn.classList.add('active');
-
-    document.getElementById('semana-INTEGRADO').style.display = m==='INTEGRADO'?'block':'none';
-    document.getElementById('semana-SUPERIOR').style.display = m==='SUPERIOR'?'block':'none';
-
     carregar();
 }
 
 async function carregar(){
-    const url=`https://docs.google.com/spreadsheets/d/${SHEETS[modalidade].id}/export?format=csv&gid=${SHEETS[modalidade].gid}`;
+    const url=`https://docs.google.com/spreadsheets/d/${SHEETS[modo].id}/export?format=csv&gid=${SHEETS[modo].gid}`;
     const txt=await (await fetch(url)).text();
 
     dados=parseCSV(txt);
@@ -168,15 +170,16 @@ async function carregar(){
 
 function processar(){
     semanas={};
-    let dataAnt="";
+    let ultima="";
 
     dados.slice(1).forEach(r=>{
-        if(r[0]) dataAnt=r[0];
-        r[0]=dataAnt;
+        if(r[0]) ultima=r[0];
+        r[0]=ultima;
         if(!r[0]) return;
 
         const [d,m,a]=r[0].split('/');
         const dt=new Date(a,m-1,d);
+
         const seg=new Date(dt.setDate(dt.getDate()-dt.getDay()+1));
         const key=seg.toLocaleDateString('pt-BR');
 
@@ -184,7 +187,7 @@ function processar(){
         semanas[key].push(r);
     });
 
-    const sel=document.getElementById('semana-'+modalidade);
+    const sel=document.getElementById('semana');
     sel.innerHTML="";
     Object.keys(semanas).forEach(s=>sel.innerHTML+=`<option>${s}</option>`);
     sel.onchange=render;
@@ -193,53 +196,52 @@ function processar(){
 }
 
 function render(){
-    const sem=document.getElementById('semana-'+modalidade).value;
+    const sem=document.getElementById('semana').value;
     const linhas=semanas[sem];
-    const cont=document.getElementById('tabela');
 
-    // 🔥 filtrar turmas corretamente (coluna fixa)
-    let tAtivas=turmas.filter((t,i)=>{
+    // 🔥 FILTRO REAL DO SUPERIOR
+    let tAtivas = turmas.filter((t,i)=>{
         return linhas.some(r=>{
             let v=(r[i+2]||"").trim();
-            return v && v!=="-";
+            return v && v!=="-" && v!==""; // 🔥 robusto
         });
     });
 
-    if(modalidade==='INTEGRADO') tAtivas=turmas;
+    if(modo==='INTEGRADO') tAtivas=turmas;
 
-    const diasNome=["DOM","SEGUNDA-FEIRA","TERÇA-FEIRA","QUARTA-FEIRA","QUINTA-FEIRA","SEXTA-FEIRA","SÁBADO"];
-    const ordem=["SEGUNDA-FEIRA","TERÇA-FEIRA","QUARTA-FEIRA","QUINTA-FEIRA","SEXTA-FEIRA","SÁBADO"];
+    const dias=["SEGUNDA-FEIRA","TERÇA-FEIRA","QUARTA-FEIRA","QUINTA-FEIRA","SEXTA-FEIRA","SÁBADO"];
+    const nomes=["DOM","SEGUNDA-FEIRA","TERÇA-FEIRA","QUARTA-FEIRA","QUINTA-FEIRA","SEXTA-FEIRA","SÁBADO"];
 
-    let dias={};
+    let grupos={};
 
     linhas.forEach(r=>{
         const [d,m,a]=r[0].split('/');
         const dt=new Date(a,m-1,d);
-        const nome=diasNome[dt.getDay()];
+        const nome=nomes[dt.getDay()];
         if(dt.getDay()==0) return;
 
-        if(!dias[nome]) dias[nome]={data:r[0],linhas:[]};
-        dias[nome].linhas.push(r);
+        if(!grupos[nome]) grupos[nome]={data:r[0],linhas:[]};
+        grupos[nome].linhas.push(r);
     });
 
     let html="";
 
-    ordem.forEach(d=>{
-        if(!dias[d]) return;
+    dias.forEach(d=>{
+        if(!grupos[d]) return;
 
         html+=`<table>`;
-        html+=`<tr class="day-divider"><td colspan="${tAtivas.length+1}">${d} - ${dias[d].data}</td></tr>`;
+        html+=`<tr class="day-divider"><td colspan="${tAtivas.length+1}">${d} - ${grupos[d].data}</td></tr>`;
 
         html+=`<tr><th class="time-col">Horário</th>`;
-        tAtivas.forEach(t=>html+=`<th style="background:${cor(t)}">${t}</th>`);
+        tAtivas.forEach(t=>html+=`<th>${t}</th>`);
         html+=`</tr>`;
 
-        dias[d].linhas.forEach(r=>{
+        grupos[d].linhas.forEach(r=>{
             html+=`<tr>`;
             html+=`<td class="time-col">${r[1]}</td>`;
             tAtivas.forEach(t=>{
                 const idx=dados[0].indexOf(t);
-                html+=`<td style="background:${cor(t)}">${r[idx]||""}</td>`;
+                html+=`<td>${r[idx]||""}</td>`;
             });
             html+=`</tr>`;
         });
@@ -247,13 +249,27 @@ function render(){
         html+=`</table>`;
     });
 
-    cont.innerHTML=html;
+    document.getElementById('tabela').innerHTML=html;
 }
 
+/* PDF FUNCIONAL */
 function exportarPDF(){
     const { jsPDF } = window.jspdf;
     const pdf = new jsPDF('l');
-    pdf.text("Horário "+modalidade,10,10);
+
+    const tables = document.querySelectorAll("table");
+
+    tables.forEach((t,i)=>{
+        if(i>0) pdf.addPage();
+        pdf.text(t.rows[0].innerText,10,10);
+
+        let y=20;
+        [...t.rows].slice(1).forEach(r=>{
+            pdf.text(r.innerText.substring(0,120),10,y);
+            y+=5;
+        });
+    });
+
     pdf.save("horario.pdf");
 }
 
