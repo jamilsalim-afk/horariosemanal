@@ -219,6 +219,10 @@ placeholder="🔍 Buscar Professor..." onkeyup="filtrarProfessor()">
 </div>
 
 <div class="week-container">
+
+<!-- 🔥 BOTÕES NOVOS -->
+<div id="botoesRelatorio"></div>
+
 <div class="table-responsive" id="tabelaHorario"></div>
 </div>
 
@@ -496,6 +500,7 @@ regrasDestaque.forEach(regra => {
     });
 
     container.innerHTML = html;
+  criarBotoesDias();
 }
 
   const coresPDF = {
@@ -508,6 +513,86 @@ regrasDestaque.forEach(regra => {
     "marcacao-extra": [224, 224, 224]
 };
 
+function coletarVagasDoDia(dia) {
+  const sem = document.getElementById('selectSemana').value;
+  const dias = semanasAgrupadas[sem].dias;
+
+  const vagas = [];
+
+  if (!dias[dia]) return vagas;
+
+  dias[dia].forEach(r => {
+    const horario = r[1];
+
+    turmasDaPlanilha.forEach(turma => {
+      const idx = dadosGlobais[0].indexOf(turma);
+      const val = (r[idx] || "").toUpperCase();
+
+      if (
+        val.includes("RESERVA ENSINO") ||
+        val.includes("ESTUDOS INDIVIDUAIS")
+      ) {
+        vagas.push({
+          turma,
+          horario
+        });
+      }
+    });
+  });
+
+  return vagas;
+}
+
+function gerarRelatorioDia(dia) {
+  const vagas = coletarVagasDoDia(dia);
+
+  let texto = `Olá Professores, na data de hoje (${dia}), estamos com aulas vagas nas seguintes turmas:\n\n`;
+
+  if (vagas.length === 0) {
+    texto += "Não há aulas vagas no dia informado.";
+    return texto;
+  }
+
+  vagas.forEach(v => {
+    texto += `${v.turma} - ${v.horario}\n`;
+  });
+
+  return texto;
+}
+
+function copiarRelatorioDia(dia) {
+  const texto = gerarRelatorioDia(dia);
+
+  navigator.clipboard.writeText(texto).then(() => {
+    alert("Relatório copiado para área de transferência!");
+  });
+}
+
+function gerarRelatorioSemana() {
+  const sem = document.getElementById('selectSemana').value;
+  const dias = semanasAgrupadas[sem].dias;
+
+  let texto = `Olá Professores, segue relatório semanal de aulas vagas:\n\n`;
+
+  Object.keys(dias).forEach(dia => {
+    const vagas = coletarVagasDoDia(dia);
+
+    if (vagas.length > 0) {
+      texto += `📅 ${dia}\n`;
+
+      vagas.forEach(v => {
+        texto += `${v.turma} - ${v.horario}\n`;
+      });
+
+      texto += `\n`;
+    }
+  });
+
+  navigator.clipboard.writeText(texto).then(() => {
+    alert("Relatório semanal copiado!");
+  });
+}
+  
 function exportarPDF(){
 const { jsPDF } = window.jspdf;
 const pdf = new jsPDF('l','mm','a4');
@@ -692,6 +777,34 @@ const nomeArquivo = `HORÁRIO ${mod} - SEMANA DE ${sem}`;
 pdf.save(nomeArquivo);
 }
 
+function criarBotoesDias() {
+  const sem = document.getElementById('selectSemana').value;
+  const dias = semanasAgrupadas[sem].dias;
+
+  let html = `
+    <div style="padding:10px;display:flex;gap:10px;flex-wrap:wrap;">
+  `;
+
+  Object.keys(dias).forEach(dia => {
+    html += `
+      <button onclick="copiarRelatorioDia('${dia}')"
+        style="padding:10px;background:#2e7d32;color:white;border:none;border-radius:6px;cursor:pointer;">
+        📅 ${dia}
+      </button>
+    `;
+  });
+
+  html += `
+      <button onclick="gerarRelatorioSemana()"
+        style="padding:10px;background:#d32f2f;color:white;border:none;border-radius:6px;cursor:pointer;">
+        📊 Semana inteira
+      </button>
+    </div>
+  `;
+
+  document.getElementById("botoesRelatorio").innerHTML = html;
+}
+  
 window.onload=init;
 </script>
 
