@@ -9,49 +9,283 @@
     <style>
         :root { --primary: #2e7d32; --bg: #f4f7f6; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding: 0; }
-        
-        .header-sticky { position: sticky; top: 0; z-index: 1000; background: var(--bg); padding: 10px 15px; }
-        .controls-card { background: white; padding: 15px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; align-items: center; }
-        
-        select, .search-box, .btn-pdf { padding: 8px; border-radius: 6px; border: 1px solid #ddd; font-size: 13px; outline: none; }
-        .search-box { width: 220px; border: 2px solid var(--primary); }
-        .btn-pdf { background: #d32f2f; color: white; border: none; cursor: pointer; font-weight: bold; }
 
-        .week-container { padding: 15px; }
-        .table-responsive { width: 100%; overflow-x: auto; background: white; border-radius: 8px; margin-bottom: 30px; }
+        /* Cabeçalho */
+        .ifro-header {
+            position: sticky;
+            top: 0;
+            z-index: 1100;
+            background: white;
+            border-bottom: 4px solid #2e7d32; /* verde IF */
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
 
-        table { width: 100%; border-collapse: collapse; font-size: 10px; table-layout: fixed; }
-        th, td { border: 1px solid #bbb; padding: 6px; text-align: center; word-wrap: break-word; white-space: normal; overflow: hidden; }
-        
-        .c-agroec { background-color: #e8f5e9 !important; } .c-agropec { background-color: #e3f2fd !important; }
-        .c-info { background-color: #fff8e1 !important; } .c-geo { background-color: #f3e5f5 !important; }
-        .c-mat { background-color: #e0f7fa !important; } .c-agroneg { background-color: #efebe9 !important; }
-        .c-zoo { background-color: #fce4ec !important; } .c-agron { background-color: #f1f8e9 !important; }
+        .ifro-header-content {
+            text-align: center;
+            padding: 10px 15px;
+        }
 
-        .day-divider { background: var(--primary); color: white; font-weight: bold; font-size: 12px; }
-        .time-col { font-weight: bold; width: 85px; background: #f1f3f4; }
-        .highlight { background-color: #fbc02d !important; font-weight: bold; border: 2px solid #000; }
-        .opaco { opacity: 0.1; }
-        .intervalo { background: #f9f9f9; color: #aaa; font-style: italic; }
+        .ifro-linha1 {
+            font-size: 14px;
+            font-weight: bold;
+            color: #2e7d32;
+        }
+
+        .ifro-linha2 {
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        .ifro-linha3 {
+            font-size: 12px;
+            color: #555;
+        }
+
+        .ifro-linha4 {
+            margin-top: 5px;
+            font-size: 13px;
+            font-weight: bold;
+            color: #d32f2f; /* vermelho IF */
+        }
+
+        /* Rodapé */
+        .ifro-footer {
+            background: #2e7d32; /* verde IF */
+            color: white;
+            margin-top: 40px;
+            padding: 20px 10px;
+        }
+
+        .ifro-footer-content {
+            text-align: center;
+            max-width: 900px;
+            margin: auto;
+        }
+
+        .footer-linha1 {
+            font-weight: bold;
+            font-size: 13px;
+        }
+
+        .footer-linha2 {
+            font-size: 12px;
+            margin-top: 4px;
+        }
+
+        .footer-linha3 {
+            font-size: 12px;
+            margin-top: 4px;
+        }
+
+        .footer-linha4 {
+            font-size: 12px;
+            margin-top: 6px;
+            font-weight: bold;
+        }
+
+        /* Abas */
+        .tabs-header {
+            display: flex;
+            gap: 5px;
+            padding: 10px;
+        }
+
+        .tab-btn {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            background: white;
+            cursor: pointer;
+            border-radius: 6px;
+        }
+
+        .tab-btn.active {
+            border: 2px solid var(--primary);
+            font-weight: bold;
+        }
+
+        .aba {
+            display: none;
+        }
+
+        .aba.active {
+            display: block;
+        }
+
+        /* Controle fixo nas abas */
+        .controls-fixed {
+            position: sticky;
+            top: 80px; /* Ajuste conforme altura do cabeçalho */
+            z-index: 999;
+            background: var(--bg);
+            padding: 10px;
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        /* Estilo da tabela */
+        .table-responsive { 
+            width: 100%; 
+            overflow-x: auto; 
+            background: white; 
+            border-radius: 8px; 
+            margin-bottom: 30px; 
+        }
+
+        table { 
+            min-width: 900px; /* Forçar scroll horizontal */
+            width: 100%; 
+            border-collapse: collapse; 
+            font-size: 12px; 
+            table-layout: fixed; 
+        }
+
+        th, td { 
+            border: 1px solid #bbb; 
+            padding: 6px; 
+            text-align: center; 
+            word-wrap: break-word; 
+            white-space: normal; 
+            overflow: hidden; 
+        }
+
+        /* Estilos adicionais para o conteúdo */
+        .c-agroec { background-color: #e8f5e9 !important; }
+        .c-agropec { background-color: #e3f2fd !important; }
+        .c-info { background-color: #fff8e1 !important; }
+        .c-geo { background-color: #f3e5f5 !important; }
+        .c-mat { background-color: #e0f7fa !important; }
+        .c-agroneg { background-color: #efebe9 !important; }
+        .c-zoo { background-color: #fce4ec !important; }
+        .c-agron { background-color: #f1f8e9 !important; }
+
+        .day-divider { 
+            background: var(--primary); 
+            color: white; 
+            font-weight: bold; 
+            font-size: 12px; 
+        }
+
+        .time-col { 
+            font-weight: bold; 
+            width: 85px; 
+            background: #f1f3f4; 
+        }
+
+        .highlight { 
+            background-color: #fbc02d !important; 
+            font-weight: bold; 
+            border: 2px solid #000; 
+        }
+
+        .opaco { 
+            opacity: 0.1; 
+        }
+
+        .intervalo { 
+            background: #e0e0e0 !important; 
+            color: #555; 
+            font-style: italic; 
+            font-weight: bold; 
+        }
+
+        .marcacao-extra {
+            background: #e0e0e0 !important;
+            font-weight: bold;
+        }
+
+        /* Feriado */
+        .feriado-overlay {
+            position: relative;
+            margin-top: -200px;
+            height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            font-weight: bold;
+            color: rgba(200,0,0,0.3);
+            pointer-events: none;
+        }
+
+        .search-box {
+            width: 220px;
+            border: 2px solid var(--primary);
+        }
+
+        .btn-pdf { 
+            background: #d32f2f; 
+            color: white; 
+            border: none; 
+            cursor: pointer; 
+            font-weight: bold; 
+        }
     </style>
 </head>
 <body>
 
-<div class="header-sticky">
-    <div class="controls-card">
-        <select id="selectModalidade" onchange="init()">
-            <option value="INTEGRADO">ENSINO INTEGRADO</option>
-            <option value="SUPERIOR">ENSINO SUPERIOR</option>
-        </select>
-        <select id="selectSemana" onchange="renderizarTabela()"></select>
-        <input type="text" id="searchProf" class="search-box" placeholder="🔍 Buscar Professor..." onkeyup="filtrarProfessor()">
-        <button class="btn-pdf" onclick="exportarPDF()">📄 PDF Oficial</button>
+<!-- Cabeçalho -->
+<div class="ifro-header">
+    <div class="ifro-header-content">
+        <div class="ifro-linha1">
+            INSTITUTO FEDERAL DE EDUCAÇÃO, CIÊNCIA E TECNOLOGIA - IFRO
+        </div>
+        <div class="ifro-linha2">
+            CAMPUS CACOAL
+        </div>
+        <div class="ifro-linha3">
+            DEPARTAMENTO DE APOIO AO ENSINO
+        </div>
+        <div class="ifro-linha4">
+            HORÁRIOS SEMANAIS - CURSOS INTEGRADOS E SUPERIORES - ANO 2026
+        </div>
     </div>
 </div>
 
-<div class="week-container">
-    <div class="table-responsive" id="tabelaHorario"></div>
+<!-- Abas -->
+<div class="tabs-header">
+    <button class="tab-btn active" onclick="trocarAba('INTEGRADO', this)">INTEGRADO</button>
+    <button class="tab-btn" onclick="trocarAba('SUPERIOR', this)">SUPERIOR</button>
 </div>
+
+<!-- Aba INTEGRADO -->
+<div id="aba-INTEGRADO" class="aba active">
+    <div class="controls-fixed">
+        <select id="semana-INTEGRADO" onchange="renderizarTabela()"></select>
+        <input type="text" id="search-INTEGRADO" class="search-box" placeholder="🔍 Buscar Professor..." onkeyup="filtrarProfessor()">
+        <button class="btn-pdf" onclick="exportarPDF()">📄 PDF Oficial</button>
+    </div>
+    <div class="table-responsive" id="tabela-INTEGRADO"></div>
+</div>
+
+<!-- Aba SUPERIOR -->
+<div id="aba-SUPERIOR" class="aba">
+    <div class="controls-fixed">
+        <select id="semana-SUPERIOR" onchange="renderizarTabela()"></select>
+        <input type="text" id="search-SUPERIOR" class="search-box" placeholder="🔍 Buscar Professor..." onkeyup="filtrarProfessor()">
+        <button class="btn-pdf" onclick="exportarPDF()">📄 PDF Oficial</button>
+    </div>
+    <div class="table-responsive" id="tabela-SUPERIOR"></div>
+</div>
+
+<!-- Rodapé -->
+<footer class="ifro-footer">
+    <div class="ifro-footer-content">
+        <div class="footer-linha1">
+            INSTITUTO FEDERAL DE EDUCAÇÃO, CIÊNCIA E TECNOLOGIA DE RONDÔNIA - IFRO
+        </div>
+        <div class="footer-linha2">
+            Campus Cacoal
+        </div>
+        <div class="footer-linha3">
+            BR 364, Km 228 - Zona Rural, Cacoal - RO
+        </div>
+        <div class="footer-linha4">
+            ☎ (69) 3443-2445 | ✉ dape.cacoal@ifro.edu.br
+        </div>
+    </div>
+</footer>
 
 <script>
     const SHEETS = {
@@ -63,7 +297,6 @@
     let turmasDaPlanilha = [];
     let semanasAgrupadas = {};
 
-    // Função para tratar CSV respeitando vírgulas dentro de aspas
     function parseCSV(text) {
         const lines = text.split(/\r?\n/);
         return lines.map(line => {
@@ -71,7 +304,7 @@
             let current = '';
             let inQuotes = false;
             for (let i = 0; i < line.length; i++) {
-                char = line[i];
+                const char = line[i];
                 if (char === '"') {
                     inQuotes = !inQuotes;
                 } else if (char === ',' && !inQuotes) {
@@ -87,7 +320,7 @@
     }
 
     async function init() {
-        const mod = document.getElementById('selectModalidade').value;
+        const mod = 'INTEGRADO';  // Default to INTEGRADO first
         const url = `https://docs.google.com/spreadsheets/d/${SHEETS[mod].id}/export?format=csv&gid=${SHEETS[mod].gid}`;
         
         try {
@@ -98,17 +331,12 @@
         } catch (e) { alert("Erro ao carregar dados."); }
     }
 
-    function getCursoInfo(t) {
-        t = t.toUpperCase();
-        if (t.includes("AGROEC")) return { cl: "c-agroec", rgb: [232, 245, 233] };
-        if (t.includes("AGROPEC")) return { cl: "c-agropec", rgb: [227, 242, 253] };
-        if (t.includes("INFO")) return { cl: "c-info", rgb: [255, 248, 225] };
-        if (t.includes("GEO")) return { cl: "c-geo", rgb: [243, 229, 245] };
-        if (t.includes("MAT")) return { cl: "c-mat", rgb: [224, 247, 250] };
-        if (t.includes("AGRONEG")) return { cl: "c-agroneg", rgb: [239, 235, 233] };
-        if (t.includes("ZOO")) return { cl: "c-zoo", rgb: [252, 228, 236] };
-        if (t.includes("AGRON")) return { cl: "c-agron", rgb: [241, 248, 233] };
-        return { cl: "", rgb: [255, 255, 255] };
+    function trocarAba(modalidade, btn) {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        document.querySelectorAll('.aba').forEach(a => a.classList.remove('active'));
+        document.getElementById(`aba-${modalidade}`).classList.add('active');
+        init();  // Refresh data for selected modalidade
     }
 
     function processarDados() {
