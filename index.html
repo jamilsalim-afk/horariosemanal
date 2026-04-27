@@ -225,8 +225,11 @@ function filtrarProfessor(){
     const td = celulas[i];
     const txt = td.innerText.toUpperCase();
 
-    /* 🔥 IGNORA COLUNA DE HORÁRIO */
-    if(td.classList.contains('time-col')){
+    /* 🔥 IGNORA COLUNA DE HORÁRIO E CABEÇALHO DO DIA */
+    if(
+      td.classList.contains('time-col') ||
+      td.parentElement.classList.contains('day-divider')
+    ){
       td.classList.remove('opaco');
       td.classList.remove('highlight');
       continue;
