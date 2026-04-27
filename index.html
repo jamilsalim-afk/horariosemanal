@@ -498,6 +498,16 @@ regrasDestaque.forEach(regra => {
     container.innerHTML = html;
 }
 
+  const coresPDF = {
+    "reserva-ensino": [212, 237, 218], // verde claro
+    "pps": [11, 61, 145], // azul escuro (texto)
+    "estudos": [255, 229, 180], // laranja claro
+    "reuniao": [208, 235, 255], // azul claro
+    "caed": [255, 243, 205], // amarelo
+    "reposicao": [30, 126, 52], // verde escuro
+    "marcacao-extra": [224, 224, 224]
+};
+
 function exportarPDF(){
 const {jsPDF}=window.jspdf;
 const pdf=new jsPDF('l','mm','a4');
@@ -567,15 +577,35 @@ tableWidth:'auto',
 styles:{ fontSize:4, halign:'center', valign:'middle', overflow:'linebreak' },
 columnStyles:{ 0:{ cellWidth:18 } },
 
-didParseCell:(data)=>{
-if(data.column.index>0){
-data.cell.styles.fillColor=getCursoInfo(turmasAtivas[data.column.index-1]).rgb;
-}
-const isLinhaVazia = data.row.raw.slice(1).every(v => !v || v.trim()==="");
+didParseCell: (data) => {
 
-if(isLinhaVazia){
-  data.cell.styles.minCellHeight = 3;
-  data.cell.styles.fontSize = 4;
+    const colIndex = data.column.index;
+
+    if (colIndex > 0) {
+        const curso = getCursoInfo(turmasAtivas[colIndex - 1]);
+        data.cell.styles.fillColor = curso.rgb;
+    }
+
+    const txt = (data.cell.raw || "").toString();
+
+    const classe = detectarClasse(txt);
+
+    if (classe && coresPDF[classe]) {
+        data.cell.styles.fillColor = coresPDF[classe];
+
+        // texto branco em fundos escuros
+        if (classe === "pps" || classe === "reposicao") {
+            data.cell.styles.textColor = [255, 255, 255];
+            data.cell.styles.fontStyle = "bold";
+        }
+    }
+
+    const isLinhaVazia = data.row.raw.slice(1).every(v => !v || v.trim() === "");
+
+    if (isLinhaVazia) {
+        data.cell.styles.minCellHeight = 3;
+        data.cell.styles.fontSize = 4;
+    }
 }
 
 const txt=(data.cell.raw||"").toString().toUpperCase();
@@ -586,6 +616,35 @@ data.cell.styles.fontStyle='bold';
 }
 });
 
+const regrasDestaque = [
+    { match: v => v.includes("RESERVA ENSINO"), classe: "reserva-ensino" },
+    { match: v => v.includes("PPS/ATENDIMENTO"), classe: "pps" },
+    { match: v => v.includes("ESTUDOS INDIVIDUAIS"), classe: "estudos" },
+    { match: v => v.includes("REUNIAO DE SERVIDORES"), classe: "reuniao" },
+    { match: v => v.includes("CAED") || v.includes("PRE-CONSELHO"), classe: "caed" },
+    { match: v => v.includes("_REP -"), classe: "reposicao" }
+];
+
+function detectarClasse(valor){
+    let valNorm = normalizarTexto(valor);
+
+    for (let regra of regrasDestaque) {
+        if (regra.match(valNorm)) {
+            return regra.classe;
+        }
+    }
+
+    if (
+        valNorm.includes("[+]") ||
+        valNorm.includes("*") ||
+        valNorm.includes("[R]") ||
+        valNorm.includes("INTERVALO")
+    ) {
+        return "marcacao-extra";
+    }
+
+    return null;
+}
 pdf.setFontSize(8);
 pdf.text("IFRO - Campus Cacoal | BR 364, Km 228, Lote 2-A | (69) 3443-2445 | dape.cacoal@ifro.edu.br",pageWidth/2,205,{align:'center'});
 
