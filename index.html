@@ -78,10 +78,34 @@ let dados=[];
 let turmas=[];
 let semanas={};
 
-// CSV robusto
+// 🎨 CORES DOS CURSOS (como você queria)
+const CORES = {
+AGROEC:'#e8f5e9',
+AGROPEC:'#e3f2fd',
+INFO:'#fff8e1',
+GEO:'#f3e5f5',
+MAT:'#e0f7fa',
+AGRONEG:'#efebe9',
+ZOO:'#fce4ec',
+AGRON:'#f1f8e9'
+};
+
+function getCor(nome){
+    nome = nome.toUpperCase();
+    if(nome.includes("AGROEC")) return CORES.AGROEC;
+    if(nome.includes("AGROPEC")) return CORES.AGROPEC;
+    if(nome.includes("INFO")) return CORES.INFO;
+    if(nome.includes("GEO")) return CORES.GEO;
+    if(nome.includes("MAT")) return CORES.MAT;
+    if(nome.includes("AGRONEG")) return CORES.AGRONEG;
+    if(nome.includes("ZOO")) return CORES.ZOO;
+    if(nome.includes("AGRON")) return CORES.AGRON;
+    return "white";
+}
+
+// CSV correto
 function parseCSV(text){
     let linhas=[],linha=[],campo='',aspas=false;
-
     for(let c of text){
         if(c=='"') aspas=!aspas;
         else if(c==',' && !aspas){ linha.push(campo); campo=''; }
@@ -135,9 +159,14 @@ function processar(){
     render();
 }
 
-// remove turmas vazias
+// 🔥 remove turmas vazias (CORRETO AGORA)
 function turmasAtivas(linhas){
-    return turmas.filter((t,i)=>linhas.some(r=>r[i+2] && r[i+2]!="-"));
+    return turmas.filter((t,i)=>{
+        return linhas.some(r=>{
+            const val = (r[i+2]||"").trim();
+            return val && val !== "-" && val !== "";
+        });
+    });
 }
 
 function render(){
@@ -148,28 +177,31 @@ function render(){
 
     const linhas=semanas[sem];
 
-    // agrupar por dia
+    // agrupar dias
+    const diasOrdem = ["SEGUNDA","TERÇA","QUARTA","QUINTA","SEXTA","SÁBADO"];
     const dias={};
 
     linhas.forEach(r=>{
-        const d=r[0];
-        const p=d.split('/');
-        const data=new Date(p[2],p[1]-1,p[0]);
-        if(data.getDay()==0) return;
+        const p=r[0].split('/');
+        const d=new Date(p[2],p[1]-1,p[0]);
+        const diaNome = ["DOM","SEGUNDA","TERÇA","QUARTA","QUINTA","SEXTA","SÁBADO"][d.getDay()];
+        if(d.getDay()==0) return;
 
-        if(!dias[d]) dias[d]=[];
-        dias[d].push(r);
+        if(!dias[diaNome]) dias[diaNome]=[];
+        dias[diaNome].push(r);
     });
 
     const tAtivas = modalidadeAtual==='SUPERIOR' ? turmasAtivas(linhas) : turmas;
 
     let html="";
 
-    Object.keys(dias).forEach(dia=>{
+    diasOrdem.forEach(dia=>{
+        if(!dias[dia]) return;
+
         html+=`<table>`;
         html+=`<tr class="day-divider"><td colspan="${tAtivas.length+1}">${dia}</td></tr>`;
         html+=`<tr><th>Horário</th>`;
-        tAtivas.forEach(t=>html+=`<th>${t}</th>`);
+        tAtivas.forEach(t=>html+=`<th style="background:${getCor(t)}">${t}</th>`);
         html+=`</tr>`;
 
         dias[dia].forEach(r=>{
@@ -180,7 +212,8 @@ function render(){
 
             tAtivas.forEach(t=>{
                 const idx=dados[0].indexOf(t);
-                html+=`<td>${r[idx]||""}</td>`;
+                const val=r[idx]||"";
+                html+=`<td style="background:${getCor(t)}">${val}</td>`;
             });
 
             html+=`</tr>`;
@@ -190,7 +223,6 @@ function render(){
     });
 
     cont.innerHTML=html;
-
     filtrar();
 }
 
