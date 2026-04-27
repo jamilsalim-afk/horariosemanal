@@ -8,193 +8,104 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
 
 <style>
-:root { --primary: #2e7d32; --bg: #f4f7f6; }
+:root { --primary:#2e7d32; --bg:#f4f7f6; }
 
-body {
-    font-family: 'Segoe UI', sans-serif;
-    background: var(--bg);
-    margin: 0;
-}
+body { font-family:'Segoe UI',sans-serif; background:var(--bg); margin:0; }
 
 /* CABEÇALHO */
-.ifro-header {
-    position: sticky;
-    top: 0;
-    z-index: 1100;
-    background: white;
-    border-bottom: 4px solid #2e7d32;
-}
+.ifro-header { position:sticky; top:0; z-index:1100; background:white; border-bottom:4px solid #2e7d32; }
+.ifro-header-content { text-align:center; padding:12px; }
 
-.ifro-header-content {
-    text-align: center;
-    padding: 12px;
-}
-
-.ifro-linha1 { font-size: 20px; font-weight: bold; color: #000; }
-.ifro-linha2 { font-size: 18px; font-weight: bold; color: #000; }
-.ifro-linha3 { font-size: 16px; color: #000; }
-.ifro-linha4 { font-size: 17px; font-weight: bold; color: #000; }
+.ifro-linha1 { font-size:20px; font-weight:bold; color:#000; }
+.ifro-linha2 { font-size:18px; font-weight:bold; color:#000; }
+.ifro-linha3 { font-size:16px; color:#000; }
+.ifro-linha4 { font-size:17px; font-weight:bold; color:#000; }
 
 /* CONTROLES */
-.header-sticky {
-    position: sticky;
-    top: 110px;
-    z-index: 1000;
-    background: var(--bg);
-    padding: 10px;
-}
+.header-sticky { position:sticky; top:110px; z-index:1000; background:var(--bg); padding:10px; }
+.controls-card { background:white; padding:15px; border-radius:12px; display:flex; flex-wrap:wrap; gap:10px; justify-content:center; }
 
-.controls-card {
-    background: white;
-    padding: 15px;
-    border-radius: 12px;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    justify-content: center;
-}
-
-select, .search-box, .btn-pdf {
-    padding: 12px;
-    font-size: 16px;
-    border-radius: 6px;
-}
-
-.search-box {
-    width: 260px;
-    border: 2px solid var(--primary);
-}
-
-.btn-pdf {
-    background: #d32f2f;
-    color: white;
-    border: none;
-    cursor: pointer;
-    font-weight: bold;
-}
+select,.search-box,.btn-pdf { padding:12px; font-size:16px; border-radius:6px; }
+.search-box { width:260px; border:2px solid var(--primary); }
+.btn-pdf { background:#d32f2f; color:white; border:none; cursor:pointer; font-weight:bold; }
 
 /* TABELA */
-.week-container { padding: 15px; }
+.week-container { padding:15px; }
+.table-responsive { width:100%; overflow-x:auto; background:white; border-radius:8px; }
 
-.table-responsive {
-    width: 100%;
-    overflow-x: auto;
-    background: white;
-    border-radius: 8px;
-}
+table { min-width:1400px; width:100%; border-collapse:collapse; font-size:11px; table-layout:fixed; }
+th,td { border:1px solid #bbb; padding:6px; text-align:center; vertical-align:middle; }
 
-table {
-    min-width: 1400px;
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 11px; /* reduzido */
-    table-layout: fixed;
-}
+/* CORES */
+.c-agroec { background:#e8f5e9 !important; }
+.c-agropec { background:#e3f2fd !important; }
+.c-info { background:#fff8e1 !important; }
+.c-geo { background:#f3e5f5 !important; }
+.c-mat { background:#e0f7fa !important; }
+.c-agroneg { background:#efebe9 !important; }
+.c-zoo { background:#fce4ec !important; }
+.c-agron { background:#f1f8e9 !important; }
 
-th, td {
-    border: 1px solid #bbb;
-    padding: 6px;
-    text-align: center;
-    word-wrap: break-word;
-}
+.day-divider { background:var(--primary); color:white; font-weight:bold; font-size:15px; }
+.time-col { font-weight:bold; width:85px; background:#f1f3f4; }
 
-/* CORES ORIGINAIS */
-.c-agroec { background-color: #e8f5e9 !important; }
-.c-agropec { background-color: #e3f2fd !important; }
-.c-info { background-color: #fff8e1 !important; }
-.c-geo { background-color: #f3e5f5 !important; }
-.c-mat { background-color: #e0f7fa !important; }
-.c-agroneg { background-color: #efebe9 !important; }
-.c-zoo { background-color: #fce4ec !important; }
-.c-agron { background-color: #f1f8e9 !important; }
+.highlight { background:#fbc02d !important; }
+.opaco { opacity:0.1; }
 
-.day-divider {
-    background: var(--primary);
-    color: white;
-    font-weight: bold;
-    font-size: 13px; /* aumentado */
-}
+.intervalo,.marcacao-extra { background:#e0e0e0 !important; font-weight:bold; }
 
-.time-col {
-    font-weight: bold;
-    width: 85px;
-    background: #f1f3f4;
-}
-
-/* DESTAQUES */
-.highlight { background-color: #fbc02d !important; }
-.opaco { opacity: 0.1; }
-
-.intervalo,
-.marcacao-extra {
-    background: #e0e0e0 !important;
-    font-weight: bold;
-}
-
-/* FERIADO */
-.feriado {
-    font-size: 40px;
-    text-align: center;
-    font-weight: bold;
-    color: rgba(200,0,0,0.4);
-    height: 200px;
-}
+.feriado { font-size:40px; text-align:center; font-weight:bold; color:rgba(200,0,0,0.4); height:200px; }
 
 /* RODAPÉ */
-.ifro-footer {
-    background: #2e7d32;
-    color: white;
-    padding: 20px;
-    text-align: center;
-}
+.ifro-footer { background:#2e7d32; color:white; padding:20px; text-align:center; }
 </style>
 </head>
 
 <body>
 
 <div class="ifro-header">
-    <div class="ifro-header-content">
-        <div class="ifro-linha1">INSTITUTO FEDERAL DE RONDÔNIA</div>
-        <div class="ifro-linha2">CAMPUS CACOAL</div>
-        <div class="ifro-linha3">DEPARTAMENTO DE APOIO AO ENSINO</div>
-        <div class="ifro-linha4">HORÁRIOS SEMANAIS 2026</div>
-    </div>
+<div class="ifro-header-content">
+<div class="ifro-linha1">INSTITUTO FEDERAL DE RONDÔNIA</div>
+<div class="ifro-linha2">CAMPUS CACOAL</div>
+<div class="ifro-linha3">DEPARTAMENTO DE APOIO AO ENSINO</div>
+<div class="ifro-linha4">HORÁRIOS SEMANAIS 2026</div>
+</div>
 </div>
 
 <div class="header-sticky">
-    <div class="controls-card">
-        <select id="selectModalidade" onchange="init()">
-            <option value="INTEGRADO">ENSINO INTEGRADO</option>
-            <option value="SUPERIOR">ENSINO SUPERIOR</option>
-        </select>
+<div class="controls-card">
+<select id="selectModalidade" onchange="init()">
+<option value="INTEGRADO">ENSINO INTEGRADO</option>
+<option value="SUPERIOR">ENSINO SUPERIOR</option>
+</select>
 
-        <select id="selectSemana" onchange="renderizarTabela()"></select>
+<select id="selectSemana" onchange="renderizarTabela()"></select>
 
-        <input type="text" id="searchProf" class="search-box"
-               placeholder="🔍 Buscar Professor..."
-               onkeyup="filtrarProfessor()">
+<input type="text" id="searchProf" class="search-box"
+placeholder="🔍 Buscar Professor..."
+onkeyup="filtrarProfessor()">
 
-        <button class="btn-pdf" onclick="exportarPDF()">📄 PDF Oficial</button>
-    </div>
+<button class="btn-pdf" onclick="exportarPDF()">📄 PDF Oficial</button>
+</div>
 </div>
 
 <div class="week-container">
-    <div class="table-responsive" id="tabelaHorario"></div>
+<div class="table-responsive" id="tabelaHorario"></div>
 </div>
 
 <footer class="ifro-footer">
-    IFRO - Campus Cacoal<br>
-    BR 364 Km 228 - Zona Rural<br>
-    ☎ (69) 3443-2445 | ✉ dape.cacoal@ifro.edu.br
+IFRO - Campus Cacoal<br>
+BR 364 Km 228 - Zona Rural<br>
+☎ (69) 3443-2445 | ✉ dape.cacoal@ifro.edu.br
 </footer>
 
 <script>
-const SHEETS = {
+const SHEETS={
 INTEGRADO:{id:'1j33kiPqwtzZNuvkBgYDaIiXZvVMY_J0qWAtRfYGdnD8',gid:'1357770092'},
 SUPERIOR:{id:'14ALXZgFIT68ee9ajuIdG63SpGVm0HyTjwp63-J6vRyg',gid:'669887707'}
 };
 
-let dadosGlobais=[], turmasDaPlanilha=[], semanasAgrupadas={};
+let dadosGlobais=[],turmasDaPlanilha=[],semanasAgrupadas={};
 
 const FERIADOS=[
 "01/01/2026","21/04/2026","01/05/2026",
@@ -239,6 +150,14 @@ if(t.includes("AGRON")) return {cl:"c-agron",rgb:[241,248,233]};
 return {cl:"",rgb:[255,255,255]};
 }
 
+/* ORDENAÇÃO CORRETA */
+function ordenarDatasBR(arr){
+return arr.sort((a,b)=>{
+const pa=a.split('/'),pb=b.split('/');
+return new Date(pa[2],pa[1]-1,pa[0]) - new Date(pb[2],pb[1]-1,pb[0]);
+});
+}
+
 function processarDados(){
 semanasAgrupadas={};
 turmasDaPlanilha=dadosGlobais[0].slice(2).filter(t=>t);
@@ -259,9 +178,10 @@ if(!semanasAgrupadas[seg].dias[r[0]]) semanasAgrupadas[seg].dias[r[0]]=[];
 semanasAgrupadas[seg].dias[r[0]].push(r);
 }
 
+/* ordenação correta */
 const sel=document.getElementById('selectSemana');
 sel.innerHTML="";
-Object.keys(semanasAgrupadas).sort().forEach(s=>{
+ordenarDatasBR(Object.keys(semanasAgrupadas)).forEach(s=>{
 sel.innerHTML+=`<option value="${s}">Semana de ${s}</option>`;
 });
 
@@ -316,7 +236,7 @@ turmasAtivas.forEach(t=>{
 const idx=dadosGlobais[0].indexOf(t);
 let val=(r[idx]||"").trim();
 let extra=val.includes("[+]")||val.includes("*")||val.includes("[R]");
-html+=`<td class="aula-cell ${extra?'marcacao-extra':''}">${val}</td>`;
+html+=`<td class="aula-cell ${getCursoInfo(t).cl} ${extra?'marcacao-extra':''}">${val}</td>`;
 });
 html+=`</tr>`;
 });
@@ -338,6 +258,7 @@ else c.classList.add('opaco');
 });
 }
 
+/* PDF COMPLETO */
 function exportarPDF(){
 const {jsPDF}=window.jspdf;
 const pdf=new jsPDF('l','mm','a4');
@@ -352,6 +273,13 @@ const turmasAtivas=document.getElementById('selectModalidade').value==="SUPERIOR
 Object.keys(diasObj).forEach((dia,i)=>{
 if(i>0) pdf.addPage();
 
+const pageWidth=pdf.internal.pageSize.getWidth();
+
+pdf.setFontSize(10);
+pdf.text("INSTITUTO FEDERAL DE RONDÔNIA",pageWidth/2,8,{align:'center'});
+pdf.text("CAMPUS CACOAL - DAPE",pageWidth/2,12,{align:'center'});
+pdf.text(`SEMANA: ${sem}`,pageWidth/2,16,{align:'center'});
+
 const body=diasObj[dia].map(r=>{
 let line=[r[1]];
 turmasAtivas.forEach(t=>{
@@ -364,14 +292,24 @@ return line;
 pdf.autoTable({
 head:[['Horário',...turmasAtivas]],
 body:body,
-startY:20,
+startY:22,
 theme:'grid',
-styles:{fontSize:5},
-tableWidth:'auto'
-});
+styles:{fontSize:6,halign:'center',valign:'middle'},
+didParseCell:(data)=>{
+if(data.column.index>0){
+data.cell.styles.fillColor=getCursoInfo(turmasAtivas[data.column.index-1]).rgb;
+}
+}
 });
 
-pdf.save("horario.pdf");
+pdf.setFontSize(8);
+pdf.text("IFRO - Campus Cacoal | (69) 3443-2445",pageWidth/2,200,{align:'center'});
+});
+
+const mod = document.getElementById('selectModalidade').value;
+const semFormatada = sem.replace(/\//g, '-');
+
+pdf.save(`HORÁRIO ${mod} - ${semFormatada}.pdf`);
 }
 
 window.onload=init;
