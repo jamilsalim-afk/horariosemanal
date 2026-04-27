@@ -464,15 +464,14 @@ function renderizarTabela(){
 
                 let classesExtras = [];
 
-                // 🔥 aplicar regras novas
-                const valUpper = val.toUpperCase();
+const valNorm = normalizarTexto(val);
 
-                regrasDestaque.forEach(regra => {
-                    if (regra.match(valUpper)) {
-                        classesExtras.push(regra.classe);
-                    }
-                });
-
+regrasDestaque.forEach(regra => {
+    if (regra.match(valNorm)) {
+        classesExtras.push(regra.classe);
+    }
+});
+              
                 // 🔥 manter regras antigas
                 if (
                     val.includes("[+]") ||
