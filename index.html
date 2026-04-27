@@ -473,14 +473,14 @@ regrasDestaque.forEach(regra => {
 });
               
                 // 🔥 manter regras antigas
-                if (
-                    val.includes("[+]") ||
-                    val.includes("*") ||
-                    val.includes("[R]") ||
-                    valUpper.includes("INTERVALO")
-                ) {
-                    classesExtras.push("marcacao-extra");
-                }
+               if (
+    val.includes("[+]") ||
+    val.includes("*") ||
+    val.includes("[R]") ||
+    valNorm.includes("INTERVALO")
+) {
+    classesExtras.push("marcacao-extra");
+}
 
                 html += `<td class="aula-cell ${getCursoInfo(t).cl} ${classesExtras.join(" ")}">
                             ${val}
