@@ -244,6 +244,10 @@ return r;
 }
 
 async function init(){
+
+/* 🔥 LIMPA A BUSCA AO TROCAR MODALIDADE */
+document.getElementById('searchProf').value="";
+
 const mod=document.getElementById('selectModalidade').value;
 const url=`https://docs.google.com/spreadsheets/d/${SHEETS[mod].id}/export?format=csv&gid=${SHEETS[mod].gid}`;
 const res=await fetch(url);
