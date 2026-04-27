@@ -214,17 +214,25 @@ function filtrarProfessor(){
   const celulas = tabela.getElementsByTagName('td');
 
   for(let i=0;i<celulas.length;i++){
-    const txt = celulas[i].innerText.toUpperCase();
+    const td = celulas[i];
+    const txt = td.innerText.toUpperCase();
+
+    /* 🔥 IGNORA COLUNA DE HORÁRIO */
+    if(td.classList.contains('time-col')){
+      td.classList.remove('opaco');
+      td.classList.remove('highlight');
+      continue;
+    }
 
     if(termo && txt.includes(termo)){
-      celulas[i].classList.add('highlight');
-      celulas[i].classList.remove('opaco');
+      td.classList.add('highlight');
+      td.classList.remove('opaco');
     } else if(termo){
-      celulas[i].classList.remove('highlight');
-      celulas[i].classList.add('opaco');
+      td.classList.remove('highlight');
+      td.classList.add('opaco');
     } else {
-      celulas[i].classList.remove('highlight');
-      celulas[i].classList.remove('opaco');
+      td.classList.remove('highlight');
+      td.classList.remove('opaco');
     }
   }
 }
