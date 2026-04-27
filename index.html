@@ -58,7 +58,8 @@ td, th { word-break: break-word; }
 
 .intervalo,.marcacao-extra { background:#e0e0e0 !important; font-weight:bold; }
 
-.feriado { font-size:40px; text-align:center; font-weight:bold; color:rgba(200,0,0,0.4); height:200px; }
+/* 🔥 ALTERAÇÃO */
+.feriado { font-size:80px; text-align:center; font-weight:bold; color:rgba(200,0,0,0.4); height:200px; }
 
 /* RODAPÉ */
 .ifro-footer { background:#2e7d32; color:white; padding:20px; text-align:center; }
@@ -112,12 +113,36 @@ SUPERIOR:{id:'14ALXZgFIT68ee9ajuIdG63SpGVm0HyTjwp63-J6vRyg',gid:'669887707'}
 let dadosGlobais=[],turmasDaPlanilha=[],semanasAgrupadas={};
 
 const FERIADOS=[
-"01/01/2026","20/04/2026","21/04/2026","01/05/2026",
-"07/09/2026","12/10/2026","02/11/2026",
+"01/01/2026","16/02/2026","17/02/2026","18/02/2026","03/04/2026","20/04/2026","21/04/2026","01/05/2026",
+"04/06/2026","05/06/2026","07/09/2026","12/10/2026","02/11/2026",
 "15/11/2026","25/12/2026"
 ];
 
 function isFeriado(d){return FERIADOS.includes(d);}
+
+/* 🔍 NOVA FUNÇÃO */
+function filtrarProfessor(){
+const termo=document.getElementById('searchProf').value.toLowerCase();
+const cells=document.querySelectorAll('.aula-cell');
+
+cells.forEach(c=>{
+c.classList.remove('highlight','opaco');
+});
+
+if(!termo){
+cells.forEach(c=>c.classList.remove('opaco'));
+return;
+}
+
+cells.forEach(c=>{
+const txt=c.textContent.toLowerCase();
+if(txt.includes(termo)){
+c.classList.add('highlight');
+}else{
+c.classList.add('opaco');
+}
+});
+}
 
 function parseCSV(text){
 return text.split(/\r?\n/).map(l=>{
@@ -272,15 +297,20 @@ pdf.text("INSTITUTO FEDERAL DE EDUCAÇÃO, CIÊNCIA E TECNOLOGIA DE RONDÔNIA - 
 pdf.text("CAMPUS CACOAL - Departamento de Apoio ao Ensino - DAPE",pageWidth/2,12,{align:'center'});
 pdf.text(`SEMANA: ${sem}`,pageWidth/2,16,{align:'center'});
 
-/* DIA NO PDF */
+/* 🔥 CABEÇALHO ESTILIZADO */
 const p=dia.split('/');
 const dObj=new Date(p[2],p[1]-1,p[0]);
-pdf.setFontSize(9);
-pdf.text(`${nomes[dObj.getDay()]} - ${dia}`, pageWidth/2, 20, {align:'center'});
+
+pdf.setFillColor(46,125,50);
+pdf.rect(0,18,pageWidth,8,'F');
+pdf.setTextColor(255,255,255);
+pdf.setFontSize(11);
+pdf.text(`${nomes[dObj.getDay()]} - ${dia}`, pageWidth/2, 23, {align:'center'});
+pdf.setTextColor(0,0,0});
 
 /* FERIADO */
 if(isFeriado(dia)){
-pdf.setFontSize(20);
+pdf.setFontSize(40);
 pdf.text("FERIADO", pageWidth/2, 100, {align:'center'});
 return;
 }
@@ -297,7 +327,7 @@ return line;
 pdf.autoTable({
 head:[['Horário',...turmasAtivas]],
 body:body,
-startY:24,
+startY:26,
 theme:'grid',
 headStyles:{ textColor:[0,0,0], fillColor:[255,255,255] },
 margin:{ top:22, left:2, right:2, bottom:2 },
