@@ -159,7 +159,7 @@ tr.linha-vazia td {
   height: 10px !important;
 }
 
-  .reserva-ensino {
+ .reserva-ensino {
     background-color: #d4edda; /* verde claro */
 }
 
@@ -240,6 +240,16 @@ const FERIADOS=[
 "15/11/2026","25/12/2026"
 ];
 
+function normalizarTexto(txt){
+    return (txt || "")
+        .toString()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "") // remove acentos
+        .replace(/\s+/g, " ") // espaços duplos
+        .trim()
+        .toUpperCase();
+}
+  
 function isFeriado(d){return FERIADOS.includes(d);}
 
 /* 🔥 NOVA FUNÇÃO (BUSCA COM HIGHLIGHT) */
