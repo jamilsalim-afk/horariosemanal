@@ -373,15 +373,6 @@
         renderizarTabela();
     }
 
-    function getTurmasAtivasNaSemana(diasDaSemana) {
-        return turmasDaPlanilha.filter(tNome => {
-            const idx = dadosGlobais[0].indexOf(tNome);
-            return Object.values(diasDaSemana).some(diaArray => 
-                diaArray.some(row => row[idx] && row[idx] !== "-" && !row[1].toUpperCase().includes("INTERVALO"))
-            );
-        });
-    }
-
     function renderizarTabela() {
         const sem = document.getElementById('selectSemana').value;
         if (!semanasAgrupadas[sem]) return;
@@ -415,19 +406,6 @@
         });
         container.innerHTML = html;
         filtrarProfessor();
-    }
-
-    function filtrarProfessor() {
-        const termo = document.getElementById('searchProf').value.toUpperCase();
-        const cells = document.getElementsByClassName('aula-cell');
-        for (let i = 0; i < cells.length; i++) {
-            const c = cells[i];
-            c.classList.remove('highlight', 'opaco');
-            if (termo !== "" && c.innerText !== "-") {
-                if (c.innerText.toUpperCase().indexOf(termo) > -1) c.classList.add('highlight');
-                else c.classList.add('opaco');
-            }
-        }
     }
 
     function exportarPDF() {
