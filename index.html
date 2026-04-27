@@ -546,7 +546,7 @@ function coletarVagasDoDia(dia) {
 function gerarRelatorioDia(dia) {
   const vagas = coletarVagasDoDia(dia);
 
-  let texto = `Olá Professores, na data de hoje (${dia}), estamos com aulas vagas nas seguintes turmas:\n\n`;
+  let texto = `Olá Professores, na data de hoje (${dia}), identificamos as turmas que estão de aulas vagas. Assim, gostariamos de oferecer para os professores das turmas. Lembrando que as aulas mediadas por tecnologia não deverão ultrapassar as aulas do dia de vossa aula normal. Sendo assim, estamos disponiveis para atende-los quando resolverem pegar as aulas. Segue lista das turmas:\n\n`;
 
   if (vagas.length === 0) {
     texto += "Não há aulas vagas no dia informado.";
