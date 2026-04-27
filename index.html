@@ -75,7 +75,8 @@ select,.search-box,.btn-pdf {
 table {
   min-width:1400px;
   width:100%;
-  border-collapse:collapse;
+  border-collapse:separate; /* 🔥 ESSENCIAL */
+  border-spacing:0;         /* mantém visual igual */
   font-size:11px;
   table-layout:fixed;
 }
