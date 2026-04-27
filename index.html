@@ -407,13 +407,13 @@ function renderizarTabela(){
 
     // 🔥 Regras de destaque
     const regrasDestaque = [
-        { match: v => v.includes("RESERVA ENSINO"), classe: "reserva-ensino" },
-        { match: v => v.includes("PPS/ATENDIMENTO"), classe: "pps" },
-        { match: v => v.includes("ESTUDOS INDIVIDUAIS"), classe: "estudos" },
-        { match: v => v.includes("REUNIÃO DE SERVIDORES"), classe: "reuniao" },
-        { match: v => v.includes("CAED") || v.includes("PRÉ-CONSELHO"), classe: "caed" },
-        { match: v => v.includes("_REP -"), classe: "reposicao" }
-    ];
+    { match: v => v.includes("RESERVA ENSINO"), classe: "reserva-ensino" },
+    { match: v => v.includes("PPS/ATENDIMENTO"), classe: "pps" },
+    { match: v => v.includes("ESTUDOS INDIVIDUAIS"), classe: "estudos" },
+    { match: v => v.includes("REUNIAO DE SERVIDORES"), classe: "reuniao" },
+    { match: v => v.includes("CAED") || v.includes("PRE-CONSELHO"), classe: "caed" },
+    { match: v => v.includes("_REP -"), classe: "reposicao" }
+];
 
     Object.keys(dias).forEach(dia => {
         const p = dia.split('/');
