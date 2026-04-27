@@ -276,8 +276,8 @@ if(i>0) pdf.addPage();
 const pageWidth=pdf.internal.pageSize.getWidth();
 
 pdf.setFontSize(10);
-pdf.text("INSTITUTO FEDERAL DE RONDÔNIA",pageWidth/2,8,{align:'center'});
-pdf.text("CAMPUS CACOAL - DAPE",pageWidth/2,12,{align:'center'});
+pdf.text("INSTITUTO FEDERAL DE EDUCAÇÃO, CIÊNCIA E TECNOLOGIA DE RONDÔNIA - IFRO",pageWidth/2,8,{align:'center'});
+pdf.text("CAMPUS CACOAL - Departamento de Apoio ao Ensino - DAPE",pageWidth/2,12,{align:'center'});
 pdf.text(`SEMANA: ${sem}`,pageWidth/2,16,{align:'center'});
 
 const body=diasObj[dia].map(r=>{
@@ -294,7 +294,7 @@ head:[['Horário',...turmasAtivas]],
 body:body,
 startY:22,
 theme:'grid',
-styles:{fontSize:6,halign:'center',valign:'middle'},
+styles:{fontSize:5,halign:'center',valign:'middle'},
 didParseCell:(data)=>{
 if(data.column.index>0){
 data.cell.styles.fillColor=getCursoInfo(turmasAtivas[data.column.index-1]).rgb;
@@ -303,7 +303,7 @@ data.cell.styles.fillColor=getCursoInfo(turmasAtivas[data.column.index-1]).rgb;
 });
 
 pdf.setFontSize(8);
-pdf.text("IFRO - Campus Cacoal | (69) 3443-2445",pageWidth/2,200,{align:'center'});
+pdf.text("IFRO - Campus Cacoal | BR 364, Km 228, Lote 2-A | (69) 3443-2445 | dape.cacoal@ifro.edu.br",pageWidth/2,200,{align:'center'});
 });
 
 const mod = document.getElementById('selectModalidade').value;
