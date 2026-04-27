@@ -123,7 +123,7 @@ td, th { word-break: break-word; }
 
 /* 🔥 ALTERAÇÃO: DOBRO DO TAMANHO */
 .feriado {
-  font-size:80px;
+  font-size:120px;
   text-align:center;
   font-weight:bold;
   color:rgba(200,0,0,0.4);
@@ -365,7 +365,7 @@ if(i>0) pdf.addPage();
 
 const pageWidth=pdf.internal.pageSize.getWidth();
 
-pdf.setFontSize(10);
+pdf.setFontSize(9);
 pdf.text("INSTITUTO FEDERAL DE EDUCAÇÃO, CIÊNCIA E TECNOLOGIA DE RONDÔNIA - IFRO",pageWidth/2,8,{align:'center'});
 pdf.text("CAMPUS CACOAL - Departamento de Apoio ao Ensino - DAPE",pageWidth/2,12,{align:'center'});
 pdf.text(`SEMANA: ${sem}`,pageWidth/2,16,{align:'center'});
@@ -377,13 +377,13 @@ const dObj=new Date(p[2],p[1]-1,p[0]);
 pdf.setFontSize(14);
 pdf.setTextColor(46,125,50);
 pdf.setFont(undefined,'bold');
-pdf.text(`${nomes[dObj.getDay()]} - ${dia}`, pageWidth/2, 20, {align:'center'});
+pdf.text(`${nomes[dObj.getDay()]} - ${dia}`, pageWidth/2, 24, {align:'center'});
 pdf.setTextColor(0,0,0);
 pdf.setFont(undefined,'normal');
 
 /* FERIADO */
 if(isFeriado(dia)){
-pdf.setFontSize(40);
+pdf.setFontSize(60);
 pdf.text("FERIADO", pageWidth/2, 100, {align:'center'});
 return;
 }
@@ -400,7 +400,7 @@ return line;
 pdf.autoTable({
 head:[['Horário',...turmasAtivas]],
 body:body,
-startY:24,
+startY:28,
 theme:'grid',
 
 /* 🔥 CABEÇALHO VERDE */
@@ -412,7 +412,7 @@ fontStyle:'bold'
 
 margin:{ top:22, left:2, right:2, bottom:2 },
 tableWidth:'auto',
-styles:{ fontSize:5, halign:'center', valign:'middle', overflow:'linebreak' },
+styles:{ fontSize:4, halign:'center', valign:'middle', overflow:'linebreak' },
 columnStyles:{ 0:{ cellWidth:18 } },
 
 didParseCell:(data)=>{
