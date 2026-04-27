@@ -479,6 +479,12 @@ didParseCell:(data)=>{
 if(data.column.index>0){
 data.cell.styles.fillColor=getCursoInfo(turmasAtivas[data.column.index-1]).rgb;
 }
+const isLinhaVazia = data.row.raw.slice(1).every(v => !v || v.trim()==="");
+
+if(isLinhaVazia){
+  data.cell.styles.minCellHeight = 3;
+  data.cell.styles.fontSize = 4;
+}
 
 const txt=(data.cell.raw||"").toString().toUpperCase();
 if(txt.includes("INTERVALO")||txt.includes("[+]")||txt.includes("*")||txt.includes("[R]")){
