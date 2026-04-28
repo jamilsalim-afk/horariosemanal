@@ -263,12 +263,20 @@ function verificarMudancaAoAbrir() {
   }
 
   const sem = document.getElementById('selectSemana').value;
-  const dias = semanasAgrupadas[sem].dias;
-
   const novo = dadosGlobais;
+
   const alteracoes = [];
 
+  let ultimaDiaNovo = "";
+  let ultimaDiaAntigo = "";
+
   for (let i = 1; i < novo.length; i++) {
+
+    // 🔥 garante o mesmo "efeito de propagação do dia"
+    if (novo[i][0]) ultimaDiaNovo = novo[i][0];
+    const diaAtual = ultimaDiaNovo;
+
+    let ultimaDiaAntigoLinha = "";
 
     for (let j = 2; j < novo[i].length; j++) {
 
@@ -279,11 +287,10 @@ function verificarMudancaAoAbrir() {
 
         const turma = dadosGlobais[0][j] || "";
         const horario = novo[i][1];
-        const dataLinha = novo[i][0]; // 🔥 AQUI PEGA O DIA CORRETO
 
         alteracoes.push({
           turma,
-          dia: dataLinha,
+          dia: diaAtual || "Dia não identificado",
           horario
         });
       }
