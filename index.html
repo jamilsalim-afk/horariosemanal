@@ -241,16 +241,20 @@ SUPERIOR:{id:'14ALXZgFIT68ee9ajuIdG63SpGVm0HyTjwp63-J6vRyg',gid:'669887707'}
 let dadosGlobais=[],turmasDaPlanilha=[],semanasAgrupadas={};
 
 function salvarSnapshotAtual() {
+  const sem = document.getElementById('selectSemana').value;
+
   const snapshot = {
     tempo: new Date().toISOString(),
     dados: dadosGlobais
   };
 
-  localStorage.setItem("snapshotHorario", JSON.stringify(snapshot));
+  localStorage.setItem("snapshot_" + sem, JSON.stringify(snapshot));
 }
 
 function obterSnapshotAntigo() {
-  const data = localStorage.getItem("snapshotHorario");
+  const sem = document.getElementById('selectSemana').value;
+
+  const data = localStorage.getItem("snapshot_" + sem);
   return data ? JSON.parse(data) : null;
 }
 
@@ -395,7 +399,6 @@ const res=await fetch(url);
 dadosGlobais=parseCSV(await res.text());
 processarDados();
 verificarMudancaAoAbrir();
-salvarSnapshotAtual();
 }
 
 function getCursoInfo(t){
@@ -582,6 +585,8 @@ regrasDestaque.forEach(regra => {
 
     container.innerHTML = html;
   criarBotoesDias();
+  salvarSnapshotAtual();
+verificarMudancaAoAbrir();
 }
 
   const coresPDF = {
