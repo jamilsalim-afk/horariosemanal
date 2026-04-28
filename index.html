@@ -546,7 +546,9 @@ function coletarVagasDoDia(dia) {
 function gerarRelatorioDia(dia) {
   const vagas = coletarVagasDoDia(dia);
 
-  let texto = `Olá Professores, na data de hoje (${dia}), identificamos as turmas que estão de aulas vagas. Assim, gostariamos de oferecer para os professores das turmas. Lembrando que as aulas mediadas por tecnologia não deverão ultrapassar as aulas do dia de vossa aula normal. Sendo assim, estamos disponiveis para atende-los quando resolverem pegar as aulas. Segue lista das turmas:\n\n`;
+  let texto = `Olá Professores, na data de hoje (${dia}), identificamos varias turmas com aulas vagas. 
+  Assim, como medida para mitigar o problema de muitas aulas vagas, gostariamos de oferecer para os professores das turmas. 
+  Sendo assim, estamos disponiveis para atende-los quando se dispuserem a pegar alguma aula. Segue lista das turmas:\n\n`;
 
   if (vagas.length === 0) {
     texto += "Não há aulas vagas no dia informado.";
@@ -572,7 +574,8 @@ function gerarRelatorioSemana() {
   const sem = document.getElementById('selectSemana').value;
   const dias = semanasAgrupadas[sem].dias;
 
-  let texto = `Olá Professores, segue relatório semanal de aulas vagas:\n\n`;
+  let texto = `Olá Professores, identificamos várias turmas com aula vaga esta semana. 
+  Se algum professor se interessar por qualquer aula lista, por favor procure-nos. Segue a lista das turmas com as aulas vagas:\n\n`;
 
   Object.keys(dias).forEach(dia => {
     const vagas = coletarVagasDoDia(dia);
