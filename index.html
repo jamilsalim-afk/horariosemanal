@@ -266,43 +266,49 @@ function verificarMudancaAoAbrir() {
     return;
   }
 
-  const sem = document.getElementById('selectSemana').value;
   const novo = dadosGlobais;
+  const agrupado = {};
 
-  const alteracoes = [];
-
-  let ultimaDiaNovo = "";
-  let ultimaDiaAntigo = "";
+  let ultimoDia = "";
 
   for (let i = 1; i < novo.length; i++) {
 
-    // 🔥 garante o mesmo "efeito de propagação do dia"
-    if (novo[i][0]) ultimaDiaNovo = novo[i][0];
-    const diaAtual = ultimaDiaNovo;
-
-    let ultimaDiaAntigoLinha = "";
+    if (novo[i][0]) ultimoDia = novo[i][0];
+    const diaAtual = ultimoDia;
 
     for (let j = 2; j < novo[i].length; j++) {
 
-      const vNovo = novo[i][j];
-      const vAntigo = antigo.dados?.[i]?.[j];
+      const vNovo = (novo[i][j] || "").toUpperCase();
+      const vAntigo = (antigo.dados?.[i]?.[j] || "").toUpperCase();
 
-      if (vNovo !== vAntigo) {
+      const virouVaga =
+        (vNovo.includes("RESERVA ENSINO") || vNovo.includes("ESTUDOS INDIVIDUAIS")) &&
+        !(vAntigo.includes("RESERVA ENSINO") || vAntigo.includes("ESTUDOS INDIVIDUAIS"));
+
+      if (virouVaga) {
 
         const turma = dadosGlobais[0][j] || "";
         const horario = novo[i][1];
 
-        alteracoes.push({
-          turma,
-          dia: diaAtual || "Dia não identificado",
-          horario
-        });
+        const chave = `${diaAtual}__${turma}`;
+
+        if (!agrupado[chave]) {
+          agrupado[chave] = {
+            dia: diaAtual,
+            turma,
+            horarios: []
+          };
+        }
+
+        agrupado[chave].horarios.push(horario);
       }
     }
   }
 
-  if (alteracoes.length > 0) {
-    mostrarAvisoAlteracoes(alteracoes);
+  const listaFinal = Object.values(agrupado);
+
+  if (listaFinal.length > 0) {
+    mostrarAvisoAlteracoes(listaFinal);
   }
 
   salvarSnapshotAtual();
@@ -310,12 +316,15 @@ function verificarMudancaAoAbrir() {
 
 function mostrarAvisoAlteracoes(lista) {
 
-  let texto = "⚠️ ALTERAÇÕES NO HORÁRIO DETECTADAS:\n\n";
+  let texto = "⚠️ ALTERAÇÕES (AULAS VAGAS) DETECTADAS:\n\n";
 
   lista.forEach(a => {
+
+    const horariosUnicos = [...new Set(a.horarios)];
+
     texto += `📅 Dia: ${a.dia}\n`;
-    texto += `⏰ Horário: ${a.horario}\n`;
-    texto += `🏫 Turma: ${a.turma}\n\n`;
+    texto += `🏫 Turma: ${a.turma}\n`;
+    texto += `⏰ Horários: ${horariosUnicos.join("; ")}\n\n`;
   });
 
   navigator.clipboard.writeText(texto);
