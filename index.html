@@ -279,10 +279,11 @@ function verificarMudancaAoAbrir() {
         const horario = novo[i][1];
 
         alteracoes.push({
-          turma,
-          dia,
-          horario
-        });
+  turma,
+  dia,
+  horario,
+  data: dia
+});
       }
     }
   }
@@ -299,8 +300,9 @@ function mostrarAvisoAlteracoes(lista) {
   let texto = "⚠️ ALTERAÇÕES NO HORÁRIO DETECTADAS:\n\n";
 
   lista.forEach(a => {
-    texto += `📅 ${a.dia} | ⏰ ${a.horario}\n`;
-    texto += `📌 ${a.turma}\n\n`;
+    texto += `📅 Dia: ${a.dia}\n`;
+    texto += `⏰ Horário: ${a.horario}\n`;
+    texto += `🏫 Turma: ${a.turma}\n\n`;
   });
 
   alert(texto);
