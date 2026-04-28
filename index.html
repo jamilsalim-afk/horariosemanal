@@ -709,17 +709,32 @@ function coletarVagasDoDia(dia) {
 function gerarRelatorioDia(dia) {
   const vagas = coletarVagasDoDia(dia);
 
-  let texto = `Olá Professores, na data de hoje (${dia}), identificamos varias turmas com aulas vagas. 
-  Assim, como medida para mitigar o problema de muitas aulas vagas, gostariamos de oferecer para os professores das turmas. 
-  Sendo assim, estamos disponiveis para atende-los quando se dispuserem a pegar alguma aula. Segue lista das turmas:\n\n`;
+  let texto = `Olá Professores, na data de hoje (${dia}), identificamos várias turmas com aulas vagas. Segue a lista das turmas e horários.\n\n`;
 
   if (vagas.length === 0) {
     texto += "Não há aulas vagas no dia informado.";
     return texto;
   }
 
+  // 🔥 AGRUPAMENTO
+  const agrupado = {};
+
   vagas.forEach(v => {
-    texto += `${v.turma} - ${v.horario}\n`;
+    if (!agrupado[v.turma]) {
+      agrupado[v.turma] = [];
+    }
+
+    agrupado[v.turma].push(v.horario);
+  });
+
+  // 🔥 MONTAGEM FINAL
+  Object.keys(agrupado).forEach(turma => {
+
+    const horariosUnicos = [...new Set(agrupado[turma])];
+
+    texto += `📅 DATA: ${dia}\n`;
+    texto += `🏫 TURMA: ${turma}\n`;
+    texto += `⏰ AULAS VAGAS: ${horariosUnicos.join(", ")}\n\n`;
   });
 
   return texto;
@@ -737,21 +752,59 @@ function gerarRelatorioSemana() {
   const sem = document.getElementById('selectSemana').value;
   const dias = semanasAgrupadas[sem].dias;
 
-  let texto = `Olá Professores, identificamos várias turmas com aula vaga esta semana. 
-  Se algum professor se interessar por qualquer aula lista, por favor procure-nos. Segue a lista das turmas com as aulas vagas:\n\n`;
+  let texto = `Olá Professores, identificamos várias turmas com aula vaga esta semana. Segue a lista dos dias, turmas e horários.\n\n`;
 
+  const agrupado = {};
+
+  // 🔥 AGRUPA DIA + TURMA
   Object.keys(dias).forEach(dia => {
     const vagas = coletarVagasDoDia(dia);
 
-    if (vagas.length > 0) {
-      texto += `📅 ${dia}\n`;
+    vagas.forEach(v => {
+      const chave = `${dia}__${v.turma}`;
 
-      vagas.forEach(v => {
-        texto += `${v.turma} - ${v.horario}\n`;
-      });
+      if (!agrupado[chave]) {
+        agrupado[chave] = {
+          dia,
+          turma: v.turma,
+          horarios: []
+        };
+      }
 
-      texto += `\n`;
+      agrupado[chave].horarios.push(v.horario);
+    });
+  });
+
+  const listaFinal = Object.values(agrupado);
+
+  if (listaFinal.length === 0) {
+    texto += "Não há aulas vagas na semana.";
+    navigator.clipboard.writeText(texto);
+    alert("Relatório semanal copiado!");
+    return;
+  }
+
+  // 🔥 ORGANIZA POR DIA
+  listaFinal.sort((a, b) => {
+    const [da, ma, aa] = a.dia.split('/');
+    const [db, mb, ab] = b.dia.split('/');
+    return new Date(aa, ma-1, da) - new Date(ab, mb-1, db);
+  });
+
+  let diaAtual = "";
+
+  listaFinal.forEach(item => {
+
+    // 🔥 quebra por dia
+    if (item.dia !== diaAtual) {
+      texto += `📅 DATA: ${item.dia}\n\n`;
+      diaAtual = item.dia;
     }
+
+    const horariosUnicos = [...new Set(item.horarios)];
+
+    texto += `🏫 TURMA: ${item.turma}\n`;
+    texto += `⏰ AULAS VAGAS: ${horariosUnicos.join(", ")}\n\n`;
   });
 
   navigator.clipboard.writeText(texto).then(() => {
