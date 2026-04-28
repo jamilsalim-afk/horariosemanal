@@ -240,6 +240,20 @@ SUPERIOR:{id:'14ALXZgFIT68ee9ajuIdG63SpGVm0HyTjwp63-J6vRyg',gid:'669887707'}
 
 let dadosGlobais=[],turmasDaPlanilha=[],semanasAgrupadas={};
 
+  function isSemanaPassada(dataStr){
+  const [d,m,a] = dataStr.split('/');
+  const data = new Date(a, m-1, d);
+
+  const hoje = new Date();
+
+  // pega segunda-feira da semana atual
+  const dia = hoje.getDay();
+  const diff = hoje.getDate() - dia + (dia === 0 ? -6 : 1);
+  const segundaAtual = new Date(hoje.setDate(diff));
+
+  return data < segundaAtual;
+}
+  
 function salvarSnapshotAtual() {
   const sem = document.getElementById('selectSemana').value;
 
@@ -274,10 +288,13 @@ function verificarMudancaAoAbrir() {
   for (let i = 1; i < novo.length; i++) {
 
     // mantém o dia corretamente (igual sua lógica da tabela)
-    if (novo[i][0]) ultimoDia = novo[i][0];
-    const diaAtual = ultimoDia;
+   if (novo[i][0]) ultimoDia = novo[i][0];
+const diaAtual = ultimoDia;
 
-    for (let j = 2; j < novo[i].length; j++) {
+// 🔥 NOVO FILTRO
+if (isSemanaPassada(diaAtual)) continue;
+
+for (let j = 2; j < novo[i].length; j++) {
 
       const vNovo = (novo[i][j] || "").trim();
       const vAntigo = (antigo.dados?.[i]?.[j] || "").trim();
@@ -403,9 +420,10 @@ document.getElementById('searchProf').value="";
 const mod=document.getElementById('selectModalidade').value;
 const url=`https://docs.google.com/spreadsheets/d/${SHEETS[mod].id}/export?format=csv&gid=${SHEETS[mod].gid}`;
 const res=await fetch(url);
-dadosGlobais=parseCSV(await res.text());
-processarDados();
-verificarMudancaAoAbrir();
+
+dadosGlobais = parseCSV(await res.text());
+
+processarDados(); // isso já chama renderizarTabela()
 }
 
 function getCursoInfo(t){
