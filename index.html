@@ -273,19 +273,17 @@ function verificarMudancaAoAbrir() {
 
   for (let i = 1; i < novo.length; i++) {
 
+    // mantém o dia corretamente (igual sua lógica da tabela)
     if (novo[i][0]) ultimoDia = novo[i][0];
     const diaAtual = ultimoDia;
 
     for (let j = 2; j < novo[i].length; j++) {
 
-      const vNovo = (novo[i][j] || "").toUpperCase();
-      const vAntigo = (antigo.dados?.[i]?.[j] || "").toUpperCase();
+      const vNovo = (novo[i][j] || "").trim();
+      const vAntigo = (antigo.dados?.[i]?.[j] || "").trim();
 
-      const virouVaga =
-        (vNovo.includes("RESERVA ENSINO") || vNovo.includes("ESTUDOS INDIVIDUAIS")) &&
-        !(vAntigo.includes("RESERVA ENSINO") || vAntigo.includes("ESTUDOS INDIVIDUAIS"));
-
-      if (virouVaga) {
+      // 🔥 AQUI: qualquer mudança
+      if (vNovo !== vAntigo) {
 
         const turma = dadosGlobais[0][j] || "";
         const horario = novo[i][1];
