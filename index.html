@@ -255,7 +255,8 @@ function obterSnapshotAntigo() {
 }
 
 function verificarMudancaAoAbrir() {
-
+const sem = document.getElementById('selectSemana').value;
+const dias = semanasAgrupadas[sem].dias;
   const antigo = obterSnapshotAntigo();
 
   if (!antigo) {
@@ -275,12 +276,20 @@ function verificarMudancaAoAbrir() {
       if (vNovo !== vAntigo) {
 
         const turma = dadosGlobais[0][j] || "";
-        const dia = novo[i][0];
+        let diaEncontrado = "";
+
+Object.keys(dias).forEach(d => {
+  dias[d].forEach(linha => {
+    if (linha === novo[i]) {
+      diaEncontrado = d;
+    }
+  });
+});
         const horario = novo[i][1];
 
         alteracoes.push({
   turma,
-  dia,
+  dia: diaEncontrado || "Dia não identificado",
   horario,
   data: dia
 });
