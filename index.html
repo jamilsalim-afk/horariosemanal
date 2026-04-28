@@ -255,19 +255,21 @@ function obterSnapshotAntigo() {
 }
 
 function verificarMudancaAoAbrir() {
-const sem = document.getElementById('selectSemana').value;
-const dias = semanasAgrupadas[sem].dias;
-  const antigo = obterSnapshotAntigo();
 
+  const antigo = obterSnapshotAntigo();
   if (!antigo) {
     salvarSnapshotAtual();
     return;
   }
 
+  const sem = document.getElementById('selectSemana').value;
+  const dias = semanasAgrupadas[sem].dias;
+
   const novo = dadosGlobais;
   const alteracoes = [];
 
   for (let i = 1; i < novo.length; i++) {
+
     for (let j = 2; j < novo[i].length; j++) {
 
       const vNovo = novo[i][j];
@@ -276,23 +278,14 @@ const dias = semanasAgrupadas[sem].dias;
       if (vNovo !== vAntigo) {
 
         const turma = dadosGlobais[0][j] || "";
-        let diaEncontrado = "";
-
-Object.keys(dias).forEach(d => {
-  dias[d].forEach(linha => {
-    if (linha === novo[i]) {
-      diaEncontrado = d;
-    }
-  });
-});
         const horario = novo[i][1];
+        const dataLinha = novo[i][0]; // 🔥 AQUI PEGA O DIA CORRETO
 
         alteracoes.push({
-  turma,
-  dia: diaEncontrado || "Dia não identificado",
-  horario,
-  data: dia
-});
+          turma,
+          dia: dataLinha,
+          horario
+        });
       }
     }
   }
@@ -313,6 +306,8 @@ function mostrarAvisoAlteracoes(lista) {
     texto += `⏰ Horário: ${a.horario}\n`;
     texto += `🏫 Turma: ${a.turma}\n\n`;
   });
+
+  navigator.clipboard.writeText(texto);
 
   alert(texto);
 }
