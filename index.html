@@ -223,8 +223,48 @@ placeholder="🔍 Buscar Professor..." onkeyup="filtrarProfessor()">
 <!-- 🔥 BOTÕES NOVOS -->
 <div id="botoesRelatorio"></div>
 
+<div id="painelAlteracoes" style="
+  display:none;
+  background:white;
+  border-left:6px solid #d32f2f;
+  padding:15px;
+  margin:10px;
+  border-radius:8px;
+  max-height:300px;
+  overflow-y:auto;
+  box-shadow:0 2px 10px rgba(0,0,0,0.2);
+">
+  <div style="display:flex;justify-content:space-between;align-items:center;">
+    <strong>⚠️ Alterações Detectadas</strong>
+    <button onclick="fecharPainel()" style="
+      background:#d32f2f;color:white;border:none;
+      padding:5px 10px;border-radius:5px;cursor:pointer;">
+      ✖
+    </button>
+  </div>
+
+  <pre id="conteudoAlteracoes" style="
+    white-space:pre-wrap;
+    font-size:12px;
+    margin-top:10px;
+  "></pre>
+
+  <button onclick="copiarAlteracoes()" style="
+    margin-top:10px;
+    padding:8px;
+    background:#2e7d32;
+    color:white;
+    border:none;
+    border-radius:5px;
+    cursor:pointer;">
+    📋 Copiar
+  </button>
+</div>
+
 <div class="table-responsive" id="tabelaHorario"></div>
 </div>
+
+
 
 <footer class="ifro-footer">
 IFRO - Campus Cacoal<br>
@@ -342,9 +382,21 @@ function mostrarAvisoAlteracoes(lista) {
     texto += `⏰ Horários: ${horariosUnicos.join("; ")}\n\n`;
   });
 
-  navigator.clipboard.writeText(texto);
+  // 🔥 joga no painel ao invés de alert
+  document.getElementById("conteudoAlteracoes").innerText = texto;
+  document.getElementById("painelAlteracoes").style.display = "block";
+}
 
-  alert(texto);
+  function fecharPainel(){
+  document.getElementById("painelAlteracoes").style.display = "none";
+}
+
+function copiarAlteracoes(){
+  const texto = document.getElementById("conteudoAlteracoes").innerText;
+
+  navigator.clipboard.writeText(texto).then(()=>{
+    alert("Copiado!");
+  });
 }
   
 const FERIADOS=[
