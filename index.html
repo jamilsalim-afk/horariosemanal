@@ -240,6 +240,72 @@ SUPERIOR:{id:'14ALXZgFIT68ee9ajuIdG63SpGVm0HyTjwp63-J6vRyg',gid:'669887707'}
 
 let dadosGlobais=[],turmasDaPlanilha=[],semanasAgrupadas={};
 
+function salvarSnapshotAtual() {
+  const snapshot = {
+    tempo: new Date().toISOString(),
+    dados: dadosGlobais
+  };
+
+  localStorage.setItem("snapshotHorario", JSON.stringify(snapshot));
+}
+
+function obterSnapshotAntigo() {
+  const data = localStorage.getItem("snapshotHorario");
+  return data ? JSON.parse(data) : null;
+}
+
+function verificarMudancaAoAbrir() {
+
+  const antigo = obterSnapshotAntigo();
+
+  if (!antigo) {
+    salvarSnapshotAtual();
+    return;
+  }
+
+  const novo = dadosGlobais;
+  const alteracoes = [];
+
+  for (let i = 1; i < novo.length; i++) {
+    for (let j = 2; j < novo[i].length; j++) {
+
+      const vNovo = novo[i][j];
+      const vAntigo = antigo.dados?.[i]?.[j];
+
+      if (vNovo !== vAntigo) {
+
+        const turma = dadosGlobais[0][j] || "";
+        const dia = novo[i][0];
+        const horario = novo[i][1];
+
+        alteracoes.push({
+          turma,
+          dia,
+          horario
+        });
+      }
+    }
+  }
+
+  if (alteracoes.length > 0) {
+    mostrarAvisoAlteracoes(alteracoes);
+  }
+
+  salvarSnapshotAtual();
+}
+
+function mostrarAvisoAlteracoes(lista) {
+
+  let texto = "⚠️ ALTERAÇÕES NO HORÁRIO DETECTADAS:\n\n";
+
+  lista.forEach(a => {
+    texto += `📅 ${a.dia} | ⏰ ${a.horario}\n`;
+    texto += `📌 ${a.turma}\n\n`;
+  });
+
+  alert(texto);
+}
+  
 const FERIADOS=[
 "01/01/2026","16/02/2026","17/02/2026","18/02/2026","03/04/2026","20/04/2026","21/04/2026","01/05/2026",
 "04/06/2026","05/06/2026","07/09/2026","12/10/2026","02/11/2026",
@@ -315,6 +381,8 @@ const url=`https://docs.google.com/spreadsheets/d/${SHEETS[mod].id}/export?forma
 const res=await fetch(url);
 dadosGlobais=parseCSV(await res.text());
 processarDados();
+verificarMudancaAoAbrir();
+salvarSnapshotAtual();
 }
 
 function getCursoInfo(t){
@@ -807,6 +875,10 @@ function criarBotoesDias() {
 
   document.getElementById("botoesRelatorio").innerHTML = html;
 }
+
+window.addEventListener("beforeunload", () => {
+  salvarSnapshotAtual();
+});
   
 window.onload=init;
 </script>
