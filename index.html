@@ -294,6 +294,8 @@ let dadosGlobais=[],turmasDaPlanilha=[],semanasAgrupadas={};
 
 function trocarModalidade(){
   window.trocouModalidade = true;
+
+  // 🔥 NÃO salvar snapshot aqui
   init();
 }
 
@@ -331,14 +333,19 @@ function valorMudou(v1, v2){
   
 function verificarMudancaAoAbrir() {
 
-  // 🔥 evita falso positivo ao trocar modalidade
+  const antigo = obterSnapshotAntigo();
+
+  // 🔥 se trocou modalidade, NÃO salvar ainda
   if (window.trocouModalidade) {
-    salvarSnapshotAtual();
     window.trocouModalidade = false;
+
+    // só salva se NÃO existir snapshot ainda
+    if (!antigo) {
+      salvarSnapshotAtual();
+    }
+
     return;
   }
-
-  const antigo = obterSnapshotAntigo();
 
   if (!antigo) {
     salvarSnapshotAtual();
