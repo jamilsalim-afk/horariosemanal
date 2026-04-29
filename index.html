@@ -209,7 +209,7 @@ tr.linha-vazia td {
 <option value="SUPERIOR">CURSOS SUPERIORES</option>
 </select>
 
-<select id="selectSemana" onchange="renderizarTabela()"></select>
+<select id="selectSemana" onchange="trocarSemana()"></select>
 
 <input type="text" id="searchProf" class="search-box"
 placeholder="🔍 Buscar Professor..." onkeyup="filtrarProfessor()">
@@ -292,11 +292,22 @@ let dadosGlobais=[],turmasDaPlanilha=[],semanasAgrupadas={};
   return data < segundaAtual;
 }
 
+function limparPainelAlteracoes(){
+  document.getElementById("conteudoAlteracoes").innerText = "";
+  document.getElementById("painelAlteracoes").style.display = "none";
+}
+  
 function trocarModalidade(){
   window.trocouModalidade = true;
 
-  // 🔥 NÃO salvar snapshot aqui
+  limparPainelAlteracoes(); // 🔥 ESSENCIAL
+
   init();
+}
+
+  function trocarSemana(){
+  limparPainelAlteracoes(); // 🔥 ESSENCIAL
+  renderizarTabela();
 }
 
 function salvarSnapshotAtual() {
