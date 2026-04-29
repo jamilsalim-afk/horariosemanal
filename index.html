@@ -2,202 +2,1070 @@
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Agro Máquinas Brasil</title>
+<title>Consulta de Horários Semanais - IFRO</title>
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
 
 <style>
+:root { --primary:#2e7d32; --bg:#f4f7f6; }
+
 body {
-    font-family: Arial;
-    margin: 0;
-    background: #f4f4f4;
+  font-family:'Segoe UI',sans-serif;
+  background:var(--bg);
+  margin:0;
 }
 
-header {
-    background: #2e7d32;
-    color: white;
-    text-align: center;
-    padding: 20px;
+/* CABEÇALHO */
+.ifro-header {
+  position:sticky;
+  top:0;
+  z-index:1100;
+  background:white;
+  border-bottom:4px solid #2e7d32;
+}
+.ifro-header-content { text-align:center; padding:12px; }
+.ifro-linha1 { font-size:20px; font-weight:bold; color:#000; }
+.ifro-linha2 { font-size:18px; font-weight:bold; color:#000; }
+.ifro-linha3 { font-size:16px; color:#000; }
+.ifro-linha4 { font-size:17px; font-weight:bold; color:#000; }
+
+/* CONTROLES */
+.header-sticky {
+  position:sticky;
+  top:110px;
+  z-index:1000;
+  background:var(--bg);
+  padding:9px;
+}
+.controls-card {
+  background:white;
+  padding:15px;
+  border-radius:12px;
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  justify-content:center;
+}
+select,.search-box,.btn-pdf {
+  padding:12px;
+  font-size:14px;
+  border-radius:6px;
+}
+.search-box {
+  width:260px;
+  border:2px solid var(--primary);
+}
+.btn-pdf {
+  background:#d32f2f;
+  color:white;
+  border:none;
+  cursor:pointer;
+  font-weight:bold;
 }
 
-nav {
-    background: #1b5e20;
-    text-align: center;
-    padding: 10px;
+/* TABELA */
+.week-container { padding:14px; }
+.table-responsive {
+  width:100%;
+  overflow-x:auto;
+  background:white;
+  border-radius:8px;
+}
+table {
+  min-width:1400px;
+  width:100%;
+  border-collapse:separate; /* 🔥 ESSENCIAL */
+  border-spacing:0;         /* mantém visual igual */
+  font-size:9px;
+  table-layout:fixed;
+}
+th,td {
+  border:1px solid #bbb;
+  padding:6px;
+  text-align:center;
+  vertical-align:middle;
 }
 
-nav a {
-    color: white;
-    margin: 10px;
-    text-decoration: none;
+/* 🔧 CORREÇÃO DE TEXTO */
+td, th { word-break: break-word; }
+.aula-cell { white-space: normal; }
+
+/* CORES */
+.c-agroec { background:#e8f5e9 !important; }
+.c-agropec { background:#e3f2fd !important; }
+.c-info { background:#fff8e1 !important; }
+.c-geo { background:#f3e5f5 !important; }
+.c-mat { background:#e0f7fa !important; }
+.c-agroneg { background:#efebe9 !important; }
+.c-zoo { background:#fce4ec !important; }
+.c-agron { background:#f1f8e9 !important; }
+
+.day-divider {
+  background:var(--primary);
+  color:white;
+  font-weight:bold;
+  font-size:15px;
+}
+
+.time-col {
+  font-weight:bold;
+  width:85px;
+  background:#f1f3f4;
+}
+
+.highlight { background:#fbc02d !important; }
+.opaco { opacity:0.1; }
+
+.intervalo,.marcacao-extra {
+  background:#e0e0e0 !important;
+  font-weight:bold;
+}
+
+/* 🔥 ALTERAÇÃO: DOBRO DO TAMANHO */
+.feriado {
+  font-size:120px;
+  text-align:center;
+  font-weight:bold;
+  color:rgba(200,0,0,0.4);
+  height:200px;
+}
+
+/* RODAPÉ */
+.ifro-footer {
+  background:#2e7d32;
+  color:white;
+  padding:20px;
+  text-align:center;
+}
+
+  /* 🔥 FIXAR PRIMEIRA COLUNA (HORÁRIOS) */
+.time-col {
+  position: sticky;
+  left: 0;
+  z-index: 2;
+  background: #f1f3f4; /* mantém cor original */
+}
+
+/* garante que o cabeçalho também fique acima */
+th.time-col {
+  z-index: 3;
+}
+
+  /* 🔥 LINHAS VAZIAS MAIS COMPACTAS */
+tr.linha-vazia td {
+  padding: 2px !important;
+  font-size: 8px !important;
+  height: 10px !important;
+}
+
+ .reserva-ensino {
+    color: #fbc02d; /* amarelo forte */
     font-weight: bold;
 }
 
-.banner {
-    height: 300px;
-    background: url('https://images.unsplash.com/photo-1500382017468-9049fed747ef') center/cover;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    color: white;
-    font-size: 2em;
-    text-shadow: 2px 2px 5px black;
+.pps {
+    color: #0b3d91; /* azul escuro */
+    font-weight: bold;
 }
 
-.container {
-    padding: 20px;
+.estudos {
+    color: ##1e7e34; /* verde escuro */
+    font-weight: bold;
 }
 
-h2 {
-    color: #2e7d32;
+.reuniao {
+    color: ##fb8c00; /* laranja forte */
+    font-weight: bold;
 }
 
-.grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 20px;
+.caed {
+    background-color: #fff3cd; /* amarelo */
 }
 
-.card {
-    background: white;
-    padding: 15px;
-    border-radius: 8px;
-    box-shadow: 0px 0px 10px rgba(0,0,0,0.1);
+.reposicao {
+    color: #0b3d91; /* azul escuro */
+    font-weight: bold;
 }
-
-.card img {
-    width: 100%;
-    border-radius: 8px;
-}
-
-footer {
-    background: #2e7d32;
-    color: white;
-    text-align: center;
-    padding: 20px;
-    margin-top: 20px;
-}
-
-.contact i {
-    margin-right: 8px;
-}
+  
 </style>
 </head>
 
 <body>
 
-<header>
-<h1>Agro Máquinas Brasil</h1>
-<p>Tratores, Máquinas e Equipamentos Agrícolas</p>
-</header>
-
-<nav>
-<a href="#">Início</a>
-<a href="#">Produtos</a>
-<a href="#">Contato</a>
-</nav>
-
-<div class="banner">
-Equipamentos para Alta Produtividade
-</div>
-
-<div class="container">
-
-<h2>🚜 Tratores</h2>
-<div class="grid">
-<div class="card">
-<img src="https://images.unsplash.com/photo-tractor-field" alt="">
-<h3>Trator 120cv</h3>
-<p>R$ 250.000</p>
-</div>
-
-<div class="card">
-<img src="https://images.unsplash.com/photo-1589927986089-35812388d1f4" alt="">
-<h3>Trator 150cv</h3>
-<p>R$ 320.000</p>
+<div class="ifro-header">
+<div class="ifro-header-content">
+<div class="ifro-linha1">INSTITUTO FEDERAL DE EDUCAÇÃO, CIÊNCIA E TECNOLOGIA DE RONDÔNIA - IFRO</div>
+<div class="ifro-linha2">CAMPUS CACOAL</div>
+<div class="ifro-linha3">DEPARTAMENTO DE APOIO AO ENSINO</div>
+<div class="ifro-linha4">HORÁRIOS SEMANAIS - 2026</div>
 </div>
 </div>
 
-<h2>🌾 Colheitadeiras</h2>
-<div class="grid">
-<div class="card">
-<img src="https://images.unsplash.com/photo-1598514982901-ae2c0e7c8c7f" alt="">
-<h3>Colheitadeira Grãos</h3>
-<p>R$ 900.000</p>
-</div>
+<div class="header-sticky">
+<div class="controls-card">
+<select id="selectModalidade" onchange="init()">
+<option value="INTEGRADO">CURSOS TÉCNICOS INTEGRADOS</option>
+<option value="SUPERIOR">CURSOS SUPERIORES</option>
+</select>
 
-<div class="card">
-<img src="https://images.unsplash.com/photo-1605000797499-95a51c5269ae" alt="">
-<h3>Colheitadeira Moderna</h3>
-<p>R$ 1.200.000</p>
-</div>
-</div>
+<select id="selectSemana" onchange="renderizarTabela()"></select>
 
-<h2>🌱 Plantadeiras</h2>
-<div class="grid">
-<div class="card">
-<img src="https://images.unsplash.com/photo-1586773860418-d37222d8fce3" alt="">
-<h3>Plantadeira 8 Linhas</h3>
-<p>R$ 180.000</p>
-</div>
+<input type="text" id="searchProf" class="search-box"
+placeholder="🔍 Buscar Professor..." onkeyup="filtrarProfessor()">
 
-<div class="card">
-<img src="https://images.unsplash.com/photo-1560493676-04071c5f467b" alt="">
-<h3>Plantadeira 12 Linhas</h3>
-<p>R$ 250.000</p>
+<button class="btn-pdf" onclick="exportarPDF()">📄 Baixe o PDF da Semana</button>
 </div>
 </div>
 
-<h2>⚙️ Implementos Agrícolas</h2>
-<div class="grid">
-<div class="card">
-<img src="https://images.unsplash.com/photo-1598511728444-07a4c3cfd5e7" alt="">
-<h3>Arado</h3>
-<p>R$ 25.000</p>
+<div class="week-container">
+
+<!-- 🔥 BOTÕES NOVOS -->
+<div id="botoesRelatorio"></div>
+
+<div id="painelAlteracoes" style="
+  display:none;
+  background:white;
+  border-left:6px solid #d32f2f;
+  padding:15px;
+  margin:10px;
+  border-radius:8px;
+  max-height:300px;
+  overflow-y:auto;
+  box-shadow:0 2px 10px rgba(0,0,0,0.2);
+">
+  <div style="display:flex;justify-content:space-between;align-items:center;">
+    <strong>⚠️ Alterações Detectadas</strong>
+    <button onclick="fecharPainel()" style="
+      background:#d32f2f;color:white;border:none;
+      padding:5px 10px;border-radius:5px;cursor:pointer;">
+      ✖
+    </button>
+  </div>
+
+  <pre id="conteudoAlteracoes" style="
+    white-space:pre-wrap;
+    font-size:12px;
+    margin-top:10px;
+  "></pre>
+
+  <button onclick="copiarAlteracoes()" style="
+    margin-top:10px;
+    padding:8px;
+    background:#2e7d32;
+    color:white;
+    border:none;
+    border-radius:5px;
+    cursor:pointer;">
+    📋 Copiar
+  </button>
 </div>
 
-<div class="card">
-<img src="https://images.unsplash.com/photo-1602524812804-3ec10f8cb5a4" alt="">
-<h3>Grade Aradora</h3>
-<p>R$ 40.000</p>
+<div class="table-responsive" id="tabelaHorario"></div>
 </div>
 
-<div class="card">
-<img src="https://images.unsplash.com/photo-1596638787647-904d822d751e" alt="">
-<h3>Pulverizador</h3>
-<p>R$ 75.000</p>
-</div>
-</div>
 
-<h2>🚛 Transporte Agrícola</h2>
-<div class="grid">
-<div class="card">
-<img src="https://images.unsplash.com/photo-1586015555751-63bb77f4326f" alt="">
-<h3>Carreta Agrícola</h3>
-<p>R$ 35.000</p>
-</div>
 
-<div class="card">
-<img src="https://images.unsplash.com/photo-1504215680853-026ed2a45def" alt="">
-<h3>Reboque</h3>
-<p>R$ 20.000</p>
-</div>
-</div>
-
-<h2>📞 Contato</h2>
-<div class="card contact">
-<p><i class="fas fa-phone"></i> (61) 99999-9999</p>
-<p><i class="fab fa-whatsapp"></i> WhatsApp: (61) 99999-9999</p>
-<p><i class="fas fa-envelope"></i> contato@agromaquinas.com</p>
-<p><i class="fas fa-map-marker-alt"></i> Brasília - DF</p>
-</div>
-
-</div>
-
-<footer>
-<p>&copy; 2026 Agro Máquinas Brasil</p>
+<footer class="ifro-footer">
+IFRO - Campus Cacoal<br>
+BR 364, Km 228, Lote 2-A - Zona Rural<br>
+☎ (69) 3443-2445 | ✉ dape.cacoal@ifro.edu.br
 </footer>
+
+<script>
+const SHEETS={
+INTEGRADO:{id:'1j33kiPqwtzZNuvkBgYDaIiXZvVMY_J0qWAtRfYGdnD8',gid:'1357770092'},
+SUPERIOR:{id:'14ALXZgFIT68ee9ajuIdG63SpGVm0HyTjwp63-J6vRyg',gid:'669887707'}
+};
+
+let dadosGlobais=[],turmasDaPlanilha=[],semanasAgrupadas={};
+
+  function isSemanaPassada(dataStr){
+  const [d,m,a] = dataStr.split('/');
+  const data = new Date(a, m-1, d);
+
+  const hoje = new Date();
+
+  // pega segunda-feira da semana atual
+  const dia = hoje.getDay();
+  const diff = hoje.getDate() - dia + (dia === 0 ? -6 : 1);
+  const segundaAtual = new Date(hoje.setDate(diff));
+
+  return data < segundaAtual;
+}
+  
+function salvarSnapshotAtual() {
+  const sem = document.getElementById('selectSemana').value;
+
+  const snapshot = {
+    tempo: new Date().toISOString(),
+    dados: dadosGlobais
+  };
+
+  localStorage.setItem("snapshot_" + sem, JSON.stringify(snapshot));
+}
+
+function obterSnapshotAntigo() {
+  const sem = document.getElementById('selectSemana').value;
+
+  const data = localStorage.getItem("snapshot_" + sem);
+  return data ? JSON.parse(data) : null;
+}
+
+function verificarMudancaAoAbrir() {
+
+  const antigo = obterSnapshotAntigo();
+
+  // 🔥 primeira execução → só salva snapshot
+  if (!antigo) {
+    salvarSnapshotAtual();
+    return;
+  }
+
+  const novo = dadosGlobais;
+  const agrupado = {};
+
+  let ultimoDia = "";
+
+  for (let i = 1; i < novo.length; i++) {
+
+    // mantém o dia corretamente
+    if (novo[i][0]) ultimoDia = novo[i][0];
+    const diaAtual = ultimoDia;
+
+    if (!diaAtual) continue;
+
+    // 🔥 ignora semanas passadas
+    if (isSemanaPassada(diaAtual)) continue;
+
+    const horario = (novo[i][1] || "").trim();
+
+    // 🔥 ignora linhas inválidas ou não-aula
+    const horarioNorm = normalizarTexto(horario);
+
+    if (
+      !horario ||
+      horarioNorm.includes("INTERVALO") ||
+      horarioNorm.includes("[+]") ||
+      horarioNorm.includes("*") ||
+      horarioNorm.includes("[R]")
+    ) {
+      continue;
+    }
+
+    // 🔥 percorre turmas
+    for (let j = 2; j < novo[i].length; j++) {
+
+      const vNovo = (novo[i][j] || "").trim();
+      const vAntigo = (antigo.dados?.[i]?.[j] || "").trim();
+
+      // 🔥 ignora se não houve mudança
+      if (vNovo === vAntigo) continue;
+
+      // 🔥 ignora células vazias (opcional, mas recomendado)
+      if (!vNovo && !vAntigo) continue;
+
+      const turma = (dadosGlobais[0][j] || "").trim();
+
+      if (!turma) continue;
+
+      const chave = `${diaAtual}__${turma}`;
+
+      if (!agrupado[chave]) {
+        agrupado[chave] = {
+          dia: diaAtual,
+          turma,
+          horarios: new Set() // 🔥 evita duplicidade automaticamente
+        };
+      }
+
+      agrupado[chave].horarios.add(horario);
+    }
+  }
+
+  // 🔥 transforma em array final
+  const listaFinal = Object.values(agrupado).map(item => ({
+    dia: item.dia,
+    turma: item.turma,
+    horarios: Array.from(item.horarios).sort()
+  }));
+
+  // 🔥 ordena por data
+  listaFinal.sort((a, b) => {
+    const [da, ma, aa] = a.dia.split('/');
+    const [db, mb, ab] = b.dia.split('/');
+    return new Date(aa, ma - 1, da) - new Date(ab, mb - 1, db);
+  });
+
+  // 🔥 exibe se houver mudanças
+  if (listaFinal.length > 0) {
+    mostrarAvisoAlteracoes(listaFinal);
+  }
+
+  salvarSnapshotAtual();
+}
+
+function mostrarAvisoAlteracoes(lista) {
+
+  let texto = "⚠️ ALTERAÇÕES DE AULAS DETECTADAS:\n\n";
+
+  lista.forEach(a => {
+
+    const horariosUnicos = [...new Set(a.horarios)];
+
+    texto += `📅 Dia: ${a.dia}\n`;
+    texto += `🏫 Turma: ${a.turma}\n`;
+    texto += `⏰ Horários: ${horariosUnicos.join("; ")}\n\n`;
+  });
+
+  // 🔥 joga no painel ao invés de alert
+  document.getElementById("conteudoAlteracoes").innerText = texto;
+  document.getElementById("painelAlteracoes").style.display = "block";
+}
+
+  function fecharPainel(){
+  document.getElementById("painelAlteracoes").style.display = "none";
+}
+
+function copiarAlteracoes(){
+  const texto = document.getElementById("conteudoAlteracoes").innerText;
+
+  navigator.clipboard.writeText(texto).then(()=>{
+    alert("Copiado!");
+  });
+}
+  
+const FERIADOS=[
+"01/01/2026","16/02/2026","17/02/2026","18/02/2026","03/04/2026","20/04/2026","21/04/2026","01/05/2026",
+"04/06/2026","05/06/2026","07/09/2026","12/10/2026","02/11/2026",
+"15/11/2026","25/12/2026"
+];
+
+function normalizarTexto(txt){
+    return (txt || "")
+        .toString()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "") // remove acentos
+        .replace(/\s+/g, " ") // espaços duplos
+        .trim()
+        .toUpperCase();
+}
+  
+function isFeriado(d){return FERIADOS.includes(d);}
+
+/* 🔥 NOVA FUNÇÃO (BUSCA COM HIGHLIGHT) */
+function filtrarProfessor(){
+  const termo = document.getElementById('searchProf').value.toUpperCase();
+  const tabela = document.getElementById('tabelaHorario');
+  const celulas = tabela.getElementsByTagName('td');
+
+  for(let i=0;i<celulas.length;i++){
+    const td = celulas[i];
+    const txt = td.innerText.toUpperCase();
+
+    /* 🔥 IGNORA COLUNA DE HORÁRIO E CABEÇALHO DO DIA */
+    if(
+      td.classList.contains('time-col') ||
+      td.parentElement.classList.contains('day-divider')
+    ){
+      td.classList.remove('opaco');
+      td.classList.remove('highlight');
+      continue;
+    }
+
+    if(termo && txt.includes(termo)){
+      td.classList.add('highlight');
+      td.classList.remove('opaco');
+    } else if(termo){
+      td.classList.remove('highlight');
+      td.classList.add('opaco');
+    } else {
+      td.classList.remove('highlight');
+      td.classList.remove('opaco');
+    }
+  }
+}
+
+function parseCSV(text){
+return text.split(/\r?\n/).map(l=>{
+let r=[],c='',q=false;
+for(let i=0;i<l.length;i++){
+let ch=l[i];
+if(ch=='"') q=!q;
+else if(ch==','&&!q){r.push(c.trim());c='';}
+else c+=ch;
+}
+r.push(c.trim());
+return r;
+});
+}
+
+async function init(){
+
+/* 🔥 LIMPA A BUSCA AO TROCAR MODALIDADE */
+document.getElementById('searchProf').value="";
+
+const mod=document.getElementById('selectModalidade').value;
+const url=`https://docs.google.com/spreadsheets/d/${SHEETS[mod].id}/export?format=csv&gid=${SHEETS[mod].gid}`;
+const res=await fetch(url);
+
+dadosGlobais = parseCSV(await res.text());
+
+processarDados(); // isso já chama renderizarTabela()
+}
+
+function getCursoInfo(t){
+t=t.toUpperCase();
+if(t.includes("AGROEC")) return {cl:"c-agroec",rgb:[232,245,233]};
+if(t.includes("AGROPEC")) return {cl:"c-agropec",rgb:[227,242,253]};
+if(t.includes("INFO")) return {cl:"c-info",rgb:[255,248,225]};
+if(t.includes("GEO")) return {cl:"c-geo",rgb:[243,229,245]};
+if(t.includes("MAT")) return {cl:"c-mat",rgb:[224,247,250]};
+if(t.includes("AGRONEG")) return {cl:"c-agroneg",rgb:[239,235,233]};
+if(t.includes("ZOO")) return {cl:"c-zoo",rgb:[252,228,236]};
+if(t.includes("AGRON")) return {cl:"c-agron",rgb:[241,248,233]};
+return {cl:"",rgb:[255,255,255]};
+}
+
+function ordenarDatasBR(arr){
+return arr.sort((a,b)=>{
+const pa=a.split('/'),pb=b.split('/');
+return new Date(pa[2],pa[1]-1,pa[0]) - new Date(pb[2],pb[1]-1,pb[0]);
+});
+}
+
+function getSemanaAtual(){
+  const hoje = new Date();
+
+  // calcula segunda-feira da semana atual
+  const dia = hoje.getDay(); // 0 = domingo
+  const diff = hoje.getDate() - dia + (dia === 0 ? -6 : 1);
+
+  const segunda = new Date(hoje.setDate(diff));
+
+  const d = String(segunda.getDate()).padStart(2,'0');
+  const m = String(segunda.getMonth()+1).padStart(2,'0');
+  const a = segunda.getFullYear();
+
+  return `${d}/${m}/${a}`;
+}
+  
+function processarDados(){
+semanasAgrupadas={};
+turmasDaPlanilha=dadosGlobais[0].slice(2).filter(t=>t);
+let ultima="";
+for(let i=1;i<dadosGlobais.length;i++){
+let r=[...dadosGlobais[i]];
+if(r[0]) ultima=r[0];
+r[0]=ultima;
+if(!r[0]) continue;
+
+const [d,m,a]=r[0].split('/');
+const dt=new Date(a,m-1,d);
+const seg=new Date(dt.setDate(dt.getDate()-dt.getDay()+1)).toLocaleDateString('pt-BR');
+
+if(!semanasAgrupadas[seg]) semanasAgrupadas[seg]={dias:{}};
+if(!semanasAgrupadas[seg].dias[r[0]]) semanasAgrupadas[seg].dias[r[0]]=[];
+semanasAgrupadas[seg].dias[r[0]].push(r);
+}
+
+const sel=document.getElementById('selectSemana');
+sel.innerHTML="";
+const semanaAtual = getSemanaAtual();
+
+ordenarDatasBR(Object.keys(semanasAgrupadas)).forEach(s=>{
+  sel.innerHTML+=`<option value="${s}">Semana de ${s}</option>`;
+});
+
+/* 🔥 SELECIONA SEMANA ATUAL SE EXISTIR */
+if(semanasAgrupadas[semanaAtual]){
+  sel.value = semanaAtual;
+}
+
+renderizarTabela();
+}
+
+function getTurmasAtivasNaSemana(dias){
+return turmasDaPlanilha.filter(t=>{
+const idx=dadosGlobais[0].indexOf(t);
+return Object.values(dias).some(d=>d.some(r=>{
+const v=(r[idx]||"").trim();
+return v && v!=="-" && !r[1].toUpperCase().includes("INTERVALO");
+}));
+});
+}
+
+function renderizarTabela(){
+    const sem = document.getElementById('selectSemana').value;
+    const dias = semanasAgrupadas[sem].dias;
+    const container = document.getElementById('tabelaHorario');
+
+    const turmasAtivas = document.getElementById('selectModalidade').value === "SUPERIOR"
+        ? getTurmasAtivasNaSemana(dias)
+        : turmasDaPlanilha;
+
+    const nomes = ["DOMINGO","SEGUNDA-FEIRA","TERÇA-FEIRA","QUARTA-FEIRA","QUINTA-FEIRA","SEXTA-FEIRA","SÁBADO"];
+
+    let html = "";
+
+    // 🔥 Regras de destaque
+    const regrasDestaque = [
+    { match: v => v.includes("RESERVA ENSINO"), classe: "reserva-ensino" },
+    { match: v => v.includes("PPS/ATENDIMENTO"), classe: "pps" },
+    { match: v => v.includes("ESTUDOS INDIVIDUAIS"), classe: "estudos" },
+    { match: v => v.includes("REUNIAO DE SERVIDORES"), classe: "reuniao" },
+    { match: v => v.includes("CAED") || v.includes("PRE-CONSELHO"), classe: "caed" },
+    { match: v => v.includes("_REP -"), classe: "reposicao" }
+];
+
+    Object.keys(dias).forEach(dia => {
+        const p = dia.split('/');
+        const dObj = new Date(p[2], p[1]-1, p[0]);
+
+        if (isFeriado(dia)){
+            html += `<table>
+                <tr class="day-divider">
+                    <td colspan="${turmasAtivas.length+1}">
+                        ${nomes[dObj.getDay()]} - ${dia}
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="${turmasAtivas.length+1}" class="feriado">
+                        FERIADO
+                    </td>
+                </tr>
+            </table><br>`;
+            return;
+        }
+
+        html += `<table>`;
+        html += `<tr class="day-divider">
+                    <td colspan="${turmasAtivas.length+1}">
+                        ${nomes[dObj.getDay()]} - ${dia}
+                    </td>
+                 </tr>`;
+
+        html += `<tr>
+                    <th class="time-col">Horário</th>`;
+
+        turmasAtivas.forEach(t => {
+            html += `<th class="${getCursoInfo(t).cl}">${t}</th>`;
+        });
+
+        html += `</tr>`;
+
+        dias[dia].forEach(r => {
+            const isInt = r[1].toUpperCase().includes("INTERVALO");
+            const linhaVazia = r.slice(2).every(v => !v || v.trim() === "");
+
+            html += `<tr class="${isInt ? 'intervalo' : ''} ${linhaVazia ? 'linha-vazia' : ''}">
+                        <td class="time-col">${r[1]}</td>`;
+
+            turmasAtivas.forEach(t => {
+                const idx = dadosGlobais[0].indexOf(t);
+                let val = (r[idx] || "").trim();
+
+                let classesExtras = [];
+
+const valNorm = normalizarTexto(val);
+
+regrasDestaque.forEach(regra => {
+    if (regra.match(valNorm)) {
+        classesExtras.push(regra.classe);
+    }
+});
+              
+                // 🔥 manter regras antigas
+               if (
+    val.includes("[+]") ||
+    val.includes("*") ||
+    val.includes("[R]") ||
+    valNorm.includes("INTERVALO")
+) {
+    classesExtras.push("marcacao-extra");
+}
+
+                html += `<td class="aula-cell ${getCursoInfo(t).cl} ${classesExtras.join(" ")}">
+                            ${val}
+                         </td>`;
+            });
+
+            html += `</tr>`;
+        });
+
+        html += `</table><br>`;
+    });
+
+    container.innerHTML = html;
+  criarBotoesDias();
+verificarMudancaAoAbrir();
+salvarSnapshotAtual();
+}
+
+  const coresPDF = {
+    "reserva-ensino": [212, 237, 218], // verde claro
+    "pps": [11, 61, 145], // azul escuro (texto)
+    "estudos": [255, 229, 180], // laranja claro
+    "reuniao": [208, 235, 255], // azul claro
+    "caed": [255, 243, 205], // amarelo
+    "reposicao": [30, 126, 52], // verde escuro
+    "marcacao-extra": [224, 224, 224]
+};
+
+function coletarVagasDoDia(dia) {
+  const sem = document.getElementById('selectSemana').value;
+  const dias = semanasAgrupadas[sem].dias;
+
+  const vagas = [];
+
+  if (!dias[dia]) return vagas;
+
+  dias[dia].forEach(r => {
+    const horario = r[1];
+
+    turmasDaPlanilha.forEach(turma => {
+      const idx = dadosGlobais[0].indexOf(turma);
+      const val = (r[idx] || "").toUpperCase();
+
+      if (
+        val.includes("RESERVA ENSINO") ||
+        val.includes("ESTUDOS INDIVIDUAIS")
+      ) {
+        vagas.push({
+          turma,
+          horario
+        });
+      }
+    });
+  });
+
+  return vagas;
+}
+
+function gerarRelatorioDia(dia) {
+  const vagas = coletarVagasDoDia(dia);
+
+  let texto = `Olá Professores, na data de hoje (${dia}), identificamos várias turmas com aulas vagas. Segue a lista das turmas e horários.\n\n`;
+
+  if (vagas.length === 0) {
+    texto += "Não há aulas vagas no dia informado.";
+    return texto;
+  }
+
+  // 🔥 AGRUPAMENTO
+  const agrupado = {};
+
+  vagas.forEach(v => {
+    if (!agrupado[v.turma]) {
+      agrupado[v.turma] = [];
+    }
+
+    agrupado[v.turma].push(v.horario);
+  });
+
+  // 🔥 MONTAGEM FINAL
+  Object.keys(agrupado).forEach(turma => {
+
+    const horariosUnicos = [...new Set(agrupado[turma])];
+
+    texto += `📅 DATA: ${dia}\n`;
+    texto += `🏫 TURMA: ${turma}\n`;
+    texto += `⏰ AULAS VAGAS: ${horariosUnicos.join(", ")}\n\n`;
+  });
+
+  return texto;
+}
+
+function copiarRelatorioDia(dia) {
+  const texto = gerarRelatorioDia(dia);
+
+  navigator.clipboard.writeText(texto).then(() => {
+    alert("Relatório copiado para área de transferência!");
+  });
+}
+
+function gerarRelatorioSemana() {
+  const sem = document.getElementById('selectSemana').value;
+  const dias = semanasAgrupadas[sem].dias;
+
+  let texto = `Olá Professores, identificamos várias turmas com aula vaga esta semana. Segue a lista dos dias, turmas e horários.\n\n`;
+
+  const agrupado = {};
+
+  // 🔥 AGRUPA DIA + TURMA
+  Object.keys(dias).forEach(dia => {
+    const vagas = coletarVagasDoDia(dia);
+
+    vagas.forEach(v => {
+      const chave = `${dia}__${v.turma}`;
+
+      if (!agrupado[chave]) {
+        agrupado[chave] = {
+          dia,
+          turma: v.turma,
+          horarios: []
+        };
+      }
+
+      agrupado[chave].horarios.push(v.horario);
+    });
+  });
+
+  const listaFinal = Object.values(agrupado);
+
+  if (listaFinal.length === 0) {
+    texto += "Não há aulas vagas na semana.";
+    navigator.clipboard.writeText(texto);
+    alert("Relatório semanal copiado!");
+    return;
+  }
+
+  // 🔥 ORGANIZA POR DIA
+  listaFinal.sort((a, b) => {
+    const [da, ma, aa] = a.dia.split('/');
+    const [db, mb, ab] = b.dia.split('/');
+    return new Date(aa, ma-1, da) - new Date(ab, mb-1, db);
+  });
+
+  let diaAtual = "";
+
+  listaFinal.forEach(item => {
+
+    // 🔥 quebra por dia
+    if (item.dia !== diaAtual) {
+      texto += `📅 DATA: ${item.dia}\n\n`;
+      diaAtual = item.dia;
+    }
+
+    const horariosUnicos = [...new Set(item.horarios)];
+
+    texto += `🏫 TURMA: ${item.turma}\n`;
+    texto += `⏰ AULAS VAGAS: ${horariosUnicos.join(", ")}\n\n`;
+  });
+
+  navigator.clipboard.writeText(texto).then(() => {
+    alert("Relatório semanal copiado!");
+  });
+}
+  
+function exportarPDF(){
+const { jsPDF } = window.jspdf;
+const pdf = new jsPDF('l','mm','a4');
+
+const sem = document.getElementById('selectSemana').value;
+const diasObj = semanasAgrupadas[sem].dias;
+
+const turmasAtivas = document.getElementById('selectModalidade').value === "SUPERIOR"
+? getTurmasAtivasNaSemana(diasObj)
+: turmasDaPlanilha;
+
+const nomes = ["DOMINGO","SEGUNDA-FEIRA","TERÇA-FEIRA","QUARTA-FEIRA","QUINTA-FEIRA","SEXTA-FEIRA","SÁBADO"];
+
+/* 🔥 CORES PDF */
+const coresPDF = {
+    "reserva-ensino": [212,237,218],
+    "pps": [11,61,145],
+    "estudos": [255,229,180],
+    "reuniao": [208,235,255],
+    "caed": [255,243,205],
+    "reposicao": [30,126,52],
+    "marcacao-extra": [224,224,224]
+};
+
+/* 🔥 DETECÇÃO DE CLASSE */
+function detectarClasse(valor){
+    let valNorm = normalizarTexto(valor);
+
+    if(valNorm.includes("RESERVA ENSINO")) return "reserva-ensino";
+    if(valNorm.includes("PPS/ATENDIMENTO")) return "pps";
+    if(valNorm.includes("ESTUDOS INDIVIDUAIS")) return "estudos";
+    if(valNorm.includes("REUNIAO DE SERVIDORES")) return "reuniao";
+    if(valNorm.includes("CAED") || valNorm.includes("PRE-CONSELHO")) return "caed";
+    if(valNorm.includes("_REP -")) return "reposicao";
+
+    if(
+        valNorm.includes("[+]") ||
+        valNorm.includes("*") ||
+        valNorm.includes("[R]") ||
+        valNorm.includes("INTERVALO")
+    ){
+        return "marcacao-extra";
+    }
+
+    return null;
+}
+
+Object.keys(diasObj).forEach((dia,i)=>{
+
+if(i>0) pdf.addPage();
+
+const pageWidth = pdf.internal.pageSize.getWidth();
+
+/* =========================
+   🔥 SEU CABEÇALHO ORIGINAL
+========================= */
+pdf.setFontSize(9);
+pdf.text("INSTITUTO FEDERAL DE EDUCAÇÃO, CIÊNCIA E TECNOLOGIA DE RONDÔNIA - IFRO",pageWidth/2,8,{align:'center'});
+pdf.text("CAMPUS CACOAL - Departamento de Apoio ao Ensino - DAPE",pageWidth/2,12,{align:'center'});
+pdf.text(`SEMANA: ${sem}`,pageWidth/2,16,{align:'center'});
+
+/* DIA */
+const p = dia.split('/');
+const dObj = new Date(p[2],p[1]-1,p[0]);
+
+pdf.setFontSize(14);
+pdf.setTextColor(46,125,50);
+pdf.setFont(undefined,'bold');
+pdf.text(`${nomes[dObj.getDay()]} - ${dia}`, pageWidth/2, 24, {align:'center'});
+pdf.setTextColor(0,0,0);
+pdf.setFont(undefined,'normal');
+
+/* FERIADO */
+if(isFeriado(dia)){
+pdf.setFontSize(60);
+pdf.text("FERIADO", pageWidth/2, 100, {align:'center'});
+return;
+}
+
+/* DADOS */
+const body = diasObj[dia].map(r=>{
+let line=[r[1]];
+turmasAtivas.forEach(t=>{
+const idx = dadosGlobais[0].indexOf(t);
+line.push((r[idx]||"").trim());
+});
+return line;
+});
+
+/* =========================
+   🔥 TABELA OTIMIZADA
+========================= */
+pdf.autoTable({
+head:[['Horário',...turmasAtivas]],
+body:body,
+startY:28,
+
+theme:'grid',
+
+/* 🔥 MARGENS 0,2cm (2mm) */
+margin:{ top: 28, left: 2, right: 2, bottom: 2 },
+
+/* 🔥 GRADE MAIS LEVE */
+tableLineColor:[200,200,200],
+tableLineWidth:0.1,
+
+styles:{
+fontSize:4.5,
+halign:'center',
+valign:'middle',
+cellPadding:1
+},
+
+/* 🔥 CABEÇALHO LIMPO */
+headStyles:{
+fillColor:[46,125,50],
+textColor:[0,0,0],
+fontStyle:'bold',
+lineColor:[200,200,200],
+lineWidth:0.1
+},
+
+/* 🔥 COLUNA HORÁRIO MENOR */
+columnStyles:{
+0:{ cellWidth:16 }
+},
+
+didParseCell:(data)=>{
+
+const col = data.column.index;
+
+/* cores por curso */
+if(col>0){
+const curso = getCursoInfo(turmasAtivas[col-1]);
+data.cell.styles.fillColor = curso.rgb;
+}
+
+/* regras de destaque */
+const txt = (data.cell.raw||"").toString();
+const classe = detectarClasse(txt);
+
+if(classe && coresPDF[classe]){
+data.cell.styles.fillColor = coresPDF[classe];
+
+if(classe==="pps" || classe==="reposicao"){
+data.cell.styles.textColor=[255,255,255];
+data.cell.styles.fontStyle="bold";
+}
+}
+
+/* 🔥 LINHAS VAZIAS MENOR POSSÍVEL */
+const vazio = data.row.raw.slice(1).every(v=>!v||v.trim()==="");
+
+if(vazio){
+data.cell.styles.minCellHeight = 1.5;
+data.cell.styles.fontSize = 3.5;
+}
+
+/* intervalo leve */
+const t = txt.toUpperCase();
+if(t.includes("INTERVALO")||t.includes("[+]")||t.includes("*")||t.includes("[R]")){
+data.cell.styles.fillColor=[235,235,235];
+}
+}
+});
+
+/* =========================
+   🔥 SEU RODAPÉ ORIGINAL
+========================= */
+pdf.setFontSize(8);
+pdf.text(
+"IFRO - Campus Cacoal | BR 364, Km 228, Lote 2-A | (69) 3443-2445 | dape.cacoal@ifro.edu.br",
+pageWidth/2,
+205,
+{align:'center'}
+);
+
+});
+
+const mod = document.getElementById('selectModalidade').value;
+const nomeArquivo = `HORÁRIO ${mod} - SEMANA DE ${sem}`;
+pdf.save(nomeArquivo);
+}
+
+function criarBotoesDias() {
+  const sem = document.getElementById('selectSemana').value;
+  const dias = semanasAgrupadas[sem].dias;
+
+  let html = `
+    <div style="padding:10px;display:flex;gap:10px;flex-wrap:wrap;">
+  `;
+
+  Object.keys(dias).forEach(dia => {
+    html += `
+      <button onclick="copiarRelatorioDia('${dia}')"
+        style="padding:10px;background:#2e7d32;color:white;border:none;border-radius:6px;cursor:pointer;">
+        📅 ${dia}
+      </button>
+    `;
+  });
+
+  html += `
+      <button onclick="gerarRelatorioSemana()"
+        style="padding:10px;background:#d32f2f;color:white;border:none;border-radius:6px;cursor:pointer;">
+        📊 Semana inteira
+      </button>
+    </div>
+  `;
+
+  document.getElementById("botoesRelatorio").innerHTML = html;
+}
+
+window.addEventListener("beforeunload", () => {
+  salvarSnapshotAtual();
+});
+  
+window.onload=init;
+</script>
 
 </body>
 </html>
