@@ -344,28 +344,23 @@ function valorMudou(v1, v2){
   
 function verificarMudancaAoAbrir() {
 
-  const antigo = obterSnapshotAntigo();
+  const sem = document.getElementById('selectSemana').value;
+  const mod = document.getElementById('selectModalidade').value;
 
-  // 🔥 se trocou modalidade, NÃO salvar ainda
-  if (window.trocouModalidade) {
-    window.trocouModalidade = false;
+  const chave = `snapshot_${mod}_${sem}`;
 
-    // só salva se NÃO existir snapshot ainda
-    if (!antigo) {
-      salvarSnapshotAtual();
-    }
+  const antigoRaw = localStorage.getItem(chave);
 
-    return;
-  }
-
-  if (!antigo) {
+  // 🔥 Se não existe snapshot → salva e sai
+  if (!antigoRaw) {
     salvarSnapshotAtual();
     return;
   }
 
+  const antigo = JSON.parse(antigoRaw);
   const novo = dadosGlobais;
-  const agrupado = {};
 
+  const agrupado = {};
   let ultimoDia = "";
 
   for (let i = 1; i < novo.length; i++) {
@@ -379,7 +374,7 @@ function verificarMudancaAoAbrir() {
     const horario = (novo[i][1] || "").trim();
     const horarioNorm = normalizarTexto(horario);
 
-    // 🔥 IGNORA INTERVALO E MARCAÇÕES
+    // 🔥 IGNORA INTERVALO
     if (
       !horario ||
       horarioNorm.includes("INTERVALO") ||
@@ -398,10 +393,10 @@ function verificarMudancaAoAbrir() {
       const turma = (dadosGlobais[0][j] || "").trim();
       if (!turma) continue;
 
-      const chave = `${diaAtual}__${turma}__${horario}`;
+      const chaveItem = `${diaAtual}__${turma}__${horario}`;
 
-      if (!agrupado[chave]) {
-        agrupado[chave] = {
+      if (!agrupado[chaveItem]) {
+        agrupado[chaveItem] = {
           dia: diaAtual,
           turma,
           horario,
@@ -409,7 +404,7 @@ function verificarMudancaAoAbrir() {
         };
       }
 
-      agrupado[chave].alteracoes.push({
+      agrupado[chaveItem].alteracoes.push({
         antes: vAntigo || "(vazio)",
         depois: vNovo || "(vazio)"
       });
@@ -418,14 +413,10 @@ function verificarMudancaAoAbrir() {
 
   const listaFinal = Object.values(agrupado);
 
-  listaFinal.sort((a, b) => {
-    const [da, ma, aa] = a.dia.split('/');
-    const [db, mb, ab] = b.dia.split('/');
-    return new Date(aa, ma - 1, da) - new Date(ab, mb - 1, db);
-  });
-
   if (listaFinal.length > 0) {
     mostrarAvisoAlteracoes(listaFinal);
+  } else {
+    document.getElementById("painelAlteracoes").style.display = "none";
   }
 
   salvarSnapshotAtual();
@@ -531,9 +522,15 @@ return r;
 
 async function init(){
 
-  document.getElementById('searchProf').value="";
+  document.getElementById('searchProf').value = "";
 
   const mod = document.getElementById('selectModalidade').value;
+
+  // 🔥 LIMPA PAINEL ao trocar
+  document.getElementById("painelAlteracoes").style.display = "none";
+
+  // 🔥 FLAG DE TROCA
+  window.trocouModalidade = true;
 
   const url = `https://docs.google.com/spreadsheets/d/${SHEETS[mod].id}/export?format=csv&gid=${SHEETS[mod].gid}`;
   const res = await fetch(url);
@@ -541,8 +538,12 @@ async function init(){
   dadosGlobais = parseCSV(await res.text());
 
   processarDados();
-}
 
+  // 🔥 GARANTE verificação após tudo carregado
+  setTimeout(() => {
+    verificarMudancaAoAbrir();
+  }, 200);
+}
 function getCursoInfo(t){
 t=t.toUpperCase();
 if(t.includes("AGROEC")) return {cl:"c-agroec",rgb:[232,245,233]};
@@ -727,7 +728,6 @@ regrasDestaque.forEach(regra => {
 
     container.innerHTML = html;
   criarBotoesDias();
-verificarMudancaAoAbrir();
 }
 
   const coresPDF = {
