@@ -408,16 +408,19 @@ function mostrarAvisoAlteracoes(lista) {
 
   let texto = "⚠️ ALTERAÇÕES DE AULAS DETECTADAS:\n\n";
 
-  lista.forEach(a => {
+  lista.forEach(item => {
 
-    const horariosUnicos = [...new Set(a.horarios)];
+    texto += `📅 Dia: ${item.dia}\n`;
+    texto += `🏫 Turma: ${item.turma}\n`;
+    texto += `⏰ Horário: ${item.horario}\n`;
 
-    texto += `📅 Dia: ${a.dia}\n`;
-    texto += `🏫 Turma: ${a.turma}\n`;
-    texto += `⏰ Horários: ${horariosUnicos.join("; ")}\n\n`;
+    item.alteracoes.forEach(a => {
+      texto += `➡️ ${a.antes} → ${a.depois}\n`;
+    });
+
+    texto += "\n";
   });
 
-  // 🔥 joga no painel ao invés de alert
   document.getElementById("conteudoAlteracoes").innerText = texto;
   document.getElementById("painelAlteracoes").style.display = "block";
 }
