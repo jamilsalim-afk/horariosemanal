@@ -219,8 +219,52 @@ placeholder="🔍 Buscar Professor..." onkeyup="filtrarProfessor()">
 </div>
 
 <div class="week-container">
+
+<!-- 🔥 BOTÕES NOVOS -->
+<div id="botoesRelatorio"></div>
+
+<div id="painelAlteracoes" style="
+  display:none;
+  background:white;
+  border-left:6px solid #d32f2f;
+  padding:15px;
+  margin:10px;
+  border-radius:8px;
+  max-height:300px;
+  overflow-y:auto;
+  box-shadow:0 2px 10px rgba(0,0,0,0.2);
+">
+  <div style="display:flex;justify-content:space-between;align-items:center;">
+    <strong>⚠️ Alterações Detectadas</strong>
+    <button onclick="fecharPainel()" style="
+      background:#d32f2f;color:white;border:none;
+      padding:5px 10px;border-radius:5px;cursor:pointer;">
+      ✖
+    </button>
+  </div>
+
+  <pre id="conteudoAlteracoes" style="
+    white-space:pre-wrap;
+    font-size:12px;
+    margin-top:10px;
+  "></pre>
+
+  <button onclick="copiarAlteracoes()" style="
+    margin-top:10px;
+    padding:8px;
+    background:#2e7d32;
+    color:white;
+    border:none;
+    border-radius:5px;
+    cursor:pointer;">
+    📋 Copiar
+  </button>
+</div>
+
 <div class="table-responsive" id="tabelaHorario"></div>
 </div>
+
+
 
 <footer class="ifro-footer">
 IFRO - Campus Cacoal<br>
@@ -236,6 +280,161 @@ SUPERIOR:{id:'14ALXZgFIT68ee9ajuIdG63SpGVm0HyTjwp63-J6vRyg',gid:'669887707'}
 
 let dadosGlobais=[],turmasDaPlanilha=[],semanasAgrupadas={};
 
+  function isSemanaPassada(dataStr){
+  const [d,m,a] = dataStr.split('/');
+  const data = new Date(a, m-1, d);
+
+  const hoje = new Date();
+
+  // pega segunda-feira da semana atual
+  const dia = hoje.getDay();
+  const diff = hoje.getDate() - dia + (dia === 0 ? -6 : 1);
+  const segundaAtual = new Date(hoje.setDate(diff));
+
+  return data < segundaAtual;
+}
+  
+function salvarSnapshotAtual() {
+  const sem = document.getElementById('selectSemana').value;
+
+  const snapshot = {
+    tempo: new Date().toISOString(),
+    dados: dadosGlobais
+  };
+
+  localStorage.setItem("snapshot_" + sem, JSON.stringify(snapshot));
+}
+
+function obterSnapshotAntigo() {
+  const sem = document.getElementById('selectSemana').value;
+
+  const data = localStorage.getItem("snapshot_" + sem);
+  return data ? JSON.parse(data) : null;
+}
+
+function verificarMudancaAoAbrir() {
+
+  const antigo = obterSnapshotAntigo();
+
+  // 🔥 primeira execução → só salva snapshot
+  if (!antigo) {
+    salvarSnapshotAtual();
+    return;
+  }
+
+  const novo = dadosGlobais;
+  const agrupado = {};
+
+  let ultimoDia = "";
+
+  for (let i = 1; i < novo.length; i++) {
+
+    // mantém o dia corretamente
+    if (novo[i][0]) ultimoDia = novo[i][0];
+    const diaAtual = ultimoDia;
+
+    if (!diaAtual) continue;
+
+    // 🔥 ignora semanas passadas
+    if (isSemanaPassada(diaAtual)) continue;
+
+    const horario = (novo[i][1] || "").trim();
+
+    // 🔥 ignora linhas inválidas ou não-aula
+    const horarioNorm = normalizarTexto(horario);
+
+    if (
+      !horario ||
+      horarioNorm.includes("INTERVALO") ||
+      horarioNorm.includes("[+]") ||
+      horarioNorm.includes("*") ||
+      horarioNorm.includes("[R]")
+    ) {
+      continue;
+    }
+
+    // 🔥 percorre turmas
+    for (let j = 2; j < novo[i].length; j++) {
+
+      const vNovo = (novo[i][j] || "").trim();
+      const vAntigo = (antigo.dados?.[i]?.[j] || "").trim();
+
+      // 🔥 ignora se não houve mudança
+      if (vNovo === vAntigo) continue;
+
+      // 🔥 ignora células vazias (opcional, mas recomendado)
+      if (!vNovo && !vAntigo) continue;
+
+      const turma = (dadosGlobais[0][j] || "").trim();
+
+      if (!turma) continue;
+
+      const chave = `${diaAtual}__${turma}`;
+
+      if (!agrupado[chave]) {
+        agrupado[chave] = {
+          dia: diaAtual,
+          turma,
+          horarios: new Set() // 🔥 evita duplicidade automaticamente
+        };
+      }
+
+      agrupado[chave].horarios.add(horario);
+    }
+  }
+
+  // 🔥 transforma em array final
+  const listaFinal = Object.values(agrupado).map(item => ({
+    dia: item.dia,
+    turma: item.turma,
+    horarios: Array.from(item.horarios).sort()
+  }));
+
+  // 🔥 ordena por data
+  listaFinal.sort((a, b) => {
+    const [da, ma, aa] = a.dia.split('/');
+    const [db, mb, ab] = b.dia.split('/');
+    return new Date(aa, ma - 1, da) - new Date(ab, mb - 1, db);
+  });
+
+  // 🔥 exibe se houver mudanças
+  if (listaFinal.length > 0) {
+    mostrarAvisoAlteracoes(listaFinal);
+  }
+
+  salvarSnapshotAtual();
+}
+
+function mostrarAvisoAlteracoes(lista) {
+
+  let texto = "⚠️ ALTERAÇÕES DE AULAS DETECTADAS:\n\n";
+
+  lista.forEach(a => {
+
+    const horariosUnicos = [...new Set(a.horarios)];
+
+    texto += `📅 Dia: ${a.dia}\n`;
+    texto += `🏫 Turma: ${a.turma}\n`;
+    texto += `⏰ Horários: ${horariosUnicos.join("; ")}\n\n`;
+  });
+
+  // 🔥 joga no painel ao invés de alert
+  document.getElementById("conteudoAlteracoes").innerText = texto;
+  document.getElementById("painelAlteracoes").style.display = "block";
+}
+
+  function fecharPainel(){
+  document.getElementById("painelAlteracoes").style.display = "none";
+}
+
+function copiarAlteracoes(){
+  const texto = document.getElementById("conteudoAlteracoes").innerText;
+
+  navigator.clipboard.writeText(texto).then(()=>{
+    alert("Copiado!");
+  });
+}
+  
 const FERIADOS=[
 "01/01/2026","16/02/2026","17/02/2026","18/02/2026","03/04/2026","20/04/2026","21/04/2026","01/05/2026",
 "04/06/2026","05/06/2026","07/09/2026","12/10/2026","02/11/2026",
@@ -309,8 +508,10 @@ document.getElementById('searchProf').value="";
 const mod=document.getElementById('selectModalidade').value;
 const url=`https://docs.google.com/spreadsheets/d/${SHEETS[mod].id}/export?format=csv&gid=${SHEETS[mod].gid}`;
 const res=await fetch(url);
-dadosGlobais=parseCSV(await res.text());
-processarDados();
+
+dadosGlobais = parseCSV(await res.text());
+
+processarDados(); // isso já chama renderizarTabela()
 }
 
 function getCursoInfo(t){
@@ -496,6 +697,9 @@ regrasDestaque.forEach(regra => {
     });
 
     container.innerHTML = html;
+  criarBotoesDias();
+verificarMudancaAoAbrir();
+salvarSnapshotAtual();
 }
 
   const coresPDF = {
@@ -508,6 +712,142 @@ regrasDestaque.forEach(regra => {
     "marcacao-extra": [224, 224, 224]
 };
 
+function coletarVagasDoDia(dia) {
+  const sem = document.getElementById('selectSemana').value;
+  const dias = semanasAgrupadas[sem].dias;
+
+  const vagas = [];
+
+  if (!dias[dia]) return vagas;
+
+  dias[dia].forEach(r => {
+    const horario = r[1];
+
+    turmasDaPlanilha.forEach(turma => {
+      const idx = dadosGlobais[0].indexOf(turma);
+      const val = (r[idx] || "").toUpperCase();
+
+      if (
+        val.includes("RESERVA ENSINO") ||
+        val.includes("ESTUDOS INDIVIDUAIS")
+      ) {
+        vagas.push({
+          turma,
+          horario
+        });
+      }
+    });
+  });
+
+  return vagas;
+}
+
+function gerarRelatorioDia(dia) {
+  const vagas = coletarVagasDoDia(dia);
+
+  let texto = `Olá Professores, na data de hoje (${dia}), identificamos várias turmas com aulas vagas. Segue a lista das turmas e horários.\n\n`;
+
+  if (vagas.length === 0) {
+    texto += "Não há aulas vagas no dia informado.";
+    return texto;
+  }
+
+  // 🔥 AGRUPAMENTO
+  const agrupado = {};
+
+  vagas.forEach(v => {
+    if (!agrupado[v.turma]) {
+      agrupado[v.turma] = [];
+    }
+
+    agrupado[v.turma].push(v.horario);
+  });
+
+  // 🔥 MONTAGEM FINAL
+  Object.keys(agrupado).forEach(turma => {
+
+    const horariosUnicos = [...new Set(agrupado[turma])];
+
+    texto += `📅 DATA: ${dia}\n`;
+    texto += `🏫 TURMA: ${turma}\n`;
+    texto += `⏰ AULAS VAGAS: ${horariosUnicos.join(", ")}\n\n`;
+  });
+
+  return texto;
+}
+
+function copiarRelatorioDia(dia) {
+  const texto = gerarRelatorioDia(dia);
+
+  navigator.clipboard.writeText(texto).then(() => {
+    alert("Relatório copiado para área de transferência!");
+  });
+}
+
+function gerarRelatorioSemana() {
+  const sem = document.getElementById('selectSemana').value;
+  const dias = semanasAgrupadas[sem].dias;
+
+  let texto = `Olá Professores, identificamos várias turmas com aula vaga esta semana. Segue a lista dos dias, turmas e horários.\n\n`;
+
+  const agrupado = {};
+
+  // 🔥 AGRUPA DIA + TURMA
+  Object.keys(dias).forEach(dia => {
+    const vagas = coletarVagasDoDia(dia);
+
+    vagas.forEach(v => {
+      const chave = `${dia}__${v.turma}`;
+
+      if (!agrupado[chave]) {
+        agrupado[chave] = {
+          dia,
+          turma: v.turma,
+          horarios: []
+        };
+      }
+
+      agrupado[chave].horarios.push(v.horario);
+    });
+  });
+
+  const listaFinal = Object.values(agrupado);
+
+  if (listaFinal.length === 0) {
+    texto += "Não há aulas vagas na semana.";
+    navigator.clipboard.writeText(texto);
+    alert("Relatório semanal copiado!");
+    return;
+  }
+
+  // 🔥 ORGANIZA POR DIA
+  listaFinal.sort((a, b) => {
+    const [da, ma, aa] = a.dia.split('/');
+    const [db, mb, ab] = b.dia.split('/');
+    return new Date(aa, ma-1, da) - new Date(ab, mb-1, db);
+  });
+
+  let diaAtual = "";
+
+  listaFinal.forEach(item => {
+
+    // 🔥 quebra por dia
+    if (item.dia !== diaAtual) {
+      texto += `📅 DATA: ${item.dia}\n\n`;
+      diaAtual = item.dia;
+    }
+
+    const horariosUnicos = [...new Set(item.horarios)];
+
+    texto += `🏫 TURMA: ${item.turma}\n`;
+    texto += `⏰ AULAS VAGAS: ${horariosUnicos.join(", ")}\n\n`;
+  });
+
+  navigator.clipboard.writeText(texto).then(() => {
+    alert("Relatório semanal copiado!");
+  });
+}
+  
 function exportarPDF(){
 const { jsPDF } = window.jspdf;
 const pdf = new jsPDF('l','mm','a4');
@@ -692,6 +1032,38 @@ const nomeArquivo = `HORÁRIO ${mod} - SEMANA DE ${sem}`;
 pdf.save(nomeArquivo);
 }
 
+function criarBotoesDias() {
+  const sem = document.getElementById('selectSemana').value;
+  const dias = semanasAgrupadas[sem].dias;
+
+  let html = `
+    <div style="padding:10px;display:flex;gap:10px;flex-wrap:wrap;">
+  `;
+
+  Object.keys(dias).forEach(dia => {
+    html += `
+      <button onclick="copiarRelatorioDia('${dia}')"
+        style="padding:10px;background:#2e7d32;color:white;border:none;border-radius:6px;cursor:pointer;">
+        📅 ${dia}
+      </button>
+    `;
+  });
+
+  html += `
+      <button onclick="gerarRelatorioSemana()"
+        style="padding:10px;background:#d32f2f;color:white;border:none;border-radius:6px;cursor:pointer;">
+        📊 Semana inteira
+      </button>
+    </div>
+  `;
+
+  document.getElementById("botoesRelatorio").innerHTML = html;
+}
+
+window.addEventListener("beforeunload", () => {
+  salvarSnapshotAtual();
+});
+  
 window.onload=init;
 </script>
 
