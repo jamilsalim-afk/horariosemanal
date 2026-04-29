@@ -204,7 +204,7 @@ tr.linha-vazia td {
 
 <div class="header-sticky">
 <div class="controls-card">
-<select id="selectModalidade" onchange="init()">
+<select id="selectModalidade" onchange="trocarModalidade()">
 <option value="INTEGRADO">CURSOS TÉCNICOS INTEGRADOS</option>
 <option value="SUPERIOR">CURSOS SUPERIORES</option>
 </select>
@@ -264,8 +264,6 @@ placeholder="🔍 Buscar Professor..." onkeyup="filtrarProfessor()">
 <div class="table-responsive" id="tabelaHorario"></div>
 </div>
 
-
-
 <footer class="ifro-footer">
 IFRO - Campus Cacoal<br>
 BR 364, Km 228, Lote 2-A - Zona Rural<br>
@@ -293,7 +291,12 @@ let dadosGlobais=[],turmasDaPlanilha=[],semanasAgrupadas={};
 
   return data < segundaAtual;
 }
-  
+
+function trocarModalidade(){
+  window.trocouModalidade = true;
+  init();
+}
+
 function salvarSnapshotAtual() {
   const sem = document.getElementById('selectSemana').value;
   const mod = document.getElementById('selectModalidade').value;
@@ -328,6 +331,7 @@ function valorMudou(v1, v2){
   
 function verificarMudancaAoAbrir() {
 
+  // 🔥 evita falso positivo ao trocar modalidade
   if (window.trocouModalidade) {
     salvarSnapshotAtual();
     window.trocouModalidade = false;
@@ -357,6 +361,7 @@ function verificarMudancaAoAbrir() {
     const horario = (novo[i][1] || "").trim();
     const horarioNorm = normalizarTexto(horario);
 
+    // 🔥 IGNORA INTERVALO E MARCAÇÕES
     if (
       !horario ||
       horarioNorm.includes("INTERVALO") ||
@@ -370,7 +375,6 @@ function verificarMudancaAoAbrir() {
       const vNovo = (novo[i][j] || "").trim();
       const vAntigo = (antigo.dados?.[i]?.[j] || "").trim();
 
-      // 🔥 comparação inteligente
       if (!valorMudou(vNovo, vAntigo)) continue;
 
       const turma = (dadosGlobais[0][j] || "").trim();
@@ -396,7 +400,6 @@ function verificarMudancaAoAbrir() {
 
   const listaFinal = Object.values(agrupado);
 
-  // ordena por data
   listaFinal.sort((a, b) => {
     const [da, ma, aa] = a.dia.split('/');
     const [db, mb, ab] = b.dia.split('/');
@@ -513,9 +516,6 @@ async function init(){
   document.getElementById('searchProf').value="";
 
   const mod = document.getElementById('selectModalidade').value;
-
-  // 🔥 marca troca de modalidade
-  window.trocouModalidade = true;
 
   const url = `https://docs.google.com/spreadsheets/d/${SHEETS[mod].id}/export?format=csv&gid=${SHEETS[mod].gid}`;
   const res = await fetch(url);
