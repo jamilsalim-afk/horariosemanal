@@ -1,126 +1,202 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Venda de Tratores</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            background-color: #f4f4f4;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agro Máquinas Brasil</title>
 
-        header {
-            background: #2e7d32;
-            color: white;
-            padding: 20px;
-            text-align: center;
-        }
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
-        nav {
-            background: #1b5e20;
-            padding: 10px;
-            text-align: center;
-        }
+<style>
+body {
+    font-family: Arial;
+    margin: 0;
+    background: #f4f4f4;
+}
 
-        nav a {
-            color: white;
-            margin: 10px;
-            text-decoration: none;
-            font-weight: bold;
-        }
+header {
+    background: #2e7d32;
+    color: white;
+    text-align: center;
+    padding: 20px;
+}
 
-        .banner {
-            background: url('https://images.unsplash.com/photo-tractor') no-repeat center/cover;
-            height: 300px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 2em;
-            font-weight: bold;
-            text-shadow: 2px 2px 5px black;
-        }
+nav {
+    background: #1b5e20;
+    text-align: center;
+    padding: 10px;
+}
 
-        .container {
-            padding: 20px;
-        }
+nav a {
+    color: white;
+    margin: 10px;
+    text-decoration: none;
+    font-weight: bold;
+}
 
-        .card {
-            background: white;
-            padding: 15px;
-            margin: 15px 0;
-            border-radius: 8px;
-            box-shadow: 0px 0px 10px rgba(0,0,0,0.1);
-        }
+.banner {
+    height: 300px;
+    background: url('https://images.unsplash.com/photo-1500382017468-9049fed747ef') center/cover;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    font-size: 2em;
+    text-shadow: 2px 2px 5px black;
+}
 
-        .card img {
-            width: 100%;
-            border-radius: 8px;
-        }
+.container {
+    padding: 20px;
+}
 
-        footer {
-            background: #2e7d32;
-            color: white;
-            text-align: center;
-            padding: 20px;
-        }
+h2 {
+    color: #2e7d32;
+}
 
-        .contact i {
-            margin-right: 8px;
-        }
-    </style>
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+.card {
+    background: white;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0px 0px 10px rgba(0,0,0,0.1);
+}
+
+.card img {
+    width: 100%;
+    border-radius: 8px;
+}
+
+footer {
+    background: #2e7d32;
+    color: white;
+    text-align: center;
+    padding: 20px;
+    margin-top: 20px;
+}
+
+.contact i {
+    margin-right: 8px;
+}
+</style>
 </head>
+
 <body>
 
 <header>
-    <h1>Agro Máquinas Brasil</h1>
-    <p>Venda de Tratores Novos e Usados</p>
+<h1>Agro Máquinas Brasil</h1>
+<p>Tratores, Máquinas e Equipamentos Agrícolas</p>
 </header>
 
 <nav>
-    <a href="#">Início</a>
-    <a href="#">Tratores</a>
-    <a href="#">Contato</a>
+<a href="#">Início</a>
+<a href="#">Produtos</a>
+<a href="#">Contato</a>
 </nav>
 
 <div class="banner">
-    As melhores máquinas para o campo
+Equipamentos para Alta Produtividade
 </div>
 
 <div class="container">
 
-    <h2>Tratores Disponíveis</h2>
+<h2>🚜 Tratores</h2>
+<div class="grid">
+<div class="card">
+<img src="https://images.unsplash.com/photo-tractor-field" alt="">
+<h3>Trator 120cv</h3>
+<p>R$ 250.000</p>
+</div>
 
-    <div class="card">
-        <img src="https://images.unsplash.com/photo-tractor-field" alt="Trator 1">
-        <h3>Trator Modelo X</h3>
-        <p>Potência: 120cv</p>
-        <p>Preço: R$ 250.000</p>
-    </div>
+<div class="card">
+<img src="https://images.unsplash.com/photo-1589927986089-35812388d1f4" alt="">
+<h3>Trator 150cv</h3>
+<p>R$ 320.000</p>
+</div>
+</div>
 
-    <div class="card">
-        <img src="https://images.unsplash.com/photo-farm-tractor" alt="Trator 2">
-        <h3>Trator Modelo Y</h3>
-        <p>Potência: 150cv</p>
-        <p>Preço: R$ 320.000</p>
-    </div>
+<h2>🌾 Colheitadeiras</h2>
+<div class="grid">
+<div class="card">
+<img src="https://images.unsplash.com/photo-1598514982901-ae2c0e7c8c7f" alt="">
+<h3>Colheitadeira Grãos</h3>
+<p>R$ 900.000</p>
+</div>
 
-    <h2>Contato</h2>
+<div class="card">
+<img src="https://images.unsplash.com/photo-1605000797499-95a51c5269ae" alt="">
+<h3>Colheitadeira Moderna</h3>
+<p>R$ 1.200.000</p>
+</div>
+</div>
 
-    <div class="card contact">
-        <p><i class="fas fa-phone"></i> Telefone: (61) 99999-9999</p>
-        <p><i class="fas fa-envelope"></i> Email: contato@agromaquinas.com</p>
-        <p><i class="fas fa-map-marker-alt"></i> Endereço: Brasília - DF</p>
-        <p><i class="fab fa-whatsapp"></i> WhatsApp: (61) 99999-9999</p>
-    </div>
+<h2>🌱 Plantadeiras</h2>
+<div class="grid">
+<div class="card">
+<img src="https://images.unsplash.com/photo-1586773860418-d37222d8fce3" alt="">
+<h3>Plantadeira 8 Linhas</h3>
+<p>R$ 180.000</p>
+</div>
+
+<div class="card">
+<img src="https://images.unsplash.com/photo-1560493676-04071c5f467b" alt="">
+<h3>Plantadeira 12 Linhas</h3>
+<p>R$ 250.000</p>
+</div>
+</div>
+
+<h2>⚙️ Implementos Agrícolas</h2>
+<div class="grid">
+<div class="card">
+<img src="https://images.unsplash.com/photo-1598511728444-07a4c3cfd5e7" alt="">
+<h3>Arado</h3>
+<p>R$ 25.000</p>
+</div>
+
+<div class="card">
+<img src="https://images.unsplash.com/photo-1602524812804-3ec10f8cb5a4" alt="">
+<h3>Grade Aradora</h3>
+<p>R$ 40.000</p>
+</div>
+
+<div class="card">
+<img src="https://images.unsplash.com/photo-1596638787647-904d822d751e" alt="">
+<h3>Pulverizador</h3>
+<p>R$ 75.000</p>
+</div>
+</div>
+
+<h2>🚛 Transporte Agrícola</h2>
+<div class="grid">
+<div class="card">
+<img src="https://images.unsplash.com/photo-1586015555751-63bb77f4326f" alt="">
+<h3>Carreta Agrícola</h3>
+<p>R$ 35.000</p>
+</div>
+
+<div class="card">
+<img src="https://images.unsplash.com/photo-1504215680853-026ed2a45def" alt="">
+<h3>Reboque</h3>
+<p>R$ 20.000</p>
+</div>
+</div>
+
+<h2>📞 Contato</h2>
+<div class="card contact">
+<p><i class="fas fa-phone"></i> (61) 99999-9999</p>
+<p><i class="fab fa-whatsapp"></i> WhatsApp: (61) 99999-9999</p>
+<p><i class="fas fa-envelope"></i> contato@agromaquinas.com</p>
+<p><i class="fas fa-map-marker-alt"></i> Brasília - DF</p>
+</div>
 
 </div>
 
 <footer>
-    <p>&copy; 2026 Agro Máquinas Brasil - Todos os direitos reservados</p>
+<p>&copy; 2026 Agro Máquinas Brasil</p>
 </footer>
 
 </body>
