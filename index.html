@@ -310,13 +310,117 @@ function trocarModalidade(){
   renderizarTabela();
 }
 
+function gerarMapaDados(dados) {
+
+  const mapa = {};
+  let ultimoDia = "";
+
+  for (let i = 1; i < dados.length; i++) {
+
+    const linha = dados[i];
+
+    if (linha[0]) ultimoDia = linha[0];
+    const dia = ultimoDia;
+
+    if (!dia) continue;
+
+    const horario = (linha[1] || "").trim();
+    const horarioNorm = normalizarTexto(horario);
+
+    // ignora lixo
+    if (
+      !horario ||
+      horarioNorm.includes("INTERVALO") ||
+      horarioNorm.includes("[+]") ||
+      horarioNorm.includes("*") ||
+      horarioNorm.includes("[R]")
+    ) continue;
+
+    for (let j = 2; j < linha.length; j++) {
+
+      const turma = (dados[0][j] || "").trim();
+      if (!turma) continue;
+
+      const valor = (linha[j] || "").trim();
+
+      const chave = `${normalizarTexto(dia)}|${horarioNorm}|${normalizarTexto(turma)}`;
+
+      mapa[chave] = {
+        dia,
+        horario,
+        turma,
+        valorOriginal: valor,
+        valorNormalizado: normalizarTexto(valor)
+      };
+    }
+  }
+
+  return mapa;
+}
+
+function compararMapas(mapaAntigo, mapaNovo) {
+
+  const alteracoes = [];
+
+  const todasChaves = new Set([
+    ...Object.keys(mapaAntigo),
+    ...Object.keys(mapaNovo)
+  ]);
+
+  todasChaves.forEach(chave => {
+
+    const antigo = mapaAntigo[chave];
+    const novo = mapaNovo[chave];
+
+    // 🔴 REMOVIDO
+    if (antigo && !novo) {
+      alteracoes.push({
+        tipo: "REMOVIDO",
+        ...antigo,
+        antes: antigo.valorOriginal,
+        depois: "(vazio)"
+      });
+      return;
+    }
+
+    // 🟢 ADICIONADO
+    if (!antigo && novo) {
+      alteracoes.push({
+        tipo: "ADICIONADO",
+        ...novo,
+        antes: "(vazio)",
+        depois: novo.valorOriginal
+      });
+      return;
+    }
+
+    // 🟡 ALTERADO
+    if (antigo.valorNormalizado !== novo.valorNormalizado) {
+      alteracoes.push({
+        tipo: "ALTERADO",
+        dia: novo.dia,
+        horario: novo.horario,
+        turma: novo.turma,
+        antes: antigo.valorOriginal,
+        depois: novo.valorOriginal
+      });
+    }
+  });
+
+  return alteracoes;
+}
+  
+  
 function salvarSnapshotAtual() {
+
   const sem = document.getElementById('selectSemana').value;
   const mod = document.getElementById('selectModalidade').value;
 
+  const mapa = gerarMapaDados(dadosGlobais);
+
   const snapshot = {
     tempo: new Date().toISOString(),
-    dados: dadosGlobais
+    mapa
   };
 
   localStorage.setItem(`snapshot_${mod}_${sem}`, JSON.stringify(snapshot));
@@ -342,101 +446,54 @@ function valorMudou(v1, v2){
   return n1 !== n2;
 }
   
-function verificarMudancaAoAbrir() {
+function verificarMudancaAoAbrir({
+  dados,
+  getSemana,
+  getModalidade
+}) {
 
-  const sem = document.getElementById('selectSemana').value;
-  const mod = document.getElementById('selectModalidade').value;
+  const sem = getSemana();
+  const mod = getModalidade();
 
   const chave = `snapshot_${mod}_${sem}`;
-
   const antigoRaw = localStorage.getItem(chave);
 
-  // 🔥 Se não existe snapshot → salva e sai
+  const mapaNovo = gerarMapaDados(dados);
+
+  // primeira execução
   if (!antigoRaw) {
-    salvarSnapshotAtual();
+    salvarSnapshotAtualRobusto(dados, sem, mod);
     return;
   }
 
-  const antigo = JSON.parse(antigoRaw);
-  const novo = dadosGlobais;
+  const snapshotAntigo = JSON.parse(antigoRaw);
+  const mapaAntigo = snapshotAntigo.mapa || {};
 
-  const agrupado = {};
-  let ultimoDia = "";
+  const alteracoes = compararMapas(mapaAntigo, mapaNovo);
 
-  for (let i = 1; i < novo.length; i++) {
+  // filtro: ignora semanas passadas
+  const filtradas = alteracoes.filter(a => !isSemanaPassada(a.dia));
 
-    if (novo[i][0]) ultimoDia = novo[i][0];
-    const diaAtual = ultimoDia;
-
-    if (!diaAtual) continue;
-    if (isSemanaPassada(diaAtual)) continue;
-
-    const horario = (novo[i][1] || "").trim();
-    const horarioNorm = normalizarTexto(horario);
-
-    // 🔥 IGNORA INTERVALO
-    if (
-      !horario ||
-      horarioNorm.includes("INTERVALO") ||
-      horarioNorm.includes("[+]") ||
-      horarioNorm.includes("*") ||
-      horarioNorm.includes("[R]")
-    ) continue;
-
-    for (let j = 2; j < novo[i].length; j++) {
-
-      const vNovo = (novo[i][j] || "").trim();
-      const vAntigo = (antigo.dados?.[i]?.[j] || "").trim();
-
-      if (!valorMudou(vNovo, vAntigo)) continue;
-
-      const turma = (dadosGlobais[0][j] || "").trim();
-      if (!turma) continue;
-
-      const chaveItem = `${diaAtual}__${turma}__${horario}`;
-
-      if (!agrupado[chaveItem]) {
-        agrupado[chaveItem] = {
-          dia: diaAtual,
-          turma,
-          horario,
-          alteracoes: []
-        };
-      }
-
-      agrupado[chaveItem].alteracoes.push({
-        antes: vAntigo || "(vazio)",
-        depois: vNovo || "(vazio)"
-      });
-    }
-  }
-
-  const listaFinal = Object.values(agrupado);
-
-  if (listaFinal.length > 0) {
-    mostrarAvisoAlteracoes(listaFinal);
+  if (filtradas.length > 0) {
+    mostrarAvisoAlteracoesRobusto(filtradas);
   } else {
     document.getElementById("painelAlteracoes").style.display = "none";
   }
 
-  salvarSnapshotAtual();
+  salvarSnapshotAtualRobusto(dados, sem, mod);
 }
 
-function mostrarAvisoAlteracoes(lista) {
+function mostrarAvisoAlteracoesRobusto(lista) {
 
-  let texto = "⚠️ ALTERAÇÕES DE AULAS DETECTADAS:\n\n";
+  let texto = "⚠️ ALTERAÇÕES DETECTADAS:\n\n";
 
   lista.forEach(item => {
 
     texto += `📅 Dia: ${item.dia}\n`;
     texto += `🏫 Turma: ${item.turma}\n`;
     texto += `⏰ Horário: ${item.horario}\n`;
-
-    item.alteracoes.forEach(a => {
-      texto += `➡️ ${a.antes} → ${a.depois}\n`;
-    });
-
-    texto += "\n";
+    texto += `🔎 Tipo: ${item.tipo}\n`;
+    texto += `➡️ ${item.antes} → ${item.depois}\n\n`;
   });
 
   document.getElementById("conteudoAlteracoes").innerText = texto;
