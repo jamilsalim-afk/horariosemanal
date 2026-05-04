@@ -170,12 +170,12 @@ tr.linha-vazia td {
 }
 
 .estudos {
-    color: ##1e7e34; /* verde escuro */
+    color: #1e7e34; /* verde escuro */
     font-weight: bold;
 }
 
 .reuniao {
-    color: ##fb8c00; /* laranja forte */
+    color: #fb8c00; /* laranja forte */
     font-weight: bold;
 }
 
@@ -462,7 +462,7 @@ function verificarMudancaAoAbrir({
 
   // primeira execução
   if (!antigoRaw) {
-    salvarSnapshotAtualRobusto(dados, sem, mod);
+    salvarSnapshotAtual();
     return;
   }
 
@@ -598,8 +598,12 @@ async function init(){
 
   // 🔥 GARANTE verificação após tudo carregado
   setTimeout(() => {
-    verificarMudancaAoAbrir();
-  }, 200);
+  verificarMudancaAoAbrir({
+    dados: dadosGlobais,
+    getSemana: () => document.getElementById('selectSemana').value,
+    getModalidade: () => document.getElementById('selectModalidade').value
+  });
+}, 100);
 }
 function getCursoInfo(t){
 t=t.toUpperCase();
