@@ -212,7 +212,7 @@ tr.linha-vazia td {
 <select id="selectSemana" onchange="trocarSemana()"></select>
 
 <input type="text" id="searchProf" class="search-box"
-placeholder="🔍 Buscar Professor..." onkeyup="filtrarProfessor()">
+placeholder="🔍 Buscar Professor..." onkeyup="filtrarProfessor(); gerarPreviewProfessor();">
 
 <button class="btn-pdf" onclick="exportarPDF()">📄 Baixe o PDF da Semana</button>
 </div>
@@ -260,6 +260,45 @@ placeholder="🔍 Buscar Professor..." onkeyup="filtrarProfessor()">
     📋 Copiar
   </button>
 </div>
+
+<div id="painelVagas" style="
+  display:none;
+  background:white;
+  border-left:6px solid #2e7d32;
+  padding:15px;
+  margin:10px;
+  border-radius:8px;
+  max-height:300px;
+  overflow-y:auto;
+  box-shadow:0 2px 10px rgba(0,0,0,0.2);
+">
+  <div style="display:flex;justify-content:space-between;">
+    <strong>📅 Aulas Vagas</strong>
+    <button onclick="fecharPainelVagas()" style="
+      background:#d32f2f;color:white;border:none;
+      padding:5px 10px;border-radius:5px;cursor:pointer;">
+      ✖
+    </button>
+  </div>
+
+  <pre id="conteudoVagas" style="
+    white-space:pre-wrap;
+    font-size:12px;
+    margin-top:10px;
+  "></pre>
+
+  <button onclick="copiarVagas()" style="
+    margin-top:10px;
+    padding:8px;
+    background:#2e7d32;
+    color:white;
+    border:none;
+    border-radius:5px;
+    cursor:pointer;">
+    📋 Copiar
+  </button>
+</div>
+
   
 <div class="table-responsive" id="tabelaHorario"></div>
 </div>
@@ -295,6 +334,25 @@ let dadosGlobais=[],turmasDaPlanilha=[],semanasAgrupadas={};
 function limparPainelAlteracoes(){
   document.getElementById("conteudoAlteracoes").innerText = "";
   document.getElementById("painelAlteracoes").style.display = "none";
+}
+
+function mostrarPainelVagas(texto){
+  document.getElementById("conteudoVagas").innerText = texto;
+
+  document.querySelector("#painelVagas strong").innerText = "📅 Aulas Vagas";
+
+  document.getElementById("painelVagas").style.display = "block";
+}
+
+function fecharPainelVagas(){
+  document.getElementById("painelVagas").style.display = "none";
+}
+
+function copiarVagas(){
+  const texto = document.getElementById("conteudoVagas").innerText;
+  navigator.clipboard.writeText(texto).then(()=>{
+    alert("Copiado!");
+  });
 }
   
 function trocarModalidade(){
@@ -462,9 +520,14 @@ function verificarMudancaAoAbrir({
 
   // primeira execução
   if (!antigoRaw) {
-    salvarSnapshotAtual();
-    return;
-  }
+
+  // 🔥 PRIMEIRO ACESSO: NÃO MOSTRA ALTERAÇÕES
+  salvarSnapshotAtual();
+
+  console.log("📌 Snapshot inicial criado — nenhuma comparação feita.");
+
+  return;
+}
 
   const snapshotAntigo = JSON.parse(antigoRaw);
   const mapaAntigo = snapshotAntigo.mapa || {};
@@ -480,7 +543,7 @@ function verificarMudancaAoAbrir({
     document.getElementById("painelAlteracoes").style.display = "none";
   }
 
-  salvarSnapshotAtualRobusto(dados, sem, mod);
+  salvarSnapshotAtual();
 }
 
 function mostrarAvisoAlteracoesRobusto(lista) {
@@ -873,7 +936,7 @@ function copiarRelatorioDia(dia) {
   });
 }
 
-function gerarRelatorioSemana() {
+function gerarRelatorioSemanaTexto() {
   const sem = document.getElementById('selectSemana').value;
   const dias = semanasAgrupadas[sem].dias;
 
@@ -881,7 +944,6 @@ function gerarRelatorioSemana() {
 
   const agrupado = {};
 
-  // 🔥 AGRUPA DIA + TURMA
   Object.keys(dias).forEach(dia => {
     const vagas = coletarVagasDoDia(dia);
 
@@ -904,12 +966,9 @@ function gerarRelatorioSemana() {
 
   if (listaFinal.length === 0) {
     texto += "Não há aulas vagas na semana.";
-    navigator.clipboard.writeText(texto);
-    alert("Relatório semanal copiado!");
-    return;
+    return texto;
   }
 
-  // 🔥 ORGANIZA POR DIA
   listaFinal.sort((a, b) => {
     const [da, ma, aa] = a.dia.split('/');
     const [db, mb, ab] = b.dia.split('/');
@@ -920,7 +979,6 @@ function gerarRelatorioSemana() {
 
   listaFinal.forEach(item => {
 
-    // 🔥 quebra por dia
     if (item.dia !== diaAtual) {
       texto += `📅 DATA: ${item.dia}\n\n`;
       diaAtual = item.dia;
@@ -932,9 +990,7 @@ function gerarRelatorioSemana() {
     texto += `⏰ AULAS VAGAS: ${horariosUnicos.join(", ")}\n\n`;
   });
 
-  navigator.clipboard.writeText(texto).then(() => {
-    alert("Relatório semanal copiado!");
-  });
+  return texto;
 }
   
 function exportarPDF(){
@@ -1120,7 +1176,12 @@ const mod = document.getElementById('selectModalidade').value;
 const nomeArquivo = `HORÁRIO ${mod} - SEMANA DE ${sem}`;
 pdf.save(nomeArquivo);
 }
-
+  
+function abrirRelatorioDia(dia){
+  const texto = gerarRelatorioDia(dia);
+  mostrarPainelVagas(texto);
+}
+  
 function criarBotoesDias() {
   const sem = document.getElementById('selectSemana').value;
   const dias = semanasAgrupadas[sem].dias;
@@ -1131,7 +1192,7 @@ function criarBotoesDias() {
 
   Object.keys(dias).forEach(dia => {
     html += `
-      <button onclick="copiarRelatorioDia('${dia}')"
+      <button onclick="abrirRelatorioDia('${dia}')"
         style="padding:10px;background:#2e7d32;color:white;border:none;border-radius:6px;cursor:pointer;">
         📅 ${dia}
       </button>
@@ -1139,7 +1200,7 @@ function criarBotoesDias() {
   });
 
   html += `
-      <button onclick="gerarRelatorioSemana()"
+      <button onclick="abrirRelatorioSemana()"
         style="padding:10px;background:#d32f2f;color:white;border:none;border-radius:6px;cursor:pointer;">
         📊 Semana inteira
       </button>
@@ -1149,6 +1210,148 @@ function criarBotoesDias() {
   document.getElementById("botoesRelatorio").innerHTML = html;
 }
 
+  function abrirRelatorioSemana(){
+  const texto = gerarRelatorioSemanaTexto();
+  mostrarPainelVagas(texto);
+}
+  
+function gerarGradeProfessor(nomeProf){
+
+  const sem = document.getElementById('selectSemana').value;
+  const dias = semanasAgrupadas[sem].dias;
+
+  const diasSemana = ["SEGUNDA-FEIRA","TERÇA-FEIRA","QUARTA-FEIRA","QUINTA-FEIRA","SEXTA-FEIRA", "SÁBADO"];
+
+  const mapa = {}; // horario -> {dia: valor}
+
+  Object.keys(dias).forEach(dia => {
+
+    const [d, m, a] = dia.split('/');
+const dataObj = new Date(a, m - 1, d); // 🔥 forma correta (local time)
+    const nomeDia = ["DOMINGO","SEGUNDA-FEIRA","TERÇA-FEIRA","QUARTA-FEIRA","QUINTA-FEIRA","SEXTA-FEIRA","SÁBADO"][dataObj.getDay()];
+
+    if(!diasSemana.includes(nomeDia)) return;
+
+    dias[dia].forEach(r => {
+
+      const horario = r[1];
+
+      if(!mapa[horario]){
+        mapa[horario] = {};
+      }
+
+      turmasDaPlanilha.forEach(turma => {
+        const idx = dadosGlobais[0].indexOf(turma);
+        const val = (r[idx] || "");
+
+        const nomeBusca = normalizarTexto(nomeProf);
+const valNorm = normalizarTexto(val);
+
+const nomesSeparados = valNorm.split(/[\n,;/]/); // quebra por vários separadores
+
+if(nomesSeparados.some(n => n.includes(nomeBusca))){
+          if(!mapa[horario][nomeDia]){
+  mapa[horario][nomeDia] = [];
+}
+
+mapa[horario][nomeDia].push({
+  turma: turma,
+  aula: val
+});
+        }
+      });
+
+    });
+
+  });
+
+  return mapa;
+}
+
+function mostrarFichaProfessorTabela(nome){
+
+  const grade = gerarGradeProfessor(nome);
+
+  const diasSemana = ["SEGUNDA-FEIRA","TERÇA-FEIRA","QUARTA-FEIRA","QUINTA-FEIRA","SEXTA-FEIRA","SÁBADO"];
+
+  let html = `
+    <h3>👨‍🏫 FICHA SEMANAL - ${nome}</h3>
+    <table border="1" style="border-collapse:collapse;width:100%;font-size:12px;">
+      <tr>
+        <th>Horário</th>
+        ${diasSemana.map(d=>`<th>${d}</th>`).join("")}
+      </tr>
+  `;
+
+  Object.keys(grade).forEach(horario => {
+
+    html += `<tr>`;
+    html += `<td><b>${horario}</b></td>`;
+
+    diasSemana.forEach(dia=>{
+      let conteudo = grade[horario][dia];
+
+if(Array.isArray(conteudo)){
+  conteudo = conteudo.map(item => {
+    return `<b>${item.turma}</b><br>${item.aula}`;
+  }).join("<hr style='margin:3px 0;'>");
+}
+
+html += `<td>${conteudo || "-"}</td>`;
+    });
+
+    html += `</tr>`;
+  });
+
+  html += `</table>`;
+
+  document.getElementById("conteudoVagas").innerHTML = html;
+  document.getElementById("painelVagas").style.display = "block";
+}
+
+  function gerarPreviewProfessor(){
+  const nome = document.getElementById('searchProf').value.trim();
+
+  if(nome.length > 3){
+    mostrarFichaProfessorTabela(nome);
+
+    document.querySelector("#painelVagas strong").innerText = "👨‍🏫 Ficha do Professor";
+
+  } else {
+    document.getElementById("painelVagas").style.display = "none";
+  }
+}
+  
+  function gerarFichaTurma(nomeTurma){
+
+  const sem = document.getElementById('selectSemana').value;
+  const dias = semanasAgrupadas[sem].dias;
+
+  let resultado = [];
+
+  Object.keys(dias).forEach(dia => {
+
+    dias[dia].forEach(r => {
+
+      const horario = r[1];
+      const idx = dadosGlobais[0].indexOf(nomeTurma);
+      const val = (r[idx] || "");
+
+      if(val){
+        resultado.push({
+          dia,
+          horario,
+          aula: val
+        });
+      }
+
+    });
+
+  });
+
+  return resultado;
+}
+  
 window.addEventListener("beforeunload", () => {
   salvarSnapshotAtual();
 });
