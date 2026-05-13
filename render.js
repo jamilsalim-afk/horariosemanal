@@ -45,3 +45,13 @@ if(semanasAgrupadas[semanaAtual]){
 
 renderizarTabela();
 }
+
+function getTurmasAtivasNaSemana(dias){
+return turmasDaPlanilha.filter(t=>{
+const idx=dadosGlobais[0].indexOf(t);
+return Object.values(dias).some(d=>d.some(r=>{
+const v=(r[idx]||"").trim();
+return v && v!=="-" && !r[1].toUpperCase().includes("INTERVALO");
+}));
+});
+}
