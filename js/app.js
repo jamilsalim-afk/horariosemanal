@@ -13,6 +13,11 @@ const SHEETS = {
   }
 };
 
+// 🔥 NOVO
+EVENTOS:{
+  id:'1IDjs0oS6lQBGDrL7ja1Ge0vaBdNCNIULDH7J5p89c5s',
+  gid:'0'}
+};
 
 // ===============================
 // 🌍 ESTADO GLOBAL DO APP (NOVO PADRÃO)
