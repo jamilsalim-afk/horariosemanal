@@ -19,6 +19,17 @@ EVENTOS:{
   gid:'0'}
 };
 
+async function carregarEventos(){
+  const url = `https://docs.google.com/spreadsheets/d/${SHEETS.EVENTOS.id}/export?format=csv&gid=${SHEETS.EVENTOS.gid}`;
+  const res = await fetch(url);
+  eventosGlobais = parseCSV(await res.text());
+}
+
+function horaParaMinutos(h){
+  const [hh, mm] = h.split(':').map(Number);
+  return hh * 60 + mm;
+}
+
 // ===============================
 // 🌍 ESTADO GLOBAL DO APP (NOVO PADRÃO)
 // ===============================
@@ -28,14 +39,12 @@ window.appState = {
   aba: "horarios"
 };
 
-
 // ===============================
 // 📦 DADOS GLOBAIS
 // ===============================
 let dadosGlobais = [];
 let turmasDaPlanilha = [];
 let semanasAgrupadas = {};
-
 
 // ===============================
 // 📅 SEMANA PASSADA
@@ -54,7 +63,6 @@ function isSemanaPassada(dataStr) {
 
   return data < segundaAtual;
 }
-
 
 // ===============================
 // 🧹 PAINEL ALTERAÇÕES
@@ -90,32 +98,35 @@ function copiarVagas() {
   });
 }
 
-
 // ===============================
 // 🔁 TROCA DE MODALIDADE (AJUSTADO)
 // ===============================
-function trocarModalidade() {
-
+function trocarModalidade(){
   window.trocouModalidade = true;
 
-  limparPainelAlteracoes();
+  limparPainelAlteracoes(); // 🔥 ESSENCIAL
 
-  if (typeof renderizarTabela === "function") {
-    renderizarTabela();
-  }
+  init();
 }
-
 
 // ===============================
 // 🔁 TROCA DE SEMANA (AJUSTADO)
 // ===============================
-function trocarSemana() {
+function trocarSemana(){
 
   limparPainelAlteracoes();
 
-  if (typeof renderizarTabela === "function") {
-    renderizarTabela();
-  }
+  renderizarTabela();
+
+  setTimeout(() => {
+
+  verificarMudancaAoAbrir({
+      dados: dadosGlobais,
+      getSemana: () => document.getElementById('selectSemana').value,
+      getModalidade: () => document.getElementById('selectModalidade').value
+    });
+
+  }, 50);
 }
 
 
@@ -156,25 +167,4 @@ async function init() {
     });
 
   });
-}
-
-// ======================================================
-// 🔥 HELPERS GLOBAIS DE ABA / FILTROS
-// ======================================================
-
-function getAbaAtiva() {
-  const el = document.querySelector(".tab.active");
-  return el ? el.dataset.tab : "horarios";
-}
-
-function getModalidadeAtual() {
-  const el = document.getElementById("selectModalidade");
-  return el ? el.value : "INTEGRADO";
-}
-
-function getSemanaAtualSelecionada() {
-  const aba = getAbaAtiva();
-
-  const el = document.querySelector(`#aba-${aba} .selectSemana`);
-  return el ? el.value : document.getElementById('selectSemana').value;
 }
