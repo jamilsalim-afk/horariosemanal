@@ -160,3 +160,33 @@ regrasDestaque.forEach(regra => {
     container.innerHTML = html;
   criarBotoesDias();
 }
+
+function coletarVagasDoDia(dia) {
+  const sem = document.getElementById('selectSemana').value;
+  const dias = semanasAgrupadas[sem].dias;
+
+  const vagas = [];
+
+  if (!dias[dia]) return vagas;
+
+  dias[dia].forEach(r => {
+    const horario = r[1];
+
+    turmasDaPlanilha.forEach(turma => {
+      const idx = dadosGlobais[0].indexOf(turma);
+      const val = (r[idx] || "").toUpperCase();
+
+      if (
+        val.includes("RESERVA ENSINO") ||
+        val.includes("ESTUDOS INDIVIDUAIS")
+      ) {
+        vagas.push({
+          turma,
+          horario
+        });
+      }
+    });
+  });
+
+  return vagas;
+}
