@@ -10,7 +10,42 @@ function salvarSnapshotAtual() {
     mapa
   };
 
-  localStorage.setItem(`snapshot_${mod}_${sem}`, JSON.stringify(snapshot));
+  // 🔥 remove snapshots antigos da mesma modalidade
+  Object.keys(localStorage).forEach(chave => {
+
+    if (
+      chave.startsWith(`snapshot_${mod}_`) &&
+      chave !== `snapshot_${mod}_${sem}`
+    ) {
+      localStorage.removeItem(chave);
+    }
+  });
+
+  try {
+
+    localStorage.setItem(
+      `snapshot_${mod}_${sem}`,
+      JSON.stringify(snapshot)
+    );
+
+  } catch (e) {
+
+    console.error("⚠️ LocalStorage cheio.");
+
+    // limpa tudo relacionado a snapshots
+    Object.keys(localStorage).forEach(chave => {
+
+      if (chave.startsWith("snapshot_")) {
+        localStorage.removeItem(chave);
+      }
+    });
+
+    // tenta salvar novamente
+    localStorage.setItem(
+      `snapshot_${mod}_${sem}`,
+      JSON.stringify(snapshot)
+    );
+  }
 }
 
 function obterSnapshotAntigo() {
