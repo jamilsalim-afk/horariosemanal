@@ -52,3 +52,25 @@ function getSemanaAtual(){
 
   return `${d}/${m}/${a}`;
 }
+
+function detectarClasse(valor){
+    let valNorm = normalizarTexto(valor);
+
+    if(valNorm.includes("RESERVA ENSINO")) return "reserva-ensino";
+    if(valNorm.includes("PPS/ATENDIMENTO")) return "pps";
+    if(valNorm.includes("ESTUDOS INDIVIDUAIS")) return "estudos";
+    if(valNorm.includes("REUNIAO DE SERVIDORES")) return "reuniao";
+    if(valNorm.includes("CAED") || valNorm.includes("PRE-CONSELHO")) return "caed";
+    if(valNorm.includes("_REP -")) return "reposicao";
+
+    if(
+        valNorm.includes("[+]") ||
+        valNorm.includes("*") ||
+        valNorm.includes("[R]") ||
+        valNorm.includes("INTERVALO")
+    ){
+        return "marcacao-extra";
+    }
+
+    return null;
+}
