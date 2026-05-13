@@ -16,6 +16,12 @@ function getCursoInfo(t){
   return {cl:"",rgb:[255,255,255]};
 }
 
+function ordenarDatasBR(arr){
+return arr.sort((a,b)=>{
+const pa=a.split('/'),pb=b.split('/');
+return new Date(pa[2],pa[1]-1,pa[0]) - new Date(pb[2],pb[1]-1,pb[0]);
+});
+}
 
 // ======================================================
 // 🔥 PROCESSAR DADOS (SEM BUG DE ABA)
