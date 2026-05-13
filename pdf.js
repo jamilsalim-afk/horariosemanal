@@ -7,3 +7,17 @@ const coresPDF = {
     "reposicao": [30, 126, 52], // verde escuro
     "marcacao-extra": [224, 224, 224]
 };
+
+function exportarPDF(){
+const { jsPDF } = window.jspdf;
+const pdf = new jsPDF('l','mm','a4');
+
+const sem = document.getElementById('selectSemana').value;
+const diasObj = semanasAgrupadas[sem].dias;
+
+const turmasAtivas = document.getElementById('selectModalidade').value === "SUPERIOR"
+? getTurmasAtivasNaSemana(diasObj)
+: turmasDaPlanilha;
+
+const nomes = ["DOMINGO","SEGUNDA-FEIRA","TERÇA-FEIRA","QUARTA-FEIRA","QUINTA-FEIRA","SEXTA-FEIRA","SÁBADO"];
+};
