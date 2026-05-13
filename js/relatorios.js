@@ -128,6 +128,14 @@ function gerarRelatorioDia(dia) {
   return texto;
 }
 
+function copiarRelatorioDia(dia) {
+  const texto = gerarRelatorioDia(dia);
+
+  navigator.clipboard.writeText(texto).then(() => {
+    alert("Relatório copiado para área de transferência!");
+  });
+}
+
 function gerarRelatorioSemanaTexto() {
 
   const sem = getSemanaAtualSelecionada?.() || document.getElementById('selectSemana').value;
