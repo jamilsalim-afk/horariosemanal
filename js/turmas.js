@@ -1,7 +1,7 @@
-  function gerarFichaTurma(nomeTurma){
+function gerarFichaTurma(nomeTurma){
 
-  const sem = document.getElementById('selectSemana').value;
-  const dias = semanasAgrupadas[sem].dias;
+  const sem = getSemanaAtualSelecionada();
+  const dias = semanasAgrupadas[sem]?.dias || {};
 
   let resultado = [];
 
@@ -11,14 +11,19 @@
 
       const horario = r[1];
       const idx = dadosGlobais[0].indexOf(nomeTurma);
-      const val = (r[idx] || "");
 
-      if(val){
+      if(idx === -1) return;
+
+      const val = (r[idx] || "").trim();
+
+      if(val && val !== "-"){
+
         resultado.push({
           dia,
           horario,
           aula: val
         });
+
       }
 
     });
