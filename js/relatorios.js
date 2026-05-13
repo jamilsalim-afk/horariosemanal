@@ -57,6 +57,12 @@ function criarBotoesDias() {
 
   Object.keys(dias).forEach(dia => {
 
+  const [d, m, a] = dia.split('/');
+  const dataObj = new Date(a, m - 1, d);
+  const diaSemana = dataObj.getDay();
+
+  if (diaSemana === 0 || diaSemana === 6) return; // remove dom e sáb
+
     html += `
       <button onclick="abrirRelatorioDia('${dia}')"
         style="
