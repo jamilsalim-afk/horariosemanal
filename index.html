@@ -13,45 +13,51 @@
 
 <body>
 
-<!-- ================= HEADER ================= -->
+
+<!-- ================= HEADER FIXO ================= -->
 <header class="ifro-header-fixed">
+
   <div class="ifro-header-content">
     <div class="ifro-linha1">INSTITUTO FEDERAL DE EDUCAÇÃO, CIÊNCIA E TECNOLOGIA DE RONDÔNIA - IFRO</div>
     <div class="ifro-linha2">CAMPUS CACOAL</div>
     <div class="ifro-linha3">DEPARTAMENTO DE APOIO AO ENSINO</div>
     <div class="ifro-linha4">HORÁRIOS SEMANAIS - 2026</div>
   </div>
+
 </header>
 
 
 <!-- ================= ABAS ================= -->
 <nav class="tabs">
 
-  <button class="tab active" data-tab="horarios" onclick="abrirAba('horarios')">
+  <button class="tab active" onclick="abrirAba('horarios')">
     Horários
   </button>
 
-  <button class="tab" data-tab="sabados" onclick="abrirAba('sabados')">
+  <button class="tab" onclick="abrirAba('sabados')">
     Sábados Letivos
   </button>
 
-  <button class="tab" data-tab="professor" onclick="abrirAba('professor')">
+  <button class="tab" onclick="abrirAba('professor')">
     Professor
   </button>
 
-  <button class="tab" data-tab="turma" onclick="abrirAba('turma')">
+  <button class="tab" onclick="abrirAba('turma')">
     Turma
   </button>
 
 </nav>
 
 
-<!-- ================= CONTROLES GLOBAIS ================= -->
-<div class="header-sticky">
+<!-- ================= CONTEÚDO DAS ABAS ================= -->
+<main class="tab-container">
+
+
+<!-- ================= ABA HORÁRIOS ================= -->
+<section id="aba-horarios" class="tab-content">
 
   <div class="controls-card">
 
-    <!-- usados globalmente pela Aba Horários -->
     <select id="selectModalidade" onchange="trocarModalidade()">
       <option value="INTEGRADO">INTEGRADO</option>
       <option value="SUPERIOR">SUPERIOR</option>
@@ -66,100 +72,92 @@
            onkeyup="filtrarProfessor(); gerarPreviewProfessor();">
 
     <button class="btn-pdf" onclick="exportarPDF()">
-      📄 PDF Geral
+      📄 PDF Horários
     </button>
 
   </div>
 
-</div>
+  <div class="week-container">
+
+    <div id="botoesRelatorio"></div>
+
+    <div id="painelAlteracoes"></div>
+
+    <div id="painelVagas"></div>
+
+    <div class="table-responsive" id="tabelaHorario"></div>
+
+  </div>
+
+</section>
 
 
-<!-- ================= CONTEÚDO ================= -->
-<main class="tab-container">
+<!-- ================= ABA SÁBADOS ================= -->
+<section id="aba-sabados" class="tab-content" style="display:none;">
 
-  <!-- ========== ABA HORÁRIOS (CORE SYSTEM) ========== -->
-  <section id="aba-horarios" class="tab-content">
+  <div class="controls-card">
 
-    <div class="week-container">
+    <select id="selectModalidadeSabados" onchange="renderSabados()">
+      <option value="INTEGRADO">INTEGRADO</option>
+      <option value="SUPERIOR">SUPERIOR</option>
+    </select>
 
-      <div id="botoesRelatorio"></div>
+    <input type="text"
+           id="searchSabados"
+           class="search-box"
+           placeholder="🔍 Professor ou turma..."
+           onkeyup="renderSabados()">
 
-      <div id="painelAlteracoes"></div>
+    <button class="btn-pdf" onclick="exportarPDFSabados()">
+      📄 PDF Sábados
+    </button>
 
-      <div id="painelVagas"></div>
+  </div>
 
-      <div class="table-responsive" id="tabelaHorario"></div>
+  <div id="containerSabados"></div>
 
-    </div>
-
-  </section>
-
-
-  <!-- ========== ABA SÁBADOS ========== -->
-  <section id="aba-sabados" class="tab-content" style="display:none;">
-
-    <div class="controls-card">
-
-      <select id="selectModalidadeSabados" onchange="renderSabados()">
-        <option value="INTEGRADO">INTEGRADO</option>
-        <option value="SUPERIOR">SUPERIOR</option>
-      </select>
-
-      <input type="text"
-             id="searchProfSabados"
-             class="search-box"
-             placeholder="🔍 Professor..."
-             onkeyup="renderSabados()">
-
-      <button class="btn-pdf" onclick="exportarPDFSabados()">
-        📄 PDF Sábados
-      </button>
-
-    </div>
-
-    <div id="containerSabados"></div>
-
-  </section>
+</section>
 
 
-  <!-- ========== ABA PROFESSOR ========== -->
-  <section id="aba-professor" class="tab-content" style="display:none;">
+<!-- ================= ABA PROFESSOR ================= -->
+<section id="aba-professor" class="tab-content" style="display:none;">
 
-    <div class="controls-card">
+  <div class="controls-card">
 
-      <select id="selectProfessor" onchange="renderProfessor()"></select>
+    <select id="selectProfessor" onchange="renderProfessor()"></select>
 
-      <select id="selectSemanaProfessor" onchange="renderProfessor()"></select>
+    <select id="selectSemanaProfessor" onchange="renderProfessor()"></select>
 
-      <button class="btn-pdf" onclick="exportarPDFProfessor()">
-        📄 PDF Professor
-      </button>
+    <button class="btn-pdf" onclick="exportarPDFProfessor()">
+      📄 PDF Professor
+    </button>
 
-    </div>
+  </div>
 
-    <div id="fichaProfessor"></div>
+  <div id="fichaProfessor"></div>
 
-  </section>
+</section>
 
 
-  <!-- ========== ABA TURMA ========== -->
-  <section id="aba-turma" class="tab-content" style="display:none;">
+<!-- ================= ABA TURMA ================= -->
+<section id="aba-turma" class="tab-content" style="display:none;">
 
-    <div class="controls-card">
+  <div class="controls-card">
 
-      <select id="selectTurma" onchange="renderTurma()"></select>
+    <select id="selectTurma" onchange="renderTurma()"></select>
 
-      <select id="selectSemanaTurma" onchange="renderTurma()"></select>
+    <select id="selectSemanaTurma" onchange="renderTurma()"></select>
 
-      <button class="btn-pdf" onclick="exportarPDFTurma()">
-        📄 PDF Turma
-      </button>
+    <button class="btn-pdf" onclick="exportarPDFTurma()">
+      📄 PDF Turma
+    </button>
 
-    </div>
+  </div>
 
-    <div id="fichaTurma"></div>
+  <div id="fichaTurma"></div>
 
-  </section>
+</section>
+
 
 </main>
 
@@ -183,6 +181,7 @@
 <script src="js/render.js"></script>
 <script src="js/pdf.js"></script>
 <script src="js/eventos.js"></script>
+
 
 </body>
 </html>
