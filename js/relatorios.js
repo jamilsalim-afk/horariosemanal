@@ -1,3 +1,32 @@
+function gerarRelatorioDia(dia) {
+
+  const vagas = coletarVagasDoDia(dia);
+
+  let texto = `📅 RELATÓRIO DO DIA (${dia})\n\n`;
+
+  if (!vagas.length) {
+    return texto + "Não há aulas vagas neste dia.";
+  }
+
+  const agrupado = {};
+
+  vagas.forEach(v => {
+    if (!agrupado[v.turma]) {
+      agrupado[v.turma] = [];
+    }
+    agrupado[v.turma].push(v.horario);
+  });
+
+  Object.keys(agrupado).forEach(turma => {
+
+    const horarios = [...new Set(agrupado[turma])];
+
+    texto += `🏫 TURMA: ${turma}\n`;
+    texto += `⏰ HORÁRIOS: ${horarios.join(", ")}\n\n`;
+  });
+
+  return texto;
+}
 
 // ===============================
 // 📅 ABRIR RELATÓRIO DO DIA
