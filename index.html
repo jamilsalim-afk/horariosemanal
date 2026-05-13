@@ -12,140 +12,128 @@
 
 <body>
 
-<div class="ifro-header">
-<div class="ifro-header-content">
-<div class="ifro-linha1">INSTITUTO FEDERAL DE EDUCAÇÃO, CIÊNCIA E TECNOLOGIA DE RONDÔNIA - IFRO</div>
-<div class="ifro-linha2">CAMPUS CACOAL</div>
-<div class="ifro-linha3">DEPARTAMENTO DE APOIO AO ENSINO</div>
-<div class="ifro-linha4">HORÁRIOS SEMANAIS - 2026</div>
-</div>
-</div>
+<!-- =========================
+🔷 HEADER FIXO (GLOBAL)
+========================= -->
+<header class="ifro-header-fixed">
+  <div class="ifro-header-content">
+    <div class="ifro-linha1">INSTITUTO FEDERAL DE EDUCAÇÃO, CIÊNCIA E TECNOLOGIA DE RONDÔNIA - IFRO</div>
+    <div class="ifro-linha2">CAMPUS CACOAL</div>
+    <div class="ifro-linha3">DEPARTAMENTO DE APOIO AO ENSINO</div>
+    <div class="ifro-linha4">HORÁRIOS SEMANAIS - 2026</div>
+  </div>
+</header>
 
+
+<!-- =========================
+🔷 NAV DE ABAS
+========================= -->
+<nav class="tabs">
+  <button onclick="abrirAba('horarios')">📅 Horários</button>
+  <button onclick="abrirAba('sabados')">📆 Sábados Letivos</button>
+  <button onclick="abrirAba('professor')">👨‍🏫 Professor</button>
+  <button onclick="abrirAba('turma')">🏫 Turma</button>
+</nav>
+
+
+<!-- =========================
+🔷 ÁREA DE CONTROLE GLOBAL (APENAS HORÁRIOS)
+========================= -->
 <div class="header-sticky">
-<div class="controls-card">
-<select id="selectModalidade" onchange="trocarModalidade()">
-<option value="INTEGRADO">CURSOS TÉCNICOS INTEGRADOS</option>
-<option value="SUPERIOR">CURSOS SUPERIORES</option>
-</select>
 
-<select id="selectSemana" onchange="trocarSemana()"></select>
+  <div class="controls-card">
 
-<input type="text" id="searchProf" class="search-box"
-placeholder="🔍 Buscar Professor..." onkeyup="filtrarProfessor(); gerarPreviewProfessor();">
+    <select id="selectModalidade" onchange="trocarModalidade()">
+      <option value="INTEGRADO">CURSOS TÉCNICOS INTEGRADOS</option>
+      <option value="SUPERIOR">CURSOS SUPERIORES</option>
+    </select>
 
-<button class="btn-pdf" onclick="exportarPDF()">📄 Baixe o PDF da Semana</button>
+    <select id="selectSemana" onchange="trocarSemana()"></select>
+
+    <input type="text" id="searchProf" class="search-box"
+      placeholder="🔍 Buscar Professor..."
+      onkeyup="filtrarProfessor(); gerarPreviewProfessor();">
+
+    <button class="btn-pdf" onclick="exportarPDF()">📄 Baixar PDF</button>
+
+  </div>
+
 </div>
-</div>
 
-<div class="week-container">
 
-<!-- 🔥 BOTÕES NOVOS -->
-<div id="botoesRelatorio"></div>
+<!-- =========================
+🔷 CONTEÚDO DAS ABAS
+========================= -->
+<main class="tab-container">
 
-<div id="painelAlteracoes" style="
-  display:none;
-  background:white;
-  border-left:6px solid #d32f2f;
-  padding:15px;
-  margin:10px;
-  border-radius:8px;
-  max-height:300px;
-  overflow-y:auto;
-  box-shadow:0 2px 10px rgba(0,0,0,0.2);
-">
-  <div style="display:flex;justify-content:space-between;align-items:center;">
+  <!-- 📅 HORÁRIOS (EX-PRINCIPAL) -->
+  <section id="aba-horarios" class="tab-content"></section>
+
+
+  <!-- 📆 SÁBADOS LETIVOS -->
+  <section id="aba-sabados" class="tab-content" style="display:none;"></section>
+
+
+  <!-- 👨‍🏫 PROFESSOR -->
+  <section id="aba-professor" class="tab-content" style="display:none;"></section>
+
+
+  <!-- 🏫 TURMA -->
+  <section id="aba-turma" class="tab-content" style="display:none;"></section>
+
+</main>
+
+
+<!-- =========================
+🔷 PAINÉIS (GLOBAIS)
+========================= -->
+
+<div id="painelAlteracoes" class="painel-alerta" style="display:none;">
+  <div class="painel-header">
     <strong>⚠️ Alterações Detectadas</strong>
-    <button onclick="fecharPainel()" style="
-      background:#d32f2f;color:white;border:none;
-      padding:5px 10px;border-radius:5px;cursor:pointer;">
-      ✖
-    </button>
+    <button onclick="fecharPainel()">✖</button>
   </div>
 
-  <pre id="conteudoAlteracoes" style="
-    white-space:pre-wrap;
-    font-size:12px;
-    margin-top:10px;
-  "></pre>
+  <pre id="conteudoAlteracoes"></pre>
 
-  <button onclick="copiarAlteracoes()" style="
-    margin-top:10px;
-    padding:8px;
-    background:#2e7d32;
-    color:white;
-    border:none;
-    border-radius:5px;
-    cursor:pointer;">
-    📋 Copiar
-  </button>
+  <button onclick="copiarAlteracoes()">📋 Copiar</button>
 </div>
 
-<div id="painelVagas" style="
-  display:none;
-  background:white;
-  border-left:6px solid #2e7d32;
-  padding:15px;
-  margin:10px;
-  border-radius:8px;
-  max-height:300px;
-  overflow-y:auto;
-  box-shadow:0 2px 10px rgba(0,0,0,0.2);
-">
-  <div style="display:flex;justify-content:space-between;">
+
+<div id="painelVagas" class="painel-vagas" style="display:none;">
+  <div class="painel-header">
     <strong>📅 Aulas Vagas</strong>
-    <button onclick="fecharPainelVagas()" style="
-      background:#d32f2f;color:white;border:none;
-      padding:5px 10px;border-radius:5px;cursor:pointer;">
-      ✖
-    </button>
+    <button onclick="fecharPainelVagas()">✖</button>
   </div>
 
-  <pre id="conteudoVagas" style="
-    white-space:pre-wrap;
-    font-size:12px;
-    margin-top:10px;
-  "></pre>
+  <pre id="conteudoVagas"></pre>
 
-  <button onclick="copiarVagas()" style="
-    margin-top:10px;
-    padding:8px;
-    background:#2e7d32;
-    color:white;
-    border:none;
-    border-radius:5px;
-    cursor:pointer;">
-    📋 Copiar
-  </button>
+  <button onclick="copiarVagas()">📋 Copiar</button>
 </div>
 
-  
-<div class="table-responsive" id="tabelaHorario"></div>
-</div>
 
-<footer class="ifro-footer">
-IFRO - Campus Cacoal<br>
-BR 364, Km 228, Lote 2-A - Zona Rural<br>
-☎ (69) 3443-2445 | ✉ dape.cacoal@ifro.edu.br
+<!-- =========================
+🔷 FOOTER FIXO
+========================= -->
+<footer class="ifro-footer-fixed">
+  IFRO - Campus Cacoal<br>
+  BR 364, Km 228, Lote 2-A - Zona Rural<br>
+  ☎ (69) 3443-2445 | ✉ dape.cacoal@ifro.edu.br
 </footer>
 
+
+<!-- =========================
+🔷 SCRIPTS (INALTERADOS)
+========================= -->
 <script src="js/app.js"></script>
-
 <script src="js/utils.js"></script>
-
 <script src="js/alteracoes.js"></script>
-
 <script src="js/comparador.js"></script>
-
 <script src="js/relatorios.js"></script>
-
 <script src="js/professores.js"></script>
-
 <script src="js/turmas.js"></script>
-
 <script src="js/render.js"></script>
-
 <script src="js/pdf.js"></script>
-
 <script src="js/eventos.js"></script>
 
 </body>
