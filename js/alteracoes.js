@@ -1,108 +1,21 @@
-function salvarSnapshotAtual() {
+// ===============================
+// 🔥 SNAPSHOT + COMPARAÇÃO (ATUAL)
+// ===============================
 
-  const sem = document.getElementById('selectSemana').value;
-  const mod = document.getElementById('selectModalidade').value;
 
-  const mapaOriginal = gerarMapaDados(dadosGlobais);
+function obterSemanaAtual() {
+  const hoje = new Date();
 
-  // 🔥 compactação do snapshot
-  const mapaCompacto = {};
+  const inicioAno = new Date(hoje.getFullYear(), 0, 1);
+  const diff = hoje - inicioAno;
 
-  Object.keys(mapaOriginal).forEach(k => {
+  const semana = Math.ceil(diff / (7 * 24 * 60 * 60 * 1000));
 
-    const item = mapaOriginal[k];
-
-    mapaCompacto[k] = {
-
-      dia: item.dia,
-
-      horario: item.horario,
-
-      turma: item.turma,
-
-      valorOriginal: (item.valorOriginal || "")
-        .replace(/\s+/g, ' ')
-        .trim()
-        .substring(0, 120),
-
-      valorNormalizado: (item.valorNormalizado || "")
-        .replace(/\s+/g, ' ')
-        .trim()
-        .substring(0, 120)
-    };
-
-  });
-
-  const snapshot = {
-    tempo: new Date().toISOString(),
-    mapa: mapaCompacto
-  };
-
-  // 🔥 remove snapshots antigos da mesma modalidade
-  Object.keys(localStorage).forEach(chave => {
-
-    if (
-      chave.startsWith(`snapshot_${mod}_`) &&
-      chave !== `snapshot_${mod}_${sem}`
-    ) {
-
-      localStorage.removeItem(chave);
-
-    }
-
-  });
-
-  try {
-
-    localStorage.setItem(
-      `snapshot_${mod}_${sem}`,
-      JSON.stringify(snapshot)
-    );
-
-  } catch (e) {
-
-    console.warn("⚠️ LocalStorage cheio.");
-
-    // 🔥 remove todos snapshots
-    Object.keys(localStorage).forEach(chave => {
-
-      if (chave.startsWith("snapshot_")) {
-
-        localStorage.removeItem(chave);
-
-      }
-
-    });
-
-    // 🔥 tenta novamente
-    try {
-
-      localStorage.setItem(
-        `snapshot_${mod}_${sem}`,
-        JSON.stringify(snapshot)
-      );
-
-    } catch(err){
-
-      console.error("❌ Snapshot ainda muito grande.");
-
-    }
-  }
+  return String(semana);
 }
 
-function obterSnapshotAntigo() {
 
-  const sem = document.getElementById('selectSemana').value;
-  const mod = document.getElementById('selectModalidade').value;
-
-  const data = localStorage.getItem(
-    `snapshot_${mod}_${sem}`
-  );
-
-  return data ? JSON.parse(data) : null;
-}
-
-function valorMudou(v1, v2){
+function valorMudou(v1, v2) {
 
   const t1 = (v1 || "").trim();
   const t2 = (v2 || "").trim();
@@ -115,14 +28,83 @@ function valorMudou(v1, v2){
   return n1 !== n2;
 }
 
-function verificarMudancaAoAbrir({
-  dados,
-  getSemana,
-  getModalidade
-}) {
+
+// ===============================
+// 💾 SALVAR SNAPSHOT ATUAL
+// ===============================
+function salvarSnapshotAtual() {
+
+  const sem = document.getElementById('selectSemana').value;
+  const mod = document.getElementById('selectModalidade').value;
+
+  const chave = `snapshot_${mod}_${sem}`;
+
+  const mapaOriginal = gerarMapaDados(dadosGlobais);
+
+  const mapaCompacto = {};
+
+  Object.keys(mapaOriginal).forEach(k => {
+
+    const item = mapaOriginal[k];
+
+    mapaCompacto[k] = {
+      dia: item.dia,
+      horario: item.horario,
+      turma: item.turma,
+      valorOriginal: normalizarTexto(item.valorOriginal || ""),
+      valorNormalizado: normalizarTexto(item.valorNormalizado || "")
+    };
+
+  });
+
+  const snapshot = {
+    tempo: Date.now(),
+    mapa: mapaCompacto
+  };
+
+  try {
+    localStorage.setItem(chave, JSON.stringify(snapshot));
+
+  } catch (e) {
+
+    console.warn("⚠️ LocalStorage cheio. Limpando snapshots do sistema...");
+
+    Object.keys(localStorage)
+      .filter(k => k.startsWith("snapshot_"))
+      .forEach(k => localStorage.removeItem(k));
+
+    localStorage.setItem(chave, JSON.stringify(snapshot));
+  }
+}
+
+
+// ===============================
+// 📥 OBTER SNAPSHOT ANTIGO
+// ===============================
+function obterSnapshotAntigo() {
+
+  const sem = document.getElementById('selectSemana').value;
+  const mod = document.getElementById('selectModalidade').value;
+
+  const chave = `snapshot_${mod}_${sem}`;
+
+  const data = localStorage.getItem(chave);
+
+  return data ? JSON.parse(data) : null;
+}
+
+
+// ===============================
+// 🔥 VERIFICAÇÃO AO ABRIR
+// ===============================
+function verificarMudancaAoAbrir({ dados, getSemana, getModalidade }) {
 
   const sem = getSemana();
   const mod = getModalidade();
+
+  // 🔥 bloqueia qualquer coisa fora da semana atual
+  const semanaAtual = obterSemanaAtual();
+  if (sem !== semanaAtual) return;
 
   const chave = `snapshot_${mod}_${sem}`;
 
@@ -130,70 +112,57 @@ function verificarMudancaAoAbrir({
 
   const mapaNovo = gerarMapaDados(dados);
 
-  // 🔥 primeiro acesso
+  const mapaAtual = {};
+
+  Object.keys(mapaNovo).forEach(k => {
+
+    const item = mapaNovo[k];
+
+    mapaAtual[k] = {
+      dia: item.dia,
+      horario: item.horario,
+      turma: item.turma,
+      valor: normalizarTexto(item.valorNormalizado || "")
+    };
+  });
+
+  // 🔥 PRIMEIRA ABERTURA (NÃO MOSTRA ALERTA)
   if (!antigoRaw) {
 
     salvarSnapshotAtual();
 
-    console.log(
-      "📌 Snapshot inicial criado — nenhuma comparação feita."
-    );
+    console.log("📌 Primeira abertura da semana: snapshot criado.");
 
     return;
   }
 
-  let snapshotAntigo = {};
+  let antigo;
 
   try {
-
-    snapshotAntigo = JSON.parse(antigoRaw);
-
-  } catch(e){
-
-    console.warn("⚠️ Snapshot corrompido.");
+    antigo = JSON.parse(antigoRaw);
+  } catch (e) {
 
     salvarSnapshotAtual();
-
     return;
   }
 
-  const mapaAntigo = snapshotAntigo.mapa || {};
+  const alteracoes = compararMapas(antigo.mapa, mapaAtual);
 
-  const alteracoes = compararMapas(
-    mapaAntigo,
-    mapaNovo
-  );
-
-  // 🔥 ignora semanas passadas
-  const filtradas = alteracoes.filter(a => {
-
-    return !isSemanaPassada(a.dia);
-
-  });
-
-  if (filtradas.length > 0) {
-
-    mostrarAvisoAlteracoesRobusto(filtradas);
-
-  } else {
-
-    const painel =
-      document.getElementById("painelAlteracoes");
-
-    if (painel) {
-
-      painel.style.display = "none";
-
-    }
+  if (alteracoes.length > 0) {
+    mostrarAvisoAlteracoesRobusto(alteracoes);
   }
 
+  // 🔥 atualiza snapshot sempre após abrir
   salvarSnapshotAtual();
 }
 
+
+// ===============================
+// ⚠️ EXIBIÇÃO DE ALTERAÇÕES
+// ===============================
 function mostrarAvisoAlteracoesRobusto(lista) {
 
-  let texto =
-    "⚠️ ALTERAÇÕES DETECTADAS:\n\n";
+  let texto = "⚠️ ALTERAÇÕES DETECTADAS:\n\n";
 
   lista.forEach(item => {
 
@@ -202,35 +171,32 @@ function mostrarAvisoAlteracoesRobusto(lista) {
     texto += `⏰ Horário: ${item.horario}\n`;
     texto += `🔎 Tipo: ${item.tipo}\n`;
     texto += `➡️ ${item.antes} → ${item.depois}\n\n`;
-
   });
 
-  document.getElementById(
-    "conteudoAlteracoes"
-  ).innerText = texto;
+  document.getElementById("conteudoAlteracoes").innerText = texto;
 
-  document.getElementById(
-    "painelAlteracoes"
-  ).style.display = "block";
+  document.getElementById("painelAlteracoes").style.display = "block";
 }
 
-function fecharPainel(){
 
-  document.getElementById(
-    "painelAlteracoes"
-  ).style.display = "none";
+// ===============================
+// ❌ FECHAR PAINEL
+// ===============================
+function fecharPainel() {
+
+  document.getElementById("painelAlteracoes").style.display = "none";
 }
 
-function copiarAlteracoes(){
 
-  const texto = document.getElementById(
-    "conteudoAlteracoes"
-  ).innerText;
+// ===============================
+// 📋 COPIAR ALTERAÇÕES
+// ===============================
+function copiarAlteracoes() {
+
+  const texto = document.getElementById("conteudoAlteracoes").innerText;
 
   navigator.clipboard.writeText(texto)
-    .then(()=>{
-
+    .then(() => {
       alert("Copiado!");
-
     });
 }
