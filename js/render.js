@@ -70,6 +70,8 @@ function processarDados(){
   }
 
   renderizarTabela();
+  filtrarProfessor();
+gerarPreviewProfessor();
 }
 
 
