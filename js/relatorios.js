@@ -121,3 +121,63 @@ function gerarRelatorioDia(dia) {
 
   return texto;
 }
+
+function gerarRelatorioSemanaTexto() {
+
+  const sem = getSemanaAtualSelecionada?.() || document.getElementById('selectSemana').value;
+  const dias = semanasAgrupadas[sem]?.dias || {};
+
+  let texto = `📊 RELATÓRIO SEMANAL DE AULAS VAGAS (SEGUNDA À SEXTA)\n\n`;
+
+  const agrupado = {};
+
+  Object.keys(dias).forEach(dia => {
+
+    const vagas = coletarVagasDoDia(dia);
+
+    vagas.forEach(v => {
+
+      const chave = `${dia}__${v.turma}`;
+
+      if (!agrupado[chave]) {
+        agrupado[chave] = {
+          dia,
+          turma: v.turma,
+          horarios: []
+        };
+      }
+
+      agrupado[chave].horarios.push(v.horario);
+    });
+
+  });
+
+  const listaFinal = Object.values(agrupado);
+
+  if (listaFinal.length === 0) {
+    return "Não há aulas vagas na semana.";
+  }
+
+  listaFinal.sort((a, b) => {
+    const [da, ma, aa] = a.dia.split('/');
+    const [db, mb, ab] = b.dia.split('/');
+    return new Date(aa, ma - 1, da) - new Date(ab, mb - 1, db);
+  });
+
+  let diaAtual = "";
+
+  listaFinal.forEach(item => {
+
+    if (item.dia !== diaAtual) {
+      texto += `📅 ${item.dia}\n\n`;
+      diaAtual = item.dia;
+    }
+
+    const horarios = [...new Set(item.horarios)];
+
+    texto += `🏫 ${item.turma}\n`;
+    texto += `⏰ ${horarios.join(", ")}\n\n`;
+  });
+
+  return texto;
+}
