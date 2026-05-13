@@ -3,11 +3,23 @@ function salvarSnapshotAtual() {
   const sem = document.getElementById('selectSemana').value;
   const mod = document.getElementById('selectModalidade').value;
 
-  const mapa = gerarMapaDados(dadosGlobais);
+  const mapaOriginal = gerarMapaDados(dadosGlobais);
+
+  // 🔥 compactação para evitar estouro do LocalStorage
+  const mapaCompacto = {};
+
+  Object.keys(mapaOriginal).forEach(k => {
+
+    mapaCompacto[k] = (mapaOriginal[k] || "")
+      .replace(/\s+/g, ' ')
+      .trim()
+      .substring(0, 120);
+
+  });
 
   const snapshot = {
     tempo: new Date().toISOString(),
-    mapa
+    mapa: mapaCompacto
   };
 
   // 🔥 remove snapshots antigos da mesma modalidade
@@ -19,6 +31,7 @@ function salvarSnapshotAtual() {
     ) {
       localStorage.removeItem(chave);
     }
+
   });
 
   try {
@@ -30,33 +43,45 @@ function salvarSnapshotAtual() {
 
   } catch (e) {
 
-    console.error("⚠️ LocalStorage cheio.");
+    console.warn("⚠️ LocalStorage cheio.");
 
-    // limpa tudo relacionado a snapshots
+    // 🔥 remove todos snapshots
     Object.keys(localStorage).forEach(chave => {
 
       if (chave.startsWith("snapshot_")) {
         localStorage.removeItem(chave);
       }
+
     });
 
-    // tenta salvar novamente
-    localStorage.setItem(
-      `snapshot_${mod}_${sem}`,
-      JSON.stringify(snapshot)
-    );
+    // 🔥 tenta novamente
+    try {
+
+      localStorage.setItem(
+        `snapshot_${mod}_${sem}`,
+        JSON.stringify(snapshot)
+      );
+
+    } catch(err){
+
+      console.error("❌ Snapshot ainda muito grande.");
+
+    }
   }
 }
 
 function obterSnapshotAntigo() {
+
   const sem = document.getElementById('selectSemana').value;
   const mod = document.getElementById('selectModalidade').value;
 
   const data = localStorage.getItem(`snapshot_${mod}_${sem}`);
+
   return data ? JSON.parse(data) : null;
 }
 
 function valorMudou(v1, v2){
+
   const t1 = (v1 || "").trim();
   const t2 = (v2 || "").trim();
 
@@ -67,7 +92,7 @@ function valorMudou(v1, v2){
 
   return n1 !== n2;
 }
-  
+
 function verificarMudancaAoAbrir({
   dados,
   getSemana,
@@ -78,33 +103,64 @@ function verificarMudancaAoAbrir({
   const mod = getModalidade();
 
   const chave = `snapshot_${mod}_${sem}`;
+
   const antigoRaw = localStorage.getItem(chave);
 
   const mapaNovo = gerarMapaDados(dados);
 
-  // primeira execução
+  // 🔥 primeiro acesso
   if (!antigoRaw) {
 
-  // 🔥 PRIMEIRO ACESSO: NÃO MOSTRA ALTERAÇÕES
-  salvarSnapshotAtual();
+    salvarSnapshotAtual();
 
-  console.log("📌 Snapshot inicial criado — nenhuma comparação feita.");
+    console.log(
+      "📌 Snapshot inicial criado — nenhuma comparação feita."
+    );
 
-  return;
-}
+    return;
+  }
 
-  const snapshotAntigo = JSON.parse(antigoRaw);
+  let snapshotAntigo = {};
+
+  try {
+
+    snapshotAntigo = JSON.parse(antigoRaw);
+
+  } catch(e){
+
+    console.warn("⚠️ Snapshot corrompido.");
+
+    salvarSnapshotAtual();
+
+    return;
+  }
+
   const mapaAntigo = snapshotAntigo.mapa || {};
 
-  const alteracoes = compararMapas(mapaAntigo, mapaNovo);
+  const alteracoes = compararMapas(
+    mapaAntigo,
+    mapaNovo
+  );
 
-  // filtro: ignora semanas passadas
-  const filtradas = alteracoes.filter(a => !isSemanaPassada(a.dia));
+  // 🔥 ignora semanas passadas
+  const filtradas = alteracoes.filter(a => {
+
+    return !isSemanaPassada(a.dia);
+
+  });
 
   if (filtradas.length > 0) {
+
     mostrarAvisoAlteracoesRobusto(filtradas);
+
   } else {
-    document.getElementById("painelAlteracoes").style.display = "none";
+
+    const painel =
+      document.getElementById("painelAlteracoes");
+
+    if (painel) {
+      painel.style.display = "none";
+    }
   }
 
   salvarSnapshotAtual();
@@ -121,20 +177,35 @@ function mostrarAvisoAlteracoesRobusto(lista) {
     texto += `⏰ Horário: ${item.horario}\n`;
     texto += `🔎 Tipo: ${item.tipo}\n`;
     texto += `➡️ ${item.antes} → ${item.depois}\n\n`;
+
   });
 
-  document.getElementById("conteudoAlteracoes").innerText = texto;
-  document.getElementById("painelAlteracoes").style.display = "block";
+  document.getElementById(
+    "conteudoAlteracoes"
+  ).innerText = texto;
+
+  document.getElementById(
+    "painelAlteracoes"
+  ).style.display = "block";
 }
 
-  function fecharPainel(){
-  document.getElementById("painelAlteracoes").style.display = "none";
+function fecharPainel(){
+
+  document.getElementById(
+    "painelAlteracoes"
+  ).style.display = "none";
 }
 
 function copiarAlteracoes(){
-  const texto = document.getElementById("conteudoAlteracoes").innerText;
 
-  navigator.clipboard.writeText(texto).then(()=>{
-    alert("Copiado!");
-  });
+  const texto = document.getElementById(
+    "conteudoAlteracoes"
+  ).innerText;
+
+  navigator.clipboard.writeText(texto)
+    .then(()=>{
+
+      alert("Copiado!");
+
+    });
 }
