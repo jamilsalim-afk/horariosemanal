@@ -36,3 +36,19 @@ const pa=a.split('/'),pb=b.split('/');
 return new Date(pa[2],pa[1]-1,pa[0]) - new Date(pb[2],pb[1]-1,pb[0]);
 });
 }
+
+function getSemanaAtual(){
+  const hoje = new Date();
+
+  // calcula segunda-feira da semana atual
+  const dia = hoje.getDay(); // 0 = domingo
+  const diff = hoje.getDate() - dia + (dia === 0 ? -6 : 1);
+
+  const segunda = new Date(hoje.setDate(diff));
+
+  const d = String(segunda.getDate()).padStart(2,'0');
+  const m = String(segunda.getMonth()+1).padStart(2,'0');
+  const a = segunda.getFullYear();
+
+  return `${d}/${m}/${a}`;
+}
