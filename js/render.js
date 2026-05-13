@@ -252,29 +252,38 @@ function filtrarProfessor(){
 // ======================================================
 // 🔥 VAGAS / RELATÓRIOS (INALTERADO FUNCIONAL)
 // ======================================================
-function coletarVagasDoDia(dia){
+function coletarVagasDoDia(dia) {
 
-  const sem = getSemanaAtualSelecionada();
-  const dias = semanasAgrupadas[sem]?.dias || {};
+  const sem = getSemanaAtualSelecionada?.() || document.getElementById('selectSemana').value;
+  const dias = semanasAgrupadas[sem]?.dias;
 
   const vagas = [];
 
-  if(!dias[dia]) return vagas;
+  if (!dias || !dias[dia]) return vagas;
 
-  dias[dia].forEach(r=>{
+  // 🔥 filtra apenas SEG–SEX
+  const [d, m, a] = dia.split('/');
+  const dataObj = new Date(a, m - 1, d);
+  const diaSemana = dataObj.getDay(); // 0 dom, 6 sáb
+
+  if (diaSemana === 0 || diaSemana === 6) {
+    return []; // ignora domingo e sábado
+  }
+
+  dias[dia].forEach(r => {
 
     const horario = r[1];
 
-    turmasDaPlanilha.forEach(turma=>{
+    turmasDaPlanilha.forEach(turma => {
 
       const idx = dadosGlobais[0].indexOf(turma);
       const val = (r[idx] || "").toUpperCase();
 
-      if(
+      if (
         val.includes("RESERVA ENSINO") ||
         val.includes("ESTUDOS INDIVIDUAIS")
-      ){
-        vagas.push({turma, horario});
+      ) {
+        vagas.push({ turma, horario });
       }
     });
   });
