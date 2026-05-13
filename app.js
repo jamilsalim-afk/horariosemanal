@@ -55,3 +55,32 @@ function trocarModalidade(){
   limparPainelAlteracoes(); // 🔥 ESSENCIAL
   renderizarTabela();
 }
+
+async function init(){
+
+  document.getElementById('searchProf').value = "";
+
+  const mod = document.getElementById('selectModalidade').value;
+
+  // 🔥 LIMPA PAINEL ao trocar
+  document.getElementById("painelAlteracoes").style.display = "none";
+
+  // 🔥 FLAG DE TROCA
+  window.trocouModalidade = true;
+
+  const url = `https://docs.google.com/spreadsheets/d/${SHEETS[mod].id}/export?format=csv&gid=${SHEETS[mod].gid}`;
+  const res = await fetch(url);
+
+  dadosGlobais = parseCSV(await res.text());
+
+  processarDados();
+
+  // 🔥 GARANTE verificação após tudo carregado
+  setTimeout(() => {
+  verificarMudancaAoAbrir({
+    dados: dadosGlobais,
+    getSemana: () => document.getElementById('selectSemana').value,
+    getModalidade: () => document.getElementById('selectModalidade').value
+  });
+}, 100);
+}
