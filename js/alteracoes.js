@@ -1,196 +1,368 @@
-
 // ===============================
-// 🔥 SNAPSHOT + COMPARAÇÃO (AJUSTADO PARA ABAS)
+// 🔥 SNAPSHOT + COMPARAÇÃO
 // ===============================
 
+(function () {
 
-function obterSemanaAtual() {
-  const hoje = new Date();
-  const inicioAno = new Date(hoje.getFullYear(), 0, 1);
-  const diff = hoje - inicioAno;
-  return String(Math.ceil(diff / (7 * 24 * 60 * 60 * 1000)));
-}
+  // ===============================
+  // 📅 SEMANA ATUAL
+  // ===============================
+  function obterSemanaAtual() {
 
+    const hoje = new Date();
 
-function valorMudou(v1, v2) {
-  const t1 = (v1 || "").trim();
-  const t2 = (v2 || "").trim();
+    const inicioAno = new Date(hoje.getFullYear(), 0, 1);
 
-  if (t1 !== t2) return true;
+    const diff = hoje - inicioAno;
 
-  return normalizarTexto(t1) !== normalizarTexto(t2);
-}
-
-
-// ===============================
-// 💾 SALVAR SNAPSHOT ATUAL (HORÁRIOS APENAS)
-// ===============================
-function salvarSnapshotAtual() {
-
-  // 🔥 GARANTE CONTEXTO CORRETO
-  const sem = window.semanaAtual || document.getElementById('selectSemana')?.value;
-  const mod = window.modalidadeAtual || document.getElementById('selectModalidade')?.value;
-
-  if (!sem || !mod) return;
-
-  const chave = `snapshot_${mod}_${sem}`;
-
-  const mapaOriginal = gerarMapaDados(dadosGlobais);
-
-  const mapaCompacto = {};
-
-  Object.keys(mapaOriginal).forEach(k => {
-
-    const item = mapaOriginal[k];
-
-    mapaCompacto[k] = {
-      dia: item.dia,
-      horario: item.horario,
-      turma: item.turma,
-      valorOriginal: normalizarTexto(item.valorOriginal || ""),
-      valorNormalizado: normalizarTexto(item.valorNormalizado || "")
-    };
-
-  });
-
-  const snapshot = {
-    tempo: Date.now(),
-    mapa: mapaCompacto
-  };
-
-  try {
-    localStorage.setItem(chave, JSON.stringify(snapshot));
-
-  } catch (e) {
-
-    console.warn("⚠️ LocalStorage cheio. Limpando snapshots...");
-
-    Object.keys(localStorage)
-      .filter(k => k.startsWith("snapshot_"))
-      .forEach(k => localStorage.removeItem(k));
-
-    localStorage.setItem(chave, JSON.stringify(snapshot));
-  }
-}
-
-
-// ===============================
-// 📥 OBTER SNAPSHOT
-// ===============================
-function obterSnapshotAntigo() {
-
-  const sem = window.semanaAtual || document.getElementById('selectSemana')?.value;
-  const mod = window.modalidadeAtual || document.getElementById('selectModalidade')?.value;
-
-  if (!sem || !mod) return null;
-
-  const chave = `snapshot_${mod}_${sem}`;
-
-  const data = localStorage.getItem(chave);
-
-  return data ? JSON.parse(data) : null;
-}
-
-
-// ===============================
-// 🔥 VERIFICAÇÃO AO ABRIR (SÓ ABA HORÁRIOS)
-// ===============================
-function verificarMudancaAoAbrir({ dados, getSemana, getModalidade }) {
-
-  // 🔥 BLOQUEIO POR ABA
-  if (window.abaAtiva && window.abaAtiva !== "horarios") return;
-
-  const sem = getSemana();
-  const mod = getModalidade();
-
-  if (!sem || !mod) return;
-
-  const semanaAtual = obterSemanaAtual();
-
-  // 🔥 continua sua regra de bloqueio
-  if (sem !== semanaAtual) return;
-
-  const chave = `snapshot_${mod}_${sem}`;
-
-  const antigoRaw = localStorage.getItem(chave);
-
-  const mapaNovo = gerarMapaDados(dados);
-
-  const mapaAtual = {};
-
-  Object.keys(mapaNovo).forEach(k => {
-
-    const item = mapaNovo[k];
-
-    mapaAtual[k] = {
-      dia: item.dia,
-      horario: item.horario,
-      turma: item.turma,
-      valor: normalizarTexto(item.valorNormalizado || "")
-    };
-  });
-
-  // 🔥 primeira abertura
-  if (!antigoRaw) {
-    salvarSnapshotAtual();
-    console.log("📌 Primeira abertura: snapshot criado.");
-    return;
+    return String(
+      Math.ceil(diff / (7 * 24 * 60 * 60 * 1000))
+    );
   }
 
-  let antigo;
 
-  try {
-    antigo = JSON.parse(antigoRaw);
-  } catch (e) {
-    salvarSnapshotAtual();
-    return;
+  // ===============================
+  // 🔍 VALOR MUDOU
+  // ===============================
+  function valorMudou(v1, v2) {
+
+    const t1 = String(v1 || "").trim();
+    const t2 = String(v2 || "").trim();
+
+    if (t1 !== t2) return true;
+
+    if (typeof normalizarTexto !== "function") {
+      return t1 !== t2;
+    }
+
+    return normalizarTexto(t1) !== normalizarTexto(t2);
   }
 
-  const alteracoes = compararMapas(antigo.mapa, mapaAtual);
 
-  if (alteracoes.length > 0) {
-    mostrarAvisoAlteracoesRobusto(alteracoes);
+  // ===============================
+  // 💾 SALVAR SNAPSHOT
+  // ===============================
+  function salvarSnapshotAtual() {
+
+    try {
+
+      const sem =
+        window.semanaAtual ||
+        document.getElementById("selectSemana")?.value;
+
+      const mod =
+        window.modalidadeAtual ||
+        document.getElementById("selectModalidade")?.value;
+
+      if (!sem || !mod) return;
+
+      if (!window.dadosGlobais) {
+        console.warn("⚠️ dadosGlobais não carregado.");
+        return;
+      }
+
+      if (typeof gerarMapaDados !== "function") {
+        console.warn("⚠️ gerarMapaDados não encontrado.");
+        return;
+      }
+
+      const chave = `snapshot_${mod}_${sem}`;
+
+      const mapaOriginal = gerarMapaDados(window.dadosGlobais);
+
+      const mapaCompacto = {};
+
+      Object.keys(mapaOriginal).forEach(k => {
+
+        const item = mapaOriginal[k];
+
+        mapaCompacto[k] = {
+          dia: item?.dia || "",
+          horario: item?.horario || "",
+          turma: item?.turma || "",
+          valorOriginal: typeof normalizarTexto === "function"
+            ? normalizarTexto(item?.valorOriginal || "")
+            : String(item?.valorOriginal || "").trim(),
+
+          valorNormalizado: typeof normalizarTexto === "function"
+            ? normalizarTexto(item?.valorNormalizado || "")
+            : String(item?.valorNormalizado || "").trim()
+        };
+
+      });
+
+      const snapshot = {
+        tempo: Date.now(),
+        mapa: mapaCompacto
+      };
+
+      localStorage.setItem(
+        chave,
+        JSON.stringify(snapshot)
+      );
+
+    } catch (e) {
+
+      console.warn("⚠️ Erro ao salvar snapshot:", e);
+
+      try {
+
+        Object.keys(localStorage)
+          .filter(k => k.startsWith("snapshot_"))
+          .forEach(k => localStorage.removeItem(k));
+
+      } catch (_) {}
+
+    }
+
   }
 
-  salvarSnapshotAtual();
-}
+
+  // ===============================
+  // 📥 OBTER SNAPSHOT
+  // ===============================
+  function obterSnapshotAntigo() {
+
+    try {
+
+      const sem =
+        window.semanaAtual ||
+        document.getElementById("selectSemana")?.value;
+
+      const mod =
+        window.modalidadeAtual ||
+        document.getElementById("selectModalidade")?.value;
+
+      if (!sem || !mod) return null;
+
+      const chave = `snapshot_${mod}_${sem}`;
+
+      const data = localStorage.getItem(chave);
+
+      return data ? JSON.parse(data) : null;
+
+    } catch (e) {
+
+      console.warn("⚠️ Erro ao obter snapshot:", e);
+
+      return null;
+    }
+
+  }
 
 
-// ===============================
-// ⚠️ ALERTA
-// ===============================
-function mostrarAvisoAlteracoesRobusto(lista) {
+  // ===============================
+  // 🔥 VERIFICAR ALTERAÇÕES
+  // ===============================
+  function verificarMudancaAoAbrir({
+    dados,
+    getSemana,
+    getModalidade
+  }) {
 
-  let texto = "⚠️ ALTERAÇÕES DETECTADAS:\n\n";
+    try {
 
-  lista.forEach(item => {
-    texto += `📅 Dia: ${item.dia}\n`;
-    texto += `🏫 Turma: ${item.turma}\n`;
-    texto += `⏰ Horário: ${item.horario}\n`;
-    texto += `🔎 Tipo: ${item.tipo}\n`;
-    texto += `➡️ ${item.antes} → ${item.depois}\n\n`;
-  });
+      // 🔥 trava fora da aba horários
+      if (
+        window.abaAtiva &&
+        window.abaAtiva !== "horarios"
+      ) {
+        return;
+      }
 
-  document.getElementById("conteudoAlteracoes").innerText = texto;
-  document.getElementById("painelAlteracoes").style.display = "block";
-}
+      if (!dados) return;
+
+      if (typeof gerarMapaDados !== "function") {
+        console.warn("⚠️ gerarMapaDados não encontrado.");
+        return;
+      }
+
+      if (typeof compararMapas !== "function") {
+        console.warn("⚠️ compararMapas não encontrado.");
+        return;
+      }
+
+      const sem = getSemana?.();
+
+      const mod = getModalidade?.();
+
+      if (!sem || !mod) return;
+
+      const semanaAtual = obterSemanaAtual();
+
+      // 🔥 mantém sua lógica original
+      if (sem !== semanaAtual) return;
+
+      const chave = `snapshot_${mod}_${sem}`;
+
+      const antigoRaw = localStorage.getItem(chave);
+
+      const mapaNovo = gerarMapaDados(dados);
+
+      const mapaAtual = {};
+
+      Object.keys(mapaNovo).forEach(k => {
+
+        const item = mapaNovo[k];
+
+        mapaAtual[k] = {
+          dia: item?.dia || "",
+          horario: item?.horario || "",
+          turma: item?.turma || "",
+          valor: typeof normalizarTexto === "function"
+            ? normalizarTexto(item?.valorNormalizado || "")
+            : String(item?.valorNormalizado || "").trim()
+        };
+
+      });
+
+      // 🔥 primeira abertura
+      if (!antigoRaw) {
+
+        salvarSnapshotAtual();
+
+        console.log("📌 Primeira abertura: snapshot criado.");
+
+        return;
+      }
+
+      let antigo;
+
+      try {
+
+        antigo = JSON.parse(antigoRaw);
+
+      } catch (_) {
+
+        salvarSnapshotAtual();
+
+        return;
+      }
+
+      const alteracoes =
+        compararMapas(
+          antigo?.mapa || {},
+          mapaAtual
+        );
+
+      if (
+        Array.isArray(alteracoes) &&
+        alteracoes.length > 0
+      ) {
+
+        mostrarAvisoAlteracoesRobusto(alteracoes);
+
+      }
+
+      salvarSnapshotAtual();
+
+    } catch (e) {
+
+      console.warn(
+        "⚠️ Erro em verificarMudancaAoAbrir:",
+        e
+      );
+
+    }
+
+  }
 
 
-// ===============================
-// ❌ FECHAR
-// ===============================
-function fecharPainel() {
-  document.getElementById("painelAlteracoes").style.display = "none";
-}
+  // ===============================
+  // ⚠️ MOSTRAR AVISO
+  // ===============================
+  function mostrarAvisoAlteracoesRobusto(lista) {
+
+    try {
+
+      const painel =
+        document.getElementById("painelAlteracoes");
+
+      const conteudo =
+        document.getElementById("conteudoAlteracoes");
+
+      if (!painel || !conteudo) return;
+
+      let texto = "⚠️ ALTERAÇÕES DETECTADAS:\n\n";
+
+      lista.forEach(item => {
+
+        texto += `📅 Dia: ${item?.dia || "-"}\n`;
+        texto += `🏫 Turma: ${item?.turma || "-"}\n`;
+        texto += `⏰ Horário: ${item?.horario || "-"}\n`;
+        texto += `🔎 Tipo: ${item?.tipo || "-"}\n`;
+        texto += `➡️ ${item?.antes || "-"} → ${item?.depois || "-"}\n\n`;
+
+      });
+
+      conteudo.innerText = texto;
+
+      painel.style.display = "block";
+
+    } catch (e) {
+
+      console.warn(
+        "⚠️ Erro ao mostrar alterações:",
+        e
+      );
+
+    }
+
+  }
 
 
-// ===============================
-// 📋 COPIAR
-// ===============================
-function copiarAlteracoes() {
+  // ===============================
+  // ❌ FECHAR
+  // ===============================
+  function fecharPainel() {
 
-  const texto = document.getElementById("conteudoAlteracoes").innerText;
+    const painel =
+      document.getElementById("painelAlteracoes");
 
-  navigator.clipboard.writeText(texto)
-    .then(() => alert("Copiado!"));
-}
+    if (painel) {
+      painel.style.display = "none";
+    }
+
+  }
+
+
+  // ===============================
+  // 📋 COPIAR
+  // ===============================
+  function copiarAlteracoes() {
+
+    try {
+
+      const texto =
+        document.getElementById("conteudoAlteracoes")
+          ?.innerText || "";
+
+      navigator.clipboard
+        .writeText(texto)
+        .then(() => alert("Copiado!"));
+
+    } catch (e) {
+
+      console.warn(
+        "⚠️ Erro ao copiar alterações:",
+        e
+      );
+
+    }
+
+  }
+
+
+  // ===============================
+  // 🌎 EXPORTAÇÃO GLOBAL
+  // ===============================
+  window.obterSemanaAtual = obterSemanaAtual;
+  window.valorMudou = valorMudou;
+  window.salvarSnapshotAtual = salvarSnapshotAtual;
+  window.obterSnapshotAntigo = obterSnapshotAntigo;
+  window.verificarMudancaAoAbrir = verificarMudancaAoAbrir;
+  window.mostrarAvisoAlteracoesRobusto = mostrarAvisoAlteracoesRobusto;
+  window.fecharPainel = fecharPainel;
+  window.copiarAlteracoes = copiarAlteracoes;
+
+})();
