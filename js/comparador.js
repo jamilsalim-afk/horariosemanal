@@ -1,3 +1,7 @@
+
+// ===============================
+// 🧠 GERAR MAPA DE DADOS (ROBUSTO)
+// ===============================
 function gerarMapaDados(dados) {
 
   const mapa = {};
@@ -8,6 +12,7 @@ function gerarMapaDados(dados) {
     const linha = dados[i];
 
     if (linha[0]) ultimoDia = linha[0];
+
     const dia = ultimoDia;
 
     if (!dia) continue;
@@ -15,7 +20,7 @@ function gerarMapaDados(dados) {
     const horario = (linha[1] || "").trim();
     const horarioNorm = normalizarTexto(horario);
 
-    // ignora lixo
+    // 🔥 ignora linhas irrelevantes
     if (
       !horario ||
       horarioNorm.includes("INTERVALO") ||
@@ -37,8 +42,8 @@ function gerarMapaDados(dados) {
         dia,
         horario,
         turma,
-        valorOriginal: valor,
-        valorNormalizado: normalizarTexto(valor)
+        valorOriginal: valor || "",
+        valorNormalizado: normalizarTexto(valor || "")
       };
     }
   }
@@ -46,7 +51,11 @@ function gerarMapaDados(dados) {
   return mapa;
 }
 
-function compararMapas(mapaAntigo, mapaNovo) {
+
+// ===============================
+// ⚖️ COMPARAÇÃO DE MAPAS (VERSÃO SEGURA)
+// ===============================
+function compararMapas(mapaAntigo = {}, mapaNovo = {}) {
 
   const alteracoes = [];
 
@@ -64,7 +73,9 @@ function compararMapas(mapaAntigo, mapaNovo) {
     if (antigo && !novo) {
       alteracoes.push({
         tipo: "REMOVIDO",
-        ...antigo,
+        dia: antigo.dia,
+        horario: antigo.horario,
+        turma: antigo.turma,
         antes: antigo.valorOriginal,
         depois: "(vazio)"
       });
@@ -75,22 +86,28 @@ function compararMapas(mapaAntigo, mapaNovo) {
     if (!antigo && novo) {
       alteracoes.push({
         tipo: "ADICIONADO",
-        ...novo,
+        dia: novo.dia,
+        horario: novo.horario,
+        turma: novo.turma,
         antes: "(vazio)",
         depois: novo.valorOriginal
       });
       return;
     }
 
-    // 🟡 ALTERADO
-    if (antigo.valorNormalizado !== novo.valorNormalizado) {
+    // 🟡 ALTERADO (SEGURANÇA TOTAL)
+    const antigoValor = antigo?.valorNormalizado || "";
+    const novoValor = novo?.valorNormalizado || "";
+
+    if (antigoValor !== novoValor) {
+
       alteracoes.push({
         tipo: "ALTERADO",
-        dia: novo.dia,
-        horario: novo.horario,
-        turma: novo.turma,
-        antes: antigo.valorOriginal,
-        depois: novo.valorOriginal
+        dia: novo?.dia || antigo?.dia,
+        horario: novo?.horario || antigo?.horario,
+        turma: novo?.turma || antigo?.turma,
+        antes: antigo?.valorOriginal || "(vazio)",
+        depois: novo?.valorOriginal || "(vazio)"
       });
     }
   });
