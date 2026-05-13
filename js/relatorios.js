@@ -1,37 +1,94 @@
-function abrirRelatorioDia(dia){
+
+// ===============================
+// 📅 ABRIR RELATÓRIO DO DIA
+// ===============================
+function abrirRelatorioDia(dia) {
+
   const texto = gerarRelatorioDia(dia);
-  mostrarPainelVagas(texto);
+
+  // 🔥 agora respeita nova estrutura de painel
+  const container = document.getElementById("painelVagas");
+
+  if (!container) return;
+
+  document.getElementById("conteudoVagas").innerText = texto;
+
+  document.querySelector("#painelVagas strong").innerText =
+    "📅 Relatório do Dia";
+
+  container.style.display = "block";
 }
-  
+
+
+// ===============================
+// 📊 ABRIR RELATÓRIO SEMANA
+// ===============================
+function abrirRelatorioSemana() {
+
+  const texto = gerarRelatorioSemanaTexto();
+
+  const container = document.getElementById("painelVagas");
+
+  if (!container) return;
+
+  document.getElementById("conteudoVagas").innerText = texto;
+
+  document.querySelector("#painelVagas strong").innerText =
+    "📊 Relatório da Semana";
+
+  container.style.display = "block";
+}
+
+
+// ===============================
+// 🔘 CRIAR BOTÕES DE DIAS
+// ===============================
 function criarBotoesDias() {
-  const sem = document.getElementById('selectSemana').value;
-  const dias = semanasAgrupadas[sem].dias;
+
+  const sem = window.appState?.semana ||
+    document.getElementById('selectSemana')?.value;
+
+  const dias = semanasAgrupadas?.[sem]?.dias;
+
+  if (!dias) return;
 
   let html = `
     <div style="padding:10px;display:flex;gap:10px;flex-wrap:wrap;">
   `;
 
   Object.keys(dias).forEach(dia => {
+
     html += `
       <button onclick="abrirRelatorioDia('${dia}')"
-        style="padding:10px;background:#2e7d32;color:white;border:none;border-radius:6px;cursor:pointer;">
+        style="
+          padding:10px;
+          background:#2e7d32;
+          color:white;
+          border:none;
+          border-radius:8px;
+          cursor:pointer;
+          font-weight:600;
+        ">
         📅 ${dia}
       </button>
     `;
   });
 
   html += `
-      <button onclick="abrirRelatorioSemana()"
-        style="padding:10px;background:#d32f2f;color:white;border:none;border-radius:6px;cursor:pointer;">
-        📊 Semana inteira
-      </button>
-    </div>
+    <button onclick="abrirRelatorioSemana()"
+      style="
+        padding:10px;
+        background:#d32f2f;
+        color:white;
+        border:none;
+        border-radius:8px;
+        cursor:pointer;
+        font-weight:600;
+      ">
+      📊 Semana inteira
+    </button>
+  </div>
   `;
 
   document.getElementById("botoesRelatorio").innerHTML = html;
-}
-
-  function abrirRelatorioSemana(){
-  const texto = gerarRelatorioSemanaTexto();
-  mostrarPainelVagas(texto);
 }
