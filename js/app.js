@@ -163,9 +163,8 @@ function getAbaAtiva() {
 }
 
 function getModalidadeAtual() {
-  const aba = getAbaAtiva();
-  const el = document.querySelector(`#aba-${aba} .selectModalidade`);
-  return el ? el.value : document.getElementById('selectModalidade').value;
+  const el = document.getElementById("selectModalidade");
+  return el ? el.value : "INTEGRADO";
 }
 
 function getSemanaAtualSelecionada() {
