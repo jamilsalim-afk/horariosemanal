@@ -5,15 +5,31 @@ function salvarSnapshotAtual() {
 
   const mapaOriginal = gerarMapaDados(dadosGlobais);
 
-  // 🔥 compactação para evitar estouro do LocalStorage
+  // 🔥 compactação do snapshot
   const mapaCompacto = {};
 
   Object.keys(mapaOriginal).forEach(k => {
 
-    mapaCompacto[k] = (mapaOriginal[k] || "")
-      .replace(/\s+/g, ' ')
-      .trim()
-      .substring(0, 120);
+    const item = mapaOriginal[k];
+
+    mapaCompacto[k] = {
+
+      dia: item.dia,
+
+      horario: item.horario,
+
+      turma: item.turma,
+
+      valorOriginal: (item.valorOriginal || "")
+        .replace(/\s+/g, ' ')
+        .trim()
+        .substring(0, 120),
+
+      valorNormalizado: (item.valorNormalizado || "")
+        .replace(/\s+/g, ' ')
+        .trim()
+        .substring(0, 120)
+    };
 
   });
 
@@ -29,7 +45,9 @@ function salvarSnapshotAtual() {
       chave.startsWith(`snapshot_${mod}_`) &&
       chave !== `snapshot_${mod}_${sem}`
     ) {
+
       localStorage.removeItem(chave);
+
     }
 
   });
@@ -49,7 +67,9 @@ function salvarSnapshotAtual() {
     Object.keys(localStorage).forEach(chave => {
 
       if (chave.startsWith("snapshot_")) {
+
         localStorage.removeItem(chave);
+
       }
 
     });
@@ -75,7 +95,9 @@ function obterSnapshotAntigo() {
   const sem = document.getElementById('selectSemana').value;
   const mod = document.getElementById('selectModalidade').value;
 
-  const data = localStorage.getItem(`snapshot_${mod}_${sem}`);
+  const data = localStorage.getItem(
+    `snapshot_${mod}_${sem}`
+  );
 
   return data ? JSON.parse(data) : null;
 }
@@ -159,7 +181,9 @@ function verificarMudancaAoAbrir({
       document.getElementById("painelAlteracoes");
 
     if (painel) {
+
       painel.style.display = "none";
+
     }
   }
 
@@ -168,7 +192,8 @@ function verificarMudancaAoAbrir({
 
 function mostrarAvisoAlteracoesRobusto(lista) {
 
-  let texto = "⚠️ ALTERAÇÕES DETECTADAS:\n\n";
+  let texto =
+    "⚠️ ALTERAÇÕES DETECTADAS:\n\n";
 
   lista.forEach(item => {
 
