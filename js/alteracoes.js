@@ -1,41 +1,37 @@
+
 // ===============================
-// 🔥 SNAPSHOT + COMPARAÇÃO (ATUAL)
+// 🔥 SNAPSHOT + COMPARAÇÃO (AJUSTADO PARA ABAS)
 // ===============================
 
 
 function obterSemanaAtual() {
   const hoje = new Date();
-
   const inicioAno = new Date(hoje.getFullYear(), 0, 1);
   const diff = hoje - inicioAno;
-
-  const semana = Math.ceil(diff / (7 * 24 * 60 * 60 * 1000));
-
-  return String(semana);
+  return String(Math.ceil(diff / (7 * 24 * 60 * 60 * 1000)));
 }
 
 
 function valorMudou(v1, v2) {
-
   const t1 = (v1 || "").trim();
   const t2 = (v2 || "").trim();
 
   if (t1 !== t2) return true;
 
-  const n1 = normalizarTexto(t1);
-  const n2 = normalizarTexto(t2);
-
-  return n1 !== n2;
+  return normalizarTexto(t1) !== normalizarTexto(t2);
 }
 
 
 // ===============================
-// 💾 SALVAR SNAPSHOT ATUAL
+// 💾 SALVAR SNAPSHOT ATUAL (HORÁRIOS APENAS)
 // ===============================
 function salvarSnapshotAtual() {
 
-  const sem = document.getElementById('selectSemana').value;
-  const mod = document.getElementById('selectModalidade').value;
+  // 🔥 GARANTE CONTEXTO CORRETO
+  const sem = window.semanaAtual || document.getElementById('selectSemana')?.value;
+  const mod = window.modalidadeAtual || document.getElementById('selectModalidade')?.value;
+
+  if (!sem || !mod) return;
 
   const chave = `snapshot_${mod}_${sem}`;
 
@@ -67,7 +63,7 @@ function salvarSnapshotAtual() {
 
   } catch (e) {
 
-    console.warn("⚠️ LocalStorage cheio. Limpando snapshots do sistema...");
+    console.warn("⚠️ LocalStorage cheio. Limpando snapshots...");
 
     Object.keys(localStorage)
       .filter(k => k.startsWith("snapshot_"))
@@ -79,12 +75,14 @@ function salvarSnapshotAtual() {
 
 
 // ===============================
-// 📥 OBTER SNAPSHOT ANTIGO
+// 📥 OBTER SNAPSHOT
 // ===============================
 function obterSnapshotAntigo() {
 
-  const sem = document.getElementById('selectSemana').value;
-  const mod = document.getElementById('selectModalidade').value;
+  const sem = window.semanaAtual || document.getElementById('selectSemana')?.value;
+  const mod = window.modalidadeAtual || document.getElementById('selectModalidade')?.value;
+
+  if (!sem || !mod) return null;
 
   const chave = `snapshot_${mod}_${sem}`;
 
@@ -95,15 +93,21 @@ function obterSnapshotAntigo() {
 
 
 // ===============================
-// 🔥 VERIFICAÇÃO AO ABRIR
+// 🔥 VERIFICAÇÃO AO ABRIR (SÓ ABA HORÁRIOS)
 // ===============================
 function verificarMudancaAoAbrir({ dados, getSemana, getModalidade }) {
+
+  // 🔥 BLOQUEIO POR ABA
+  if (window.abaAtiva && window.abaAtiva !== "horarios") return;
 
   const sem = getSemana();
   const mod = getModalidade();
 
-  // 🔥 bloqueia qualquer coisa fora da semana atual
+  if (!sem || !mod) return;
+
   const semanaAtual = obterSemanaAtual();
+
+  // 🔥 continua sua regra de bloqueio
   if (sem !== semanaAtual) return;
 
   const chave = `snapshot_${mod}_${sem}`;
@@ -126,13 +130,10 @@ function verificarMudancaAoAbrir({ dados, getSemana, getModalidade }) {
     };
   });
 
-  // 🔥 PRIMEIRA ABERTURA (NÃO MOSTRA ALERTA)
+  // 🔥 primeira abertura
   if (!antigoRaw) {
-
     salvarSnapshotAtual();
-
-    console.log("📌 Primeira abertura da semana: snapshot criado.");
-
+    console.log("📌 Primeira abertura: snapshot criado.");
     return;
   }
 
@@ -141,7 +142,6 @@ function verificarMudancaAoAbrir({ dados, getSemana, getModalidade }) {
   try {
     antigo = JSON.parse(antigoRaw);
   } catch (e) {
-
     salvarSnapshotAtual();
     return;
   }
@@ -152,20 +152,18 @@ function verificarMudancaAoAbrir({ dados, getSemana, getModalidade }) {
     mostrarAvisoAlteracoesRobusto(alteracoes);
   }
 
-  // 🔥 atualiza snapshot sempre após abrir
   salvarSnapshotAtual();
 }
 
 
 // ===============================
-// ⚠️ EXIBIÇÃO DE ALTERAÇÕES
+// ⚠️ ALERTA
 // ===============================
 function mostrarAvisoAlteracoesRobusto(lista) {
 
   let texto = "⚠️ ALTERAÇÕES DETECTADAS:\n\n";
 
   lista.forEach(item => {
-
     texto += `📅 Dia: ${item.dia}\n`;
     texto += `🏫 Turma: ${item.turma}\n`;
     texto += `⏰ Horário: ${item.horario}\n`;
@@ -174,29 +172,25 @@ function mostrarAvisoAlteracoesRobusto(lista) {
   });
 
   document.getElementById("conteudoAlteracoes").innerText = texto;
-
   document.getElementById("painelAlteracoes").style.display = "block";
 }
 
 
 // ===============================
-// ❌ FECHAR PAINEL
+// ❌ FECHAR
 // ===============================
 function fecharPainel() {
-
   document.getElementById("painelAlteracoes").style.display = "none";
 }
 
 
 // ===============================
-// 📋 COPIAR ALTERAÇÕES
+// 📋 COPIAR
 // ===============================
 function copiarAlteracoes() {
 
   const texto = document.getElementById("conteudoAlteracoes").innerText;
 
   navigator.clipboard.writeText(texto)
-    .then(() => {
-      alert("Copiado!");
-    });
+    .then(() => alert("Copiado!"));
 }
