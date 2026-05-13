@@ -133,38 +133,30 @@ function trocarSemana(){
 // ===============================
 // 🚀 INIT PRINCIPAL (AJUSTADO)
 // ===============================
-async function init() {
-
-  document.getElementById('searchProf').value = "";
+async function init(){
 
   const mod = document.getElementById('selectModalidade').value;
 
-  window.appState.modalidade = mod;
-
+  // 🔥 LIMPA PAINEL ao trocar
   document.getElementById("painelAlteracoes").style.display = "none";
 
-  const url = `https://docs.google.com/spreadsheets/d/${SHEETS[mod].id}/export?format=csv&gid=${SHEETS[mod].gid}`;
+  // 🔥 FLAG DE TROCA
+  window.trocouModalidade = true;
 
+  const url = `https://docs.google.com/spreadsheets/d/${SHEETS[mod].id}/export?format=csv&gid=${SHEETS[mod].gid}`;
   const res = await fetch(url);
 
   dadosGlobais = parseCSV(await res.text());
+  await carregarEventos(); // 🔥 NOVO
 
   processarDados();
 
-  // ===============================
-  // 🔥 VERIFICAÇÃO DE ALTERAÇÕES (SEM TIMEOUT)
-  // ===============================
-  requestAnimationFrame(() => {
-
-    verificarMudancaAoAbrir({
-      dados: dadosGlobais,
-
-      getSemana: () =>
-        document.getElementById('selectSemana')?.value,
-
-      getModalidade: () =>
-        document.getElementById('selectModalidade')?.value
-    });
-
+  // 🔥 GARANTE verificação após tudo carregado
+  setTimeout(() => {
+  verificarMudancaAoAbrir({
+    dados: dadosGlobais,
+    getSemana: () => document.getElementById('selectSemana').value,
+    getModalidade: () => document.getElementById('selectModalidade').value
   });
+}, 100);
 }
