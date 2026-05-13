@@ -160,3 +160,41 @@ async function init(){
   });
 }, 100);
 }
+
+function getEventoGeral(dia, horario){
+
+  if(!horario || !horario.includes(" - ")) return null;
+
+  const [hIniStr, hFimStr] = horario.split(" - ");
+
+  const hIniLinha = horaParaMinutos(hIniStr);
+  const hFimLinha = horaParaMinutos(hFimStr);
+
+  for(let i = 1; i < eventosGlobais.length; i++){
+
+    const ev = eventosGlobais[i];
+
+    const modalidade = ev[0];
+    const tipo = ev[1];
+    const data = ev[3];
+    const hInicio = horaParaMinutos(ev[4]);
+    const hFim = horaParaMinutos(ev[5]);
+    const desc = ev[6];
+
+    const modAtual = document.getElementById('selectModalidade').value;
+
+    if(modalidade !== modAtual) continue;
+    if(tipo !== "GERAL") continue;
+    if(data !== dia) continue;
+
+    // 🔥 REGRA CORRETA (INTERSEÇÃO DE INTERVALO)
+    const dentro =
+      hIniLinha < hFim && hFimLinha > hInicio;
+
+    if(dentro){
+      return desc || "EVENTO";
+    }
+  }
+
+  return null;
+}
