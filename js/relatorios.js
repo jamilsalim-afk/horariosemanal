@@ -102,7 +102,7 @@ function gerarRelatorioDia(dia) {
 
   const vagas = coletarVagasDoDia(dia);
 
-  let texto = `📅 RELATÓRIO DO DIA (${dia})\n\n`;
+  let texto = `📅 RELATÓRIO DE AULAS VAGAS DO DIA (${dia})\n\n`;
 
   if (!vagas.length) {
     return texto + "Não há aulas vagas neste dia.";
