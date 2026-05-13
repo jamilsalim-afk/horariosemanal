@@ -55,10 +55,12 @@ function isSemanaPassada(dataStr) {
 // 🧹 PAINEL ALTERAÇÕES
 // ===============================
 function limparPainelAlteracoes() {
-  document.getElementById("conteudoAlteracoes").innerText = "";
-  document.getElementById("painelAlteracoes").style.display = "none";
-}
+  const conteudo = document.getElementById("conteudoAlteracoes");
+  const painel = document.getElementById("painelAlteracoes");
 
+  if (conteudo) conteudo.innerText = "";
+  if (painel) painel.style.display = "none";
+}
 
 // ===============================
 // 📅 PAINEL VAGAS
@@ -89,13 +91,13 @@ function copiarVagas() {
 // ===============================
 function trocarModalidade() {
 
-  const mod = document.getElementById('selectModalidade').value;
-
-  window.appState.modalidade = mod;
+  window.trocouModalidade = true;
 
   limparPainelAlteracoes();
 
-  init();
+  if (typeof renderizarTabela === "function") {
+    renderizarTabela();
+  }
 }
 
 
@@ -104,13 +106,11 @@ function trocarModalidade() {
 // ===============================
 function trocarSemana() {
 
-  const sem = document.getElementById('selectSemana').value;
-
-  window.appState.semana = sem;
-
   limparPainelAlteracoes();
 
-  renderizarTabela();
+  if (typeof renderizarTabela === "function") {
+    renderizarTabela();
+  }
 }
 
 
