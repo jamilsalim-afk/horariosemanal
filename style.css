@@ -1,0 +1,1037 @@
+:root{
+  --primary:#22c55e;
+  --primary-dark:#15803d;
+  --bg:#020617;
+  --card:#0f172a;
+  --card-2:#111827;
+  --text:#f8fafc;
+  --muted:#94a3b8;
+  --border:rgba(255,255,255,0.08);
+  --shadow:0 10px 35px rgba(0,0,0,0.35);
+  --radius:24px;
+}
+
+/* =========================================
+   RESET
+========================================= */
+
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+}
+
+html{
+  scroll-behavior:smooth;
+}
+
+body{
+  font-family:'Inter',sans-serif;
+
+  background:
+    radial-gradient(circle at top left,rgba(34,197,94,0.15),transparent 30%),
+    radial-gradient(circle at bottom right,rgba(59,130,246,0.15),transparent 30%),
+    linear-gradient(135deg,#020617,#0f172a,#111827);
+
+  color:var(--text);
+
+  min-height:100vh;
+
+  overflow-x:hidden;
+}
+
+/* =========================================
+   HEADER PRINCIPAL
+========================================= */
+
+.ifro-header{
+
+  position:relative;
+
+  background:
+    linear-gradient(
+      to bottom,
+      rgba(2,6,23,0.95),
+      rgba(2,6,23,0.88)
+    );
+
+  border-bottom:
+    1px solid rgba(255,255,255,0.05);
+
+  overflow:hidden;
+}
+
+.ifro-header-content{
+
+  max-width:1800px;
+
+  margin:auto;
+
+  padding:26px 22px 18px;
+
+  text-align:center;
+
+  transition:0.3s ease;
+}
+
+.ifro-linha1{
+
+  color:#cbd5e1;
+
+  letter-spacing:2px;
+
+  font-size:11px;
+
+  margin-bottom:8px;
+
+  opacity:0.9;
+}
+
+.ifro-linha2{
+
+  font-size:36px;
+
+  font-weight:800;
+
+  color:white;
+
+  line-height:1.1;
+}
+
+.ifro-linha3{
+
+  margin-top:8px;
+
+  color:#94a3b8;
+
+  font-size:13px;
+
+  line-height:1.4;
+}
+
+.ifro-linha4{
+
+  margin-top:18px;
+
+  display:inline-flex;
+
+  align-items:center;
+
+  gap:10px;
+
+  padding:12px 22px;
+
+  border-radius:999px;
+
+  background:
+    linear-gradient(
+      135deg,
+      #16a34a,
+      #22c55e
+    );
+
+  color:white;
+
+  font-weight:700;
+
+  box-shadow:
+    0 12px 25px rgba(34,197,94,0.25);
+
+  font-size:14px;
+}
+
+/* =========================================
+   BARRA FIXA DOS CONTROLES
+========================================= */
+
+.header-sticky{
+
+  position:sticky;
+
+  top:0;
+
+  z-index:9999;
+
+  padding:10px 14px;
+
+  background:
+    linear-gradient(
+      to bottom,
+      rgba(2,6,23,0.98),
+      rgba(2,6,23,0.90)
+    );
+
+  backdrop-filter:blur(18px);
+
+  border-bottom:
+    1px solid rgba(255,255,255,0.06);
+}
+
+.controls-card{
+
+  max-width:1800px;
+
+  margin:auto;
+
+  display:flex;
+
+  flex-wrap:wrap;
+
+  justify-content:center;
+
+  align-items:center;
+
+  gap:12px;
+
+  padding:14px;
+
+  border-radius:22px;
+
+  background:
+    rgba(15,23,42,0.82);
+
+  backdrop-filter:blur(18px);
+
+  border:
+    1px solid rgba(255,255,255,0.06);
+
+  box-shadow:var(--shadow);
+}
+
+/* =========================================
+   INPUTS E BOTÕES
+========================================= */
+
+select,
+.search-box,
+.btn-pdf{
+
+  border:none;
+
+  outline:none;
+
+  font-family:'Inter',sans-serif;
+
+  transition:0.25s ease;
+}
+
+select,
+.search-box{
+
+  min-width:220px;
+
+  height:48px;
+
+  padding:0 16px;
+
+  border-radius:14px;
+
+  background:#111827;
+
+  color:white;
+
+  border:
+    1px solid rgba(255,255,255,0.08);
+
+  font-size:14px;
+}
+
+select:hover,
+.search-box:hover{
+
+  border-color:#22c55e;
+}
+
+select:focus,
+.search-box:focus{
+
+  border-color:#22c55e;
+
+  box-shadow:
+    0 0 0 4px rgba(34,197,94,0.15);
+}
+
+.search-box::placeholder{
+  color:#64748b;
+}
+
+.btn-pdf{
+
+  height:48px;
+
+  padding:0 20px;
+
+  border-radius:14px;
+
+  background:
+    linear-gradient(
+      135deg,
+      #dc2626,
+      #ef4444
+    );
+
+  color:white;
+
+  font-weight:700;
+
+  cursor:pointer;
+
+  box-shadow:
+    0 10px 22px rgba(239,68,68,0.22);
+
+  font-size:14px;
+
+  white-space:nowrap;
+}
+
+.btn-pdf:hover{
+
+  transform:translateY(-2px);
+}
+
+/* =========================================
+   CONTAINER PRINCIPAL
+========================================= */
+
+.week-container{
+
+  width:100%;
+
+  max-width:100vw;
+
+  margin:18px auto;
+
+  padding:0 14px 50px;
+}
+
+/* =========================================
+   RELATÓRIOS
+========================================= */
+
+#botoesRelatorio{
+
+  margin-bottom:20px;
+}
+
+#botoesRelatorio > div{
+
+  display:flex;
+
+  flex-wrap:wrap;
+
+  gap:10px;
+}
+
+#botoesRelatorio button{
+
+  padding:12px 16px !important;
+
+  border:none !important;
+
+  border-radius:14px !important;
+
+  background:
+    rgba(15,23,42,0.90) !important;
+
+  color:white !important;
+
+  font-weight:700;
+
+  cursor:pointer;
+
+  transition:0.25s ease;
+
+  border:
+    1px solid rgba(255,255,255,0.08) !important;
+}
+
+#botoesRelatorio button:hover{
+
+  background:#16a34a !important;
+
+  transform:translateY(-2px);
+}
+
+/* =========================================
+   PAINÉIS
+========================================= */
+
+#painelAlteracoes,
+#painelVagas{
+
+  background:
+    rgba(15,23,42,0.92) !important;
+
+  color:white;
+
+  border:none !important;
+
+  border-radius:24px !important;
+
+  backdrop-filter:blur(18px);
+
+  box-shadow:var(--shadow);
+}
+
+#painelAlteracoes pre,
+#painelVagas pre{
+
+  color:#e2e8f0;
+
+  line-height:1.7;
+}
+
+#painelAlteracoes button,
+#painelVagas button{
+
+  border:none !important;
+
+  border-radius:12px !important;
+
+  font-weight:700;
+
+  transition:0.25s ease;
+}
+
+#painelAlteracoes button:hover,
+#painelVagas button:hover{
+
+  transform:translateY(-2px);
+}
+
+/* =========================================
+   TABELA
+========================================= */
+
+.table-responsive{
+
+  width:100%;
+
+  position:relative;
+
+  overflow-x:auto;
+
+  overflow-y:visible;
+
+  padding:14px;
+
+  border-radius:24px;
+
+  background:
+    rgba(15,23,42,0.80);
+
+  backdrop-filter:blur(20px);
+
+  border:
+    1px solid rgba(255,255,255,0.08);
+
+  box-shadow:var(--shadow);
+
+  -webkit-overflow-scrolling:touch;
+
+  touch-action:pan-x pan-y;
+}
+
+.table-responsive::-webkit-scrollbar{
+  height:10px;
+}
+
+.table-responsive::-webkit-scrollbar-thumb{
+
+  background:#475569;
+
+  border-radius:999px;
+}
+
+table{
+
+  width:max-content;
+
+  min-width:100%;
+
+  table-layout:fixed;
+
+  border-collapse:separate;
+
+  border-spacing:0;
+
+  border-radius:18px;
+
+  margin-bottom:12px;
+}
+
+th,
+td{
+
+  border:
+    1px solid rgba(255,255,255,0.05);
+
+  padding:8px 6px;
+
+  text-align:center;
+
+  vertical-align:middle;
+
+  transition:0.2s ease;
+
+  white-space:normal;
+
+  word-break:break-word;
+
+  overflow-wrap:anywhere;
+
+  hyphens:auto;
+
+  width:140px;
+
+  min-width:140px;
+
+  max-width:140px;
+}
+
+/* =========================================
+   CABEÇALHO DA TABELA
+========================================= */
+
+th{
+
+  background:#111827;
+
+  color:white;
+
+  font-size:11px;
+
+  font-weight:700;
+
+  line-height:1.3;
+
+  position:sticky;
+
+  top:0;
+
+  z-index:5;
+}
+
+/* =========================================
+   COLUNA HORÁRIO FIXA
+========================================= */
+
+.time-col{
+
+  position:sticky;
+
+  left:0;
+
+  z-index:9999;
+
+  width:90px !important;
+
+  min-width:90px !important;
+
+  max-width:90px !important;
+
+  background:#020617 !important;
+
+  color:white;
+
+  font-weight:600;
+
+  font-size:10px;
+
+  line-height:1.2;
+
+  white-space:nowrap;
+
+  overflow:hidden;
+
+  border-right:
+    2px solid rgba(255,255,255,0.08);
+
+  box-shadow:
+    6px 0 12px rgba(0,0,0,0.35);
+
+  isolation:isolate;
+}
+
+td.time-col{
+
+  position:sticky;
+
+  left:0;
+
+  z-index:9998;
+
+  background:#020617 !important;
+
+  background-clip:padding-box;
+}
+
+th.time-col{
+
+  position:sticky;
+
+  left:0;
+
+  top:0;
+
+  z-index:10000;
+
+  background:#020617 !important;
+
+  background-clip:padding-box;
+}
+
+/* =========================================
+   CÉLULAS
+========================================= */
+
+.aula-cell{
+
+  background:
+    rgba(255,255,255,0.02);
+
+  color:#f8fafc;
+
+  font-size:10px;
+
+  line-height:1.45;
+}
+
+.aula-cell:hover{
+
+  background:
+    rgba(34,197,94,0.12);
+}
+
+/* =========================================
+   DIVISÃO DIA
+========================================= */
+
+.day-divider td{
+
+  background:
+    linear-gradient(
+      135deg,
+      #15803d,
+      #22c55e
+    );
+
+  color:white;
+
+  font-weight:800;
+
+  font-size:15px;
+
+  letter-spacing:1px;
+
+  padding:14px;
+
+  position:sticky;
+
+  left:0;
+
+  z-index:50;
+}
+
+/* =========================================
+   INTERVALOS
+========================================= */
+
+.intervalo td,
+.marcacao-extra{
+
+  background:
+    rgba(255,255,255,0.05) !important;
+
+  color:#94a3b8;
+
+  font-weight:700;
+}
+
+/* =========================================
+   HIGHLIGHT
+========================================= */
+
+.highlight{
+
+  background:
+    linear-gradient(
+      135deg,
+      #facc15,
+      #f59e0b
+    ) !important;
+
+  color:white !important;
+
+  font-weight:800;
+
+  box-shadow:
+    0 0 20px rgba(250,204,21,0.25);
+}
+
+.opaco{
+  opacity:0.12;
+}
+
+/* =========================================
+   FERIADO
+========================================= */
+
+.feriado{
+
+  background:
+    linear-gradient(
+      135deg,
+      #991b1b,
+      #dc2626
+    );
+
+  color:white;
+
+  font-size:72px;
+
+  font-weight:900;
+
+  letter-spacing:8px;
+
+  height:220px;
+}
+
+/* =========================================
+   EVENTOS
+========================================= */
+
+.evento-bloco{
+
+  background:
+    linear-gradient(
+      135deg,
+      #0f766e,
+      #14b8a6
+    ) !important;
+
+  color:white;
+
+  font-weight:800;
+
+  font-size:18px;
+
+  letter-spacing:1px;
+
+  text-align:center;
+
+  vertical-align:middle;
+}
+
+/* =========================================
+   CURSOS
+========================================= */
+
+.c-agroec{
+  background:rgba(34,197,94,0.15) !important;
+}
+
+.c-agropec{
+  background:rgba(59,130,246,0.15) !important;
+}
+
+.c-info{
+  background:rgba(250,204,21,0.15) !important;
+}
+
+.c-geo{
+  background:rgba(168,85,247,0.15) !important;
+}
+
+.c-mat{
+  background:rgba(6,182,212,0.15) !important;
+}
+
+.c-agroneg{
+  background:rgba(120,113,108,0.18) !important;
+}
+
+.c-zoo{
+  background:rgba(244,114,182,0.15) !important;
+}
+
+.c-agron{
+  background:rgba(132,204,22,0.15) !important;
+}
+
+/* =========================================
+   STATUS
+========================================= */
+
+.reserva-ensino{
+  color:#fde047;
+  font-weight:800;
+}
+
+.pps{
+  color:#93c5fd;
+  font-weight:800;
+}
+
+.estudos{
+  color:#86efac;
+  font-weight:800;
+}
+
+.reuniao{
+  color:#fdba74;
+  font-weight:800;
+}
+
+.caed{
+  background:rgba(250,204,21,0.16) !important;
+}
+
+.reposicao{
+  color:#4ade80;
+  font-weight:800;
+}
+
+/* =========================================
+   FOOTER
+========================================= */
+
+.ifro-footer{
+
+  margin-top:50px;
+
+  background:#020617;
+
+  color:#94a3b8;
+
+  text-align:center;
+
+  padding:34px 20px;
+
+  line-height:1.7;
+
+  border-top:
+    1px solid rgba(255,255,255,0.08);
+
+  font-size:14px;
+}
+
+/* =========================================
+   TABLET
+========================================= */
+
+@media(max-width:1024px){
+
+  .ifro-linha2{
+    font-size:28px;
+  }
+
+  .controls-card{
+    gap:10px;
+  }
+
+  th,
+  td{
+
+    width:125px;
+
+    min-width:125px;
+
+    max-width:125px;
+  }
+
+  .aula-cell{
+    font-size:9px;
+  }
+
+  th{
+    font-size:10px;
+  }
+
+  .time-col{
+
+    width:82px !important;
+
+    min-width:82px !important;
+
+    max-width:82px !important;
+
+    font-size:9px;
+  }
+
+  .feriado{
+    font-size:44px;
+  }
+}
+
+/* =========================================
+   CELULAR
+========================================= */
+
+@media(max-width:768px){
+
+  /* HEADER MENOR */
+
+  .ifro-header-content{
+
+    padding:10px 10px 8px;
+  }
+
+  .ifro-linha1{
+
+    display:none;
+  }
+
+  .ifro-linha2{
+
+    font-size:19px;
+
+    line-height:1.2;
+  }
+
+  .ifro-linha3{
+
+    display:none;
+  }
+
+  .ifro-linha4{
+
+    margin-top:8px;
+
+    padding:7px 12px;
+
+    font-size:10px;
+  }
+
+  /* CONTROLES FIXOS */
+
+  .header-sticky{
+
+    padding:6px;
+  }
+
+  .controls-card{
+
+    display:grid;
+
+    grid-template-columns:1fr 1fr;
+
+    gap:8px;
+
+    padding:10px;
+
+    border-radius:18px;
+  }
+
+  select,
+  .search-box,
+  .btn-pdf{
+
+    width:100%;
+
+    min-width:unset;
+
+    height:42px;
+
+    font-size:12px;
+  }
+
+  .btn-pdf{
+
+    grid-column:span 2;
+  }
+
+  /* TABELA */
+
+  .table-responsive{
+
+    padding:8px;
+  }
+
+  th,
+  td{
+
+    width:110px;
+
+    min-width:110px;
+
+    max-width:110px;
+
+    padding:5px 4px;
+  }
+
+  .aula-cell{
+
+    font-size:8px;
+
+    line-height:1.3;
+  }
+
+  th{
+
+    font-size:8px;
+  }
+
+  .time-col{
+
+    width:68px !important;
+
+    min-width:68px !important;
+
+    max-width:68px !important;
+
+    font-size:7px;
+  }
+
+  .day-divider td{
+
+    font-size:11px;
+
+    padding:10px;
+  }
+
+  .feriado{
+
+    font-size:26px;
+
+    letter-spacing:3px;
+
+    height:120px;
+  }
+
+  .ifro-footer{
+
+    font-size:11px;
+
+    line-height:1.5;
+  }
+}
+
+/* =========================================
+   MÁSCARA DA COLUNA FIXA
+========================================= */
+
+td.time-col::after,
+th.time-col::after{
+
+  content:"";
+
+  position:absolute;
+
+  top:0;
+
+  right:-12px;
+
+  width:12px;
+
+  height:100%;
+
+  background:
+    linear-gradient(
+      to right,
+      rgba(2,6,23,1),
+      rgba(2,6,23,0)
+    );
+
+  pointer-events:none;
+}
