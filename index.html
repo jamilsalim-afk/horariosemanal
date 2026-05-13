@@ -1,20 +1,19 @@
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
 <meta charset="UTF-8">
 <title>Consulta de Horários Semanais - IFRO</title>
 
 <link rel="stylesheet" href="style.css">
-  
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
 </head>
 
 <body>
 
-<!-- =========================
-🔷 HEADER FIXO (GLOBAL)
-========================= -->
+<!-- ================= HEADER ================= -->
 <header class="ifro-header-fixed">
   <div class="ifro-header-content">
     <div class="ifro-linha1">INSTITUTO FEDERAL DE EDUCAÇÃO, CIÊNCIA E TECNOLOGIA DE RONDÔNIA - IFRO</div>
@@ -25,9 +24,7 @@
 </header>
 
 
-<!-- =========================
-🔷 NAV DE ABAS
-========================= -->
+<!-- ================= ABAS ================= -->
 <nav class="tabs">
 
   <button class="tab active" data-tab="horarios" onclick="abrirAba('horarios')">
@@ -49,85 +46,125 @@
 </nav>
 
 
-<!-- =========================
-🔷 ÁREA DE CONTROLE GLOBAL (APENAS HORÁRIOS)
-========================= -->
+<!-- ================= CONTROLES GLOBAIS ================= -->
 <div class="header-sticky">
 
   <div class="controls-card">
 
+    <!-- usados globalmente pela Aba Horários -->
     <select id="selectModalidade" onchange="trocarModalidade()">
-      <option value="INTEGRADO">CURSOS TÉCNICOS INTEGRADOS</option>
-      <option value="SUPERIOR">CURSOS SUPERIORES</option>
+      <option value="INTEGRADO">INTEGRADO</option>
+      <option value="SUPERIOR">SUPERIOR</option>
     </select>
 
     <select id="selectSemana" onchange="trocarSemana()"></select>
 
-    <input type="text" id="searchProf" class="search-box"
-      placeholder="🔍 Buscar Professor..."
-      onkeyup="filtrarProfessor(); gerarPreviewProfessor();">
+    <input type="text"
+           id="searchProf"
+           class="search-box"
+           placeholder="🔍 Buscar Professor..."
+           onkeyup="filtrarProfessor(); gerarPreviewProfessor();">
 
-    <button class="btn-pdf" onclick="exportarPDF()">📄 Baixar PDF</button>
+    <button class="btn-pdf" onclick="exportarPDF()">
+      📄 PDF Geral
+    </button>
 
   </div>
 
 </div>
 
 
-<!-- =========================
-🔷 CONTEÚDO DAS ABAS
-========================= -->
+<!-- ================= CONTEÚDO ================= -->
 <main class="tab-container">
 
-  <!-- 📅 HORÁRIOS (EX-PRINCIPAL) -->
-  <section id="aba-horarios" class="tab-content"></section>
+  <!-- ========== ABA HORÁRIOS (CORE SYSTEM) ========== -->
+  <section id="aba-horarios" class="tab-content">
+
+    <div class="week-container">
+
+      <div id="botoesRelatorio"></div>
+
+      <div id="painelAlteracoes"></div>
+
+      <div id="painelVagas"></div>
+
+      <div class="table-responsive" id="tabelaHorario"></div>
+
+    </div>
+
+  </section>
 
 
-  <!-- 📆 SÁBADOS LETIVOS -->
-  <section id="aba-sabados" class="tab-content" style="display:none;"></section>
+  <!-- ========== ABA SÁBADOS ========== -->
+  <section id="aba-sabados" class="tab-content" style="display:none;">
+
+    <div class="controls-card">
+
+      <select id="selectModalidadeSabados" onchange="renderSabados()">
+        <option value="INTEGRADO">INTEGRADO</option>
+        <option value="SUPERIOR">SUPERIOR</option>
+      </select>
+
+      <input type="text"
+             id="searchProfSabados"
+             class="search-box"
+             placeholder="🔍 Professor..."
+             onkeyup="renderSabados()">
+
+      <button class="btn-pdf" onclick="exportarPDFSabados()">
+        📄 PDF Sábados
+      </button>
+
+    </div>
+
+    <div id="containerSabados"></div>
+
+  </section>
 
 
-  <!-- 👨‍🏫 PROFESSOR -->
-  <section id="aba-professor" class="tab-content" style="display:none;"></section>
+  <!-- ========== ABA PROFESSOR ========== -->
+  <section id="aba-professor" class="tab-content" style="display:none;">
+
+    <div class="controls-card">
+
+      <select id="selectProfessor" onchange="renderProfessor()"></select>
+
+      <select id="selectSemanaProfessor" onchange="renderProfessor()"></select>
+
+      <button class="btn-pdf" onclick="exportarPDFProfessor()">
+        📄 PDF Professor
+      </button>
+
+    </div>
+
+    <div id="fichaProfessor"></div>
+
+  </section>
 
 
-  <!-- 🏫 TURMA -->
-  <section id="aba-turma" class="tab-content" style="display:none;"></section>
+  <!-- ========== ABA TURMA ========== -->
+  <section id="aba-turma" class="tab-content" style="display:none;">
+
+    <div class="controls-card">
+
+      <select id="selectTurma" onchange="renderTurma()"></select>
+
+      <select id="selectSemanaTurma" onchange="renderTurma()"></select>
+
+      <button class="btn-pdf" onclick="exportarPDFTurma()">
+        📄 PDF Turma
+      </button>
+
+    </div>
+
+    <div id="fichaTurma"></div>
+
+  </section>
 
 </main>
 
 
-<!-- =========================
-🔷 PAINÉIS (GLOBAIS)
-========================= -->
-
-<div id="painelAlteracoes" class="painel-alerta" style="display:none;">
-  <div class="painel-header">
-    <strong>⚠️ Alterações Detectadas</strong>
-    <button onclick="fecharPainel()">✖</button>
-  </div>
-
-  <pre id="conteudoAlteracoes"></pre>
-
-  <button onclick="copiarAlteracoes()">📋 Copiar</button>
-</div>
-
-
-<div id="painelVagas" class="painel-vagas" style="display:none;">
-  <div class="painel-header">
-    <strong>📅 Aulas Vagas</strong>
-    <button onclick="fecharPainelVagas()">✖</button>
-  </div>
-
-  <pre id="conteudoVagas"></pre>
-
-  <button onclick="copiarVagas()">📋 Copiar</button>
-</div>
-
-
-<!-- =========================
-🔷 FOOTER FIXO
-========================= -->
+<!-- ================= FOOTER ================= -->
 <footer class="ifro-footer">
   IFRO - Campus Cacoal<br>
   BR 364, Km 228, Lote 2-A - Zona Rural<br>
@@ -135,9 +172,7 @@
 </footer>
 
 
-<!-- =========================
-🔷 SCRIPTS (INALTERADOS)
-========================= -->
+<!-- ================= SCRIPTS ================= -->
 <script src="js/app.js"></script>
 <script src="js/utils.js"></script>
 <script src="js/alteracoes.js"></script>
