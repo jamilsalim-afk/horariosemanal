@@ -20,7 +20,6 @@ const turmasAtivas = document.getElementById('selectModalidade').value === "SUPE
 : turmasDaPlanilha;
 
 const nomes = ["DOMINGO","SEGUNDA-FEIRA","TERÇA-FEIRA","QUARTA-FEIRA","QUINTA-FEIRA","SEXTA-FEIRA","SÁBADO"];
-};
 
 Object.keys(diasObj).forEach((dia,i)=>{
 
