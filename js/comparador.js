@@ -1,116 +1,275 @@
-
 // ===============================
-// 🧠 GERAR MAPA DE DADOS (ROBUSTO)
+// 🧠 COMPARADOR DE DADOS
 // ===============================
-function gerarMapaDados(dados) {
 
-  const mapa = {};
-  let ultimoDia = "";
+(function () {
 
-  for (let i = 1; i < dados.length; i++) {
+  // ===============================
+  // 🔤 NORMALIZAÇÃO SEGURA
+  // ===============================
+  function normalizarSeguro(texto) {
 
-    const linha = dados[i];
+    try {
 
-    if (linha[0]) ultimoDia = linha[0];
+      if (typeof normalizarTexto === "function") {
+        return normalizarTexto(texto || "");
+      }
 
-    const dia = ultimoDia;
+      return String(texto || "")
+        .trim()
+        .toUpperCase();
 
-    if (!dia) continue;
+    } catch (e) {
 
-    const horario = (linha[1] || "").trim();
-    const horarioNorm = normalizarTexto(horario);
+      console.warn("⚠️ Erro ao normalizar texto:", e);
 
-    // 🔥 ignora linhas irrelevantes
-    if (
-      !horario ||
-      horarioNorm.includes("INTERVALO") ||
-      horarioNorm.includes("[+]") ||
-      horarioNorm.includes("*") ||
-      horarioNorm.includes("[R]")
-    ) continue;
-
-    for (let j = 2; j < linha.length; j++) {
-
-      const turma = (dados[0][j] || "").trim();
-      if (!turma) continue;
-
-      const valor = (linha[j] || "").trim();
-
-      const chave = `${normalizarTexto(dia)}|${horarioNorm}|${normalizarTexto(turma)}`;
-
-      mapa[chave] = {
-        dia,
-        horario,
-        turma,
-        valorOriginal: valor || "",
-        valorNormalizado: normalizarTexto(valor || "")
-      };
+      return String(texto || "")
+        .trim()
+        .toUpperCase();
     }
+
   }
 
-  return mapa;
-}
 
+  // ===============================
+  // 🧠 GERAR MAPA DE DADOS
+  // ===============================
+  function gerarMapaDados(dados) {
 
-// ===============================
-// ⚖️ COMPARAÇÃO DE MAPAS (VERSÃO SEGURA)
-// ===============================
-function compararMapas(mapaAntigo = {}, mapaNovo = {}) {
+    const mapa = {};
 
-  const alteracoes = [];
+    try {
 
-  const todasChaves = new Set([
-    ...Object.keys(mapaAntigo),
-    ...Object.keys(mapaNovo)
-  ]);
+      if (!Array.isArray(dados)) {
+        console.warn("⚠️ gerarMapaDados: dados inválidos.");
+        return mapa;
+      }
 
-  todasChaves.forEach(chave => {
+      if (dados.length === 0) {
+        return mapa;
+      }
 
-    const antigo = mapaAntigo[chave];
-    const novo = mapaNovo[chave];
+      let ultimoDia = "";
 
-    // 🔴 REMOVIDO
-    if (antigo && !novo) {
-      alteracoes.push({
-        tipo: "REMOVIDO",
-        dia: antigo.dia,
-        horario: antigo.horario,
-        turma: antigo.turma,
-        antes: antigo.valorOriginal,
-        depois: "(vazio)"
-      });
-      return;
+      for (let i = 1; i < dados.length; i++) {
+
+        const linha = dados[i];
+
+        if (!Array.isArray(linha)) continue;
+
+        // 🔥 mantém último dia válido
+        if (linha[0]) {
+          ultimoDia = String(linha[0]).trim();
+        }
+
+        const dia = ultimoDia;
+
+        if (!dia) continue;
+
+        const horario =
+          String(linha[1] || "").trim();
+
+        const horarioNorm =
+          normalizarSeguro(horario);
+
+        // 🔥 ignora linhas irrelevantes
+        if (
+          !horario ||
+          horarioNorm.includes("INTERVALO") ||
+          horarioNorm.includes("[+]") ||
+          horarioNorm.includes("*") ||
+          horarioNorm.includes("[R]")
+        ) {
+          continue;
+        }
+
+        // 🔥 percorre turmas
+        for (let j = 2; j < linha.length; j++) {
+
+          const turma =
+            String(dados[0]?.[j] || "").trim();
+
+          if (!turma) continue;
+
+          const valor =
+            String(linha[j] || "").trim();
+
+          const chave = [
+            normalizarSeguro(dia),
+            horarioNorm,
+            normalizarSeguro(turma)
+          ].join("|");
+
+          mapa[chave] = {
+
+            dia,
+
+            horario,
+
+            turma,
+
+            valorOriginal: valor || "",
+
+            valorNormalizado:
+              normalizarSeguro(valor || "")
+
+          };
+
+        }
+
+      }
+
+    } catch (e) {
+
+      console.error(
+        "❌ Erro em gerarMapaDados:",
+        e
+      );
+
     }
 
-    // 🟢 ADICIONADO
-    if (!antigo && novo) {
-      alteracoes.push({
-        tipo: "ADICIONADO",
-        dia: novo.dia,
-        horario: novo.horario,
-        turma: novo.turma,
-        antes: "(vazio)",
-        depois: novo.valorOriginal
+    return mapa;
+  }
+
+
+  // ===============================
+  // ⚖️ COMPARAÇÃO DE MAPAS
+  // ===============================
+  function compararMapas(
+    mapaAntigo = {},
+    mapaNovo = {}
+  ) {
+
+    const alteracoes = [];
+
+    try {
+
+      const todasChaves = new Set([
+
+        ...Object.keys(mapaAntigo || {}),
+
+        ...Object.keys(mapaNovo || {})
+
+      ]);
+
+      todasChaves.forEach(chave => {
+
+        const antigo = mapaAntigo?.[chave];
+
+        const novo = mapaNovo?.[chave];
+
+        // ===============================
+        // 🔴 REMOVIDO
+        // ===============================
+        if (antigo && !novo) {
+
+          alteracoes.push({
+
+            tipo: "REMOVIDO",
+
+            dia: antigo?.dia || "",
+
+            horario: antigo?.horario || "",
+
+            turma: antigo?.turma || "",
+
+            antes:
+              antigo?.valorOriginal || "(vazio)",
+
+            depois: "(vazio)"
+
+          });
+
+          return;
+        }
+
+        // ===============================
+        // 🟢 ADICIONADO
+        // ===============================
+        if (!antigo && novo) {
+
+          alteracoes.push({
+
+            tipo: "ADICIONADO",
+
+            dia: novo?.dia || "",
+
+            horario: novo?.horario || "",
+
+            turma: novo?.turma || "",
+
+            antes: "(vazio)",
+
+            depois:
+              novo?.valorOriginal || "(vazio)"
+
+          });
+
+          return;
+        }
+
+        // ===============================
+        // 🟡 ALTERADO
+        // ===============================
+        const antigoValor =
+          antigo?.valorNormalizado || "";
+
+        const novoValor =
+          novo?.valorNormalizado || "";
+
+        if (antigoValor !== novoValor) {
+
+          alteracoes.push({
+
+            tipo: "ALTERADO",
+
+            dia:
+              novo?.dia ||
+              antigo?.dia ||
+              "",
+
+            horario:
+              novo?.horario ||
+              antigo?.horario ||
+              "",
+
+            turma:
+              novo?.turma ||
+              antigo?.turma ||
+              "",
+
+            antes:
+              antigo?.valorOriginal ||
+              "(vazio)",
+
+            depois:
+              novo?.valorOriginal ||
+              "(vazio)"
+
+          });
+
+        }
+
       });
-      return;
+
+    } catch (e) {
+
+      console.error(
+        "❌ Erro em compararMapas:",
+        e
+      );
+
     }
 
-    // 🟡 ALTERADO (SEGURANÇA TOTAL)
-    const antigoValor = antigo?.valorNormalizado || "";
-    const novoValor = novo?.valorNormalizado || "";
+    return alteracoes;
+  }
 
-    if (antigoValor !== novoValor) {
 
-      alteracoes.push({
-        tipo: "ALTERADO",
-        dia: novo?.dia || antigo?.dia,
-        horario: novo?.horario || antigo?.horario,
-        turma: novo?.turma || antigo?.turma,
-        antes: antigo?.valorOriginal || "(vazio)",
-        depois: novo?.valorOriginal || "(vazio)"
-      });
-    }
-  });
+  // ===============================
+  // 🌎 EXPORTAÇÃO GLOBAL
+  // ===============================
+  window.gerarMapaDados = gerarMapaDados;
 
-  return alteracoes;
-}
+  window.compararMapas = compararMapas;
+
+})();
