@@ -4,10 +4,14 @@
 
 
 // ======================================================
-// 🔥 CONFIG
+// 🔥 PLANILHA PROFESSORES
 // ======================================================
-const URL_CSV_PROFESSORES =
-  "https://docs.google.com/spreadsheets/d/e/2PACX-1vQx3mL0G0v4wX2j5mW2e6sY5vN3/pub?gid=1694280391&single=true&output=csv";
+const SHEETS_PROFESSORES = {
+
+  id: "1IDjs0oS6lQBGDrL7ja1Ge0vaBdNCNIULDH7J5p89c5s",
+
+  gid: "1694280391"
+};
 
 let PROFESSORES_MAPA = {};
 let PROFESSORES_LISTA = [];
@@ -36,6 +40,99 @@ const HORARIOS_FICHA = [
   "21:40 - 22:30"
 ];
 
+// ======================================================
+// 🔥 CARREGAR PROFESSORES
+// ======================================================
+async function carregarProfessores(){
+
+  try{
+
+    const url =
+      `https://docs.google.com/spreadsheets/d/${SHEETS_PROFESSORES.id}/export?format=csv&gid=${SHEETS_PROFESSORES.gid}`;
+
+    const res = await fetch(url);
+
+    if(!res.ok){
+      throw new Error(
+        "Falha ao carregar professores."
+      );
+    }
+
+    const texto = await res.text();
+
+    const linhas = parseCSV(texto);
+
+    PROFESSORES_MAPA = {};
+    PROFESSORES_LISTA = [];
+
+    linhas.slice(1).forEach(l => {
+
+      const nomeExibicao =
+        (l[0] || "").trim();
+
+      const variacoes =
+        (l[1] || "").trim();
+
+      if(!nomeExibicao){
+        return;
+      }
+
+      const nomeNorm =
+        normalizarSeguro(nomeExibicao);
+
+      PROFESSORES_LISTA.push(
+        nomeExibicao
+      );
+
+      PROFESSORES_MAPA[nomeNorm] = {
+
+        exibicao: nomeExibicao,
+
+        variacoes: []
+      };
+
+      // 🔥 variações separadas por vírgula
+      if(variacoes){
+
+        variacoes
+          .split(",")
+          .map(v => v.trim())
+          .filter(v => v)
+          .forEach(v => {
+
+            PROFESSORES_MAPA[nomeNorm]
+              .variacoes
+              .push(
+                normalizarSeguro(v)
+              );
+          });
+      }
+
+      // 🔥 adiciona o próprio nome
+      PROFESSORES_MAPA[nomeNorm]
+        .variacoes
+        .push(nomeNorm);
+
+    });
+
+    preencherSelectProfessores();
+
+    console.log(
+      "✅ Professores carregados:",
+      PROFESSORES_LISTA
+    );
+
+  }catch(e){
+
+    console.warn(
+      "⚠️ Erro ao carregar professores:",
+      e
+    );
+
+    PROFESSORES_MAPA = {};
+    PROFESSORES_LISTA = [];
+  }
+}
 
 // ======================================================
 // 🔥 NORMALIZAÇÃO SEGURA
@@ -59,77 +156,6 @@ function normalizarSeguro(txt){
       .toUpperCase();
   }
 }
-
-
-// ======================================================
-// 🔥 CARREGAR PROFESSORES
-// ======================================================
-async function carregarProfessores(){
-
-  try{
-
-    const resp = await fetch(URL_CSV_PROFESSORES);
-
-    const txt = await resp.text();
-
-    const linhas = parseCSV(txt);
-
-    PROFESSORES_MAPA = {};
-    PROFESSORES_LISTA = [];
-
-    linhas.slice(1).forEach(l => {
-
-      const nomeExibicao =
-        (l[0] || "").trim();
-
-      const variacoes =
-        (l[1] || "").trim();
-
-      if(!nomeExibicao) return;
-
-      const nomeNorm =
-        normalizarSeguro(nomeExibicao);
-
-      PROFESSORES_LISTA.push(nomeExibicao);
-
-      PROFESSORES_MAPA[nomeNorm] = {
-        exibicao: nomeExibicao,
-        variacoes: []
-      };
-
-      if(variacoes){
-
-        variacoes
-          .split(",")
-          .map(v => v.trim())
-          .filter(v => v)
-          .forEach(v => {
-
-            PROFESSORES_MAPA[nomeNorm]
-              .variacoes
-              .push(
-                normalizarSeguro(v)
-              );
-          });
-      }
-
-      PROFESSORES_MAPA[nomeNorm]
-        .variacoes
-        .push(nomeNorm);
-
-    });
-
-    preencherSelectProfessores();
-
-  }catch(e){
-
-    console.error(
-      "❌ Erro ao carregar professores:",
-      e
-    );
-  }
-}
-
 
 // ======================================================
 // 🔥 PREENCHE SELECT PROFESSORES
