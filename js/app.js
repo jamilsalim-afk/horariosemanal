@@ -420,6 +420,73 @@ function getEventoGeral(dia, horario) {
 
 }
 
+async function carregarBaseUnificada() {
+
+  const integrado = await carregarCSVIntegrado();
+  const superior  = await carregarCSVSuperior();
+
+  const base = [
+    ...normalizarBase(integrado, "integrado"),
+    ...normalizarBase(superior, "superior")
+  ];
+
+  window.BASE_UNIFICADA = base;
+
+  console.log("✅ BASE UNIFICADA:", base.length);
+}
+
+function normalizarBase(dados, origem) {
+
+  const saida = [];
+
+  dados.forEach(linha => {
+
+    const data = linha.data;
+    const horario = (linha[1] || "").trim();
+
+    if (!data || !horario) return;
+
+    turmasDaPlanilha.forEach(turma => {
+
+      const idx = dadosGlobais[0].indexOf(turma);
+      if (idx === -1) return;
+
+      const valor = (linha[idx] || "").trim();
+      if (!valor) return;
+
+      const prof = localizarProfessor(valor);
+      if (!prof) return;
+
+      const dt = new Date(data.split("/")[2], data.split("/")[1] - 1, data.split("/")[0]);
+
+      const nomesDias = [
+        "DOMINGO",
+        "SEGUNDA",
+        "TERÇA",
+        "QUARTA",
+        "QUINTA",
+        "SEXTA",
+        "SÁBADO"
+      ];
+
+      const dia = nomesDias[dt.getDay()];
+
+      saida.push({
+        data,
+        dia,
+        horario,
+        turma,
+        valor,
+        professor: prof,
+        origem
+      });
+
+    });
+
+  });
+
+  return saida;
+}
 
 // ===============================
 // 🌎 EXPORTAÇÃO GLOBAL
