@@ -326,3 +326,21 @@ function exportarPDFSabados() {
 
   pdf.save(`SABADOS_${modalidade}.pdf`);
 }
+
+// ======================================================
+// 🔥 TROCAR MODALIDADE SÁBADOS
+// ======================================================
+async function trocarModalidadeSabados() {
+
+  const modalidade =
+    document.getElementById("selectModalidadeSabados").value;
+
+  // sincroniza select principal
+  document.getElementById("selectModalidade").value = modalidade;
+
+  // recarrega planilha correta
+  await init();
+
+  // renderiza sábados
+  renderSabados();
+}
