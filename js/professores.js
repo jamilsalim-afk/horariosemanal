@@ -674,7 +674,6 @@ async function exportarPDFProfessor() {
 
     const { jsPDF } = window.jspdf;
 
-    // 📄 retrato A4
     const pdf = new jsPDF("p", "mm", "a4");
 
     // ===============================
@@ -716,7 +715,10 @@ async function exportarPDFProfessor() {
       const nomeDia = nomesDias[dt.getDay() - 1];
 
       if (nomeDia) {
-        diasSemana.push({ chave: nomeDia, data });
+        diasSemana.push({
+          chave: nomeDia,
+          data
+        });
       }
 
     });
@@ -738,7 +740,7 @@ async function exportarPDFProfessor() {
     const totaisDia = {};
 
     // ===============================
-    // 📏 LAYOUT (IMPORTANTE)
+    // 📏 LAYOUT
     // ===============================
     const pageWidth = pdf.internal.pageSize.getWidth();
 
@@ -748,7 +750,6 @@ async function exportarPDFProfessor() {
     const usableWidth = pageWidth - marginLeft - marginRight;
 
     const firstColWidth = 18;
-
     const otherColsWidth =
       (usableWidth - firstColWidth) / diasSemana.length;
 
@@ -767,14 +768,14 @@ async function exportarPDFProfessor() {
     pdf.setFontSize(10);
 
     pdf.text(
-      "CAMPUS CACOAL - DAPE",
+      "CAMPUS CACOAL - Departamento de Apoio ao Ensino",
       pageWidth / 2,
       15,
       { align: "center" }
     );
 
     pdf.text(
-      `FICHA SEMANAL DO PROFESSOR`,
+      "FICHA SEMANAL DO PROFESSOR",
       pageWidth / 2,
       20,
       { align: "center" }
@@ -796,21 +797,42 @@ async function exportarPDFProfessor() {
     ]];
 
     // ===============================
-    // 📋 BODY
+    // 📋 BODY (COM INTERVALOS REAIS)
     // ===============================
-    const body = HORARIOS_FICHA.map(horario => {
+    const body = [];
+
+    HORARIOS_FICHA.forEach(horario => {
+
+      // ===============================
+      // ⏱️ INTERVALOS COMO LINHA
+      // ===============================
+      const intervalo = INTERVALOS[horario];
+
+      if (intervalo) {
+
+        body.push([
+          `${horario} - ${intervalo}`,
+          ...diasSemana.map(() => "")
+        ]);
+
+        return;
+      }
 
       const linha = [horario];
 
       diasSemana.forEach(dia => {
 
-        const aula = mapa?.[horario]?.[dia.chave];
+        const aula =
+          mapa?.[horario]?.[dia.chave];
 
         if (!aula) {
           linha.push("");
           return;
         }
 
+        // ===============================
+        // 🔢 TOTAL POR DIA
+        // ===============================
         if (aulaValida(aula.valor)) {
           totaisDia[dia.chave] =
             (totaisDia[dia.chave] || 0) + 1;
@@ -820,7 +842,7 @@ async function exportarPDFProfessor() {
 
       });
 
-      return linha;
+      body.push(linha);
 
     });
 
@@ -828,7 +850,7 @@ async function exportarPDFProfessor() {
     // 📊 LINHA TOTAL
     // ===============================
     body.push([
-      "TOTAL",
+      "TOTAL DE AULAS",
       ...diasSemana.map(d => totaisDia[d.chave] || 0)
     ]);
 
@@ -862,9 +884,6 @@ async function exportarPDFProfessor() {
         fontStyle: "bold"
       },
 
-      // ===============================
-      // 📏 LARGURAS DAS COLUNAS
-      // ===============================
       columnStyles: {
         0: { cellWidth: firstColWidth },
         1: { cellWidth: otherColsWidth },
@@ -879,10 +898,12 @@ async function exportarPDFProfessor() {
 
         const txt = (data.cell.raw || "").toString();
 
-        // ⭐ REPOSIÇÃO
+        // ⭐ REPOSIÇÃO (*)
         if (txt.includes("*")) {
+
           data.cell.styles.fillColor = [255, 230, 150];
           data.cell.styles.fontStyle = "bold";
+
         }
 
         // ⏱️ INTERVALOS
@@ -891,14 +912,18 @@ async function exportarPDFProfessor() {
           txt.includes("ALMOÇO") ||
           txt.includes("JANTAR")
         ) {
+
           data.cell.styles.fillColor = [235, 235, 235];
           data.cell.styles.fontStyle = "bold";
+
         }
 
         // 📊 TOTAL
-        if (txt === "TOTAL") {
+        if (txt.includes("TOTAL")) {
+
           data.cell.styles.fillColor = [200, 200, 200];
           data.cell.styles.fontStyle = "bold";
+
         }
 
       }
