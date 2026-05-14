@@ -1,199 +1,675 @@
 // ===============================
-// 🔍 FILTRO DE PROFESSOR (POR ABA)
+// 👨‍🏫 PROFESSORES
 // ===============================
-function filtrarProfessor() {
 
-  const input = document.getElementById('searchProf');
-  if (!input) return;
+(function () {
 
-  const termo = input.value.toUpperCase();
+  // ===============================
+  // 🔤 NORMALIZAÇÃO SEGURA
+  // ===============================
+  function normalizarSeguro(texto) {
 
-  const abaAtiva = document.querySelector(".tab.active")?.dataset.tab;
-  if (!abaAtiva) return;
+    try {
 
-  const container = document.getElementById(`aba-${abaAtiva}`);
-  if (!container) return;
-
-  const celulas = container.getElementsByTagName('td');
-
-  for (let i = 0; i < celulas.length; i++) {
-
-    const td = celulas[i];
-    const txt = td.innerText.toUpperCase();
-
-    if (
-      td.classList.contains('time-col') ||
-      td.parentElement.classList.contains('day-divider')
-    ) {
-      td.classList.remove('highlight', 'opaco');
-      continue;
-    }
-
-    if (termo && txt.includes(termo)) {
-      td.classList.add('highlight');
-      td.classList.remove('opaco');
-    } else if (termo) {
-      td.classList.remove('highlight');
-      td.classList.add('opaco');
-    } else {
-      td.classList.remove('highlight', 'opaco');
-    }
-  }
-}
-
-
-// ===============================
-// 🧠 NORMALIZAÇÃO DE PROFESSOR
-// ===============================
-function normalizarProfessor(nome) {
-
-  if (!nome) return "";
-
-  return normalizarTexto(nome)
-    .replace(/\s+/g, " ")
-    .trim()
-    .split(" ")
-    .slice(0, 2)
-    .join(" ");
-}
-
-
-// ===============================
-// 📊 GRADE DO PROFESSOR
-// ===============================
-function gerarGradeProfessor(nomeProf) {
-
-  const sem =
-    window.appState?.semana ||
-    document.getElementById('selectSemana')?.value;
-
-  const dias = semanasAgrupadas?.[sem]?.dias || {};
-
-  const diasSemana = [
-    "SEGUNDA-FEIRA","TERÇA-FEIRA","QUARTA-FEIRA",
-    "QUINTA-FEIRA","SEXTA-FEIRA","SÁBADO"
-  ];
-
-  const mapa = {};
-
-  const nomeBusca = normalizarTexto(nomeProf);
-
-  Object.keys(dias).forEach(dia => {
-
-    const [d, m, a] = dia.split('/');
-    const dataObj = new Date(a, m - 1, d);
-
-    const nomesDias = [
-      "DOMINGO",
-      "SEGUNDA-FEIRA",
-      "TERÇA-FEIRA",
-      "QUARTA-FEIRA",
-      "QUINTA-FEIRA",
-      "SEXTA-FEIRA",
-      "SÁBADO"
-    ];
-
-    const nomeDia = nomesDias[dataObj.getDay()];
-    if (!diasSemana.includes(nomeDia)) return;
-
-    dias[dia].forEach(r => {
-
-      const horario = r[1];
-
-      if (!mapa[horario]) {
-        mapa[horario] = {};
+      if (typeof normalizarTexto === "function") {
+        return normalizarTexto(texto || "");
       }
 
-      turmasDaPlanilha.forEach(turma => {
+      return String(texto || "")
+        .trim()
+        .toUpperCase();
 
-        const idx = dadosGlobais[0].indexOf(turma);
-        const val = (r[idx] || "");
+    } catch (e) {
 
-        const valNorm = normalizarTexto(val);
+      return String(texto || "")
+        .trim()
+        .toUpperCase();
 
-        if (valNorm.includes(nomeBusca)) {
+    }
 
-          if (!mapa[horario][nomeDia]) {
-            mapa[horario][nomeDia] = [];
+  }
+
+
+  // ===============================
+  // 🔍 FILTRO DE PROFESSOR
+  // ===============================
+  function filtrarProfessor() {
+
+    try {
+
+      const input =
+        document.getElementById(
+          "searchProf"
+        );
+
+      if (!input) return;
+
+      const termo =
+        input.value.toUpperCase().trim();
+
+      // 🔥 tabela principal
+      const tabela =
+        document.getElementById(
+          "tabelaHorario"
+        );
+
+      if (!tabela) return;
+
+      const celulas =
+        tabela.getElementsByTagName("td");
+
+      for (let i = 0; i < celulas.length; i++) {
+
+        const td = celulas[i];
+
+        const txt =
+          td.innerText.toUpperCase();
+
+        // 🔥 ignora coluna horário
+        if (
+
+          td.classList.contains(
+            "time-col"
+          ) ||
+
+          td.classList.contains(
+            "horario-col"
+          ) ||
+
+          td.parentElement?.classList.contains(
+            "day-divider"
+          )
+
+        ) {
+
+          td.classList.remove(
+            "highlight",
+            "opaco"
+          );
+
+          continue;
+        }
+
+        // 🔥 destaque
+        if (
+          termo &&
+          txt.includes(termo)
+        ) {
+
+          td.classList.add("highlight");
+
+          td.classList.remove("opaco");
+
+        }
+
+        // 🔥 opaco
+        else if (termo) {
+
+          td.classList.remove(
+            "highlight"
+          );
+
+          td.classList.add("opaco");
+
+        }
+
+        // 🔥 limpa
+        else {
+
+          td.classList.remove(
+            "highlight",
+            "opaco"
+          );
+
+        }
+
+      }
+
+    } catch (e) {
+
+      console.error(
+        "❌ Erro em filtrarProfessor:",
+        e
+      );
+
+    }
+
+  }
+
+
+  // ===============================
+  // 🧠 NORMALIZAR PROFESSOR
+  // ===============================
+  function normalizarProfessor(nome) {
+
+    try {
+
+      if (!nome) return "";
+
+      return normalizarSeguro(nome)
+
+        .replace(/\s+/g, " ")
+
+        .trim()
+
+        .split(" ")
+
+        .slice(0, 2)
+
+        .join(" ");
+
+    } catch (e) {
+
+      console.warn(
+        "⚠️ Erro em normalizarProfessor:",
+        e
+      );
+
+      return String(nome || "");
+
+    }
+
+  }
+
+
+  // ===============================
+  // 📊 GERAR GRADE PROFESSOR
+  // ===============================
+  function gerarGradeProfessor(
+    nomeProf
+  ) {
+
+    const mapa = {};
+
+    try {
+
+      const sem =
+
+        window.appState?.semana ||
+
+        window.semanaAtual ||
+
+        document.getElementById(
+          "selectSemanaProfessor"
+        )?.value ||
+
+        document.getElementById(
+          "selectSemana"
+        )?.value;
+
+      const dias =
+        window.semanasAgrupadas?.[sem]
+          ?.dias || {};
+
+      const diasSemana = [
+
+        "SEGUNDA-FEIRA",
+
+        "TERÇA-FEIRA",
+
+        "QUARTA-FEIRA",
+
+        "QUINTA-FEIRA",
+
+        "SEXTA-FEIRA",
+
+        "SÁBADO"
+
+      ];
+
+      const nomeBusca =
+        normalizarSeguro(nomeProf);
+
+      Object.keys(dias)
+        .forEach(dia => {
+
+          try {
+
+            const [d, m, a] =
+              dia.split("/");
+
+            const dataObj =
+              new Date(
+                a,
+                m - 1,
+                d
+              );
+
+            const nomesDias = [
+
+              "DOMINGO",
+
+              "SEGUNDA-FEIRA",
+
+              "TERÇA-FEIRA",
+
+              "QUARTA-FEIRA",
+
+              "QUINTA-FEIRA",
+
+              "SEXTA-FEIRA",
+
+              "SÁBADO"
+
+            ];
+
+            const nomeDia =
+              nomesDias[
+                dataObj.getDay()
+              ];
+
+            if (
+              !diasSemana.includes(
+                nomeDia
+              )
+            ) {
+              return;
+            }
+
+            dias[dia]
+              .forEach(r => {
+
+                try {
+
+                  const horario =
+                    r[1];
+
+                  if (
+                    !mapa[horario]
+                  ) {
+
+                    mapa[horario] =
+                      {};
+
+                  }
+
+                  (
+                    window
+                      .turmasDaPlanilha ||
+                    []
+                  ).forEach(
+                    turma => {
+
+                      try {
+
+                        const idx =
+                          window
+                            .dadosGlobais?.[0]
+                            ?.indexOf(
+                              turma
+                            );
+
+                        if (
+                          idx === -1 ||
+                          idx ==
+                            null
+                        ) {
+                          return;
+                        }
+
+                        const val =
+                          (
+                            r[idx] ||
+                            ""
+                          ).trim();
+
+                        const valNorm =
+                          normalizarSeguro(
+                            val
+                          );
+
+                        if (
+                          valNorm.includes(
+                            nomeBusca
+                          )
+                        ) {
+
+                          if (
+                            !mapa[
+                              horario
+                            ][
+                              nomeDia
+                            ]
+                          ) {
+
+                            mapa[
+                              horario
+                            ][
+                              nomeDia
+                            ] = [];
+
+                          }
+
+                          mapa[
+                            horario
+                          ][
+                            nomeDia
+                          ].push({
+
+                            turma,
+
+                            aula: val
+
+                          });
+
+                        }
+
+                      } catch (e) {
+
+                        console.warn(
+                          "⚠️ Erro turma professor:",
+                          e
+                        );
+
+                      }
+
+                    }
+                  );
+
+                } catch (e) {
+
+                  console.warn(
+                    "⚠️ Erro linha professor:",
+                    e
+                  );
+
+                }
+
+              });
+
+          } catch (e) {
+
+            console.warn(
+              "⚠️ Erro dia professor:",
+              e
+            );
+
           }
 
-          mapa[horario][nomeDia].push({
-            turma,
-            aula: val
+        });
+
+    } catch (e) {
+
+      console.error(
+        "❌ Erro em gerarGradeProfessor:",
+        e
+      );
+
+    }
+
+    return mapa;
+
+  }
+
+
+  // ===============================
+  // 👨‍🏫 MOSTRAR FICHA
+  // ===============================
+  function mostrarFichaProfessorTabela(
+    nome
+  ) {
+
+    try {
+
+      const grade =
+        gerarGradeProfessor(nome);
+
+      const diasSemana = [
+
+        "SEGUNDA-FEIRA",
+
+        "TERÇA-FEIRA",
+
+        "QUARTA-FEIRA",
+
+        "QUINTA-FEIRA",
+
+        "SEXTA-FEIRA",
+
+        "SÁBADO"
+
+      ];
+
+      let html = `
+
+        <div class="table-responsive">
+
+        <h3 style="
+          margin:10px 0;
+          color:#2e7d32;
+        ">
+          👨‍🏫 FICHA SEMANAL - ${nome}
+        </h3>
+
+        <table style="
+          border-collapse:collapse;
+          width:100%;
+          font-size:12px;
+        ">
+
+          <thead>
+
+            <tr>
+
+              <th>Horário</th>
+
+              ${diasSemana
+                .map(
+                  d => `<th>${d}</th>`
+                )
+                .join("")}
+
+            </tr>
+
+          </thead>
+
+          <tbody>
+
+      `;
+
+      Object.keys(grade)
+        .forEach(horario => {
+
+          html += `<tr>`;
+
+          html += `
+            <td>
+              <b>${horario}</b>
+            </td>
+          `;
+
+          diasSemana.forEach(dia => {
+
+            let conteudo =
+              grade[horario]?.[dia];
+
+            if (
+              Array.isArray(
+                conteudo
+              )
+            ) {
+
+              conteudo =
+                conteudo
+                  .map(
+                    item => `
+
+                      <div style="
+                        margin-bottom:6px;
+                      ">
+
+                        <b>
+                          ${item.turma}
+                        </b>
+
+                        <br>
+
+                        ${item.aula}
+
+                      </div>
+
+                    `
+                  )
+                  .join(
+                    "<hr style='margin:3px 0;'>"
+                  );
+
+            }
+
+            html += `
+              <td>
+                ${conteudo || "-"}
+              </td>
+            `;
+
           });
-        }
-      });
 
-    });
-  });
+          html += `</tr>`;
 
-  return mapa;
-}
+        });
 
+      html += `
+          </tbody>
+        </table>
+        </div>
+      `;
 
-// ===============================
-// 👨‍🏫 FICHA DO PROFESSOR (ABA)
-// ===============================
-function mostrarFichaProfessorTabela(nome) {
+      const container =
+        document.getElementById(
+          "fichaProfessor"
+        );
 
-  const grade = gerarGradeProfessor(nome);
+      if (container) {
 
-  const diasSemana = [
-    "SEGUNDA-FEIRA","TERÇA-FEIRA","QUARTA-FEIRA",
-    "QUINTA-FEIRA","SEXTA-FEIRA","SÁBADO"
-  ];
+        container.innerHTML = html;
 
-  let html = `
-    <h3>👨‍🏫 FICHA SEMANAL - ${nome}</h3>
-    <table style="border-collapse:collapse;width:100%;font-size:12px;">
-      <tr>
-        <th>Horário</th>
-        ${diasSemana.map(d => `<th>${d}</th>`).join("")}
-      </tr>
-  `;
-
-  Object.keys(grade).forEach(horario => {
-
-    html += `<tr>`;
-    html += `<td><b>${horario}</b></td>`;
-
-    diasSemana.forEach(dia => {
-
-      let conteudo = grade[horario]?.[dia];
-
-      if (Array.isArray(conteudo)) {
-        conteudo = conteudo.map(item =>
-          `<b>${item.turma}</b><br>${item.aula}`
-        ).join("<hr style='margin:3px 0;'>");
       }
 
-      html += `<td>${conteudo || "-"}</td>`;
-    });
+    } catch (e) {
 
-    html += `</tr>`;
-  });
+      console.error(
+        "❌ Erro em mostrarFichaProfessorTabela:",
+        e
+      );
 
-  html += `</table>`;
+    }
 
-  const container = document.getElementById("aba-professor");
-
-  if (container) {
-    container.innerHTML = html;
   }
-}
 
 
-// ===============================
-// 🔎 PREVIEW PROFESSOR (ABA)
-// ===============================
-function gerarPreviewProfessor() {
+  // ===============================
+  // 🔄 RENDER PROFESSOR
+  // ===============================
+  function renderProfessor() {
 
-  const nome = document.getElementById('searchProf')?.value.trim();
+    try {
 
-  if (nome.length > 3) {
-    mostrarFichaProfessorTabela(nome);
-  } else {
-    const container = document.getElementById("aba-professor");
-    if (container) container.innerHTML = "";
+      const select =
+        document.getElementById(
+          "selectProfessor"
+        );
+
+      if (!select) return;
+
+      const nome =
+        select.value;
+
+      if (!nome) {
+
+        const container =
+          document.getElementById(
+            "fichaProfessor"
+          );
+
+        if (container) {
+          container.innerHTML = "";
+        }
+
+        return;
+      }
+
+      mostrarFichaProfessorTabela(
+        nome
+      );
+
+    } catch (e) {
+
+      console.error(
+        "❌ Erro em renderProfessor:",
+        e
+      );
+
+    }
+
   }
-}
+
+
+  // ===============================
+  // 🔎 PREVIEW PROFESSOR
+  // ===============================
+  function gerarPreviewProfessor() {
+
+    try {
+
+      const nome =
+        document.getElementById(
+          "searchProf"
+        )?.value
+          .trim();
+
+      if (
+        nome &&
+        nome.length > 3
+      ) {
+
+        mostrarFichaProfessorTabela(
+          nome
+        );
+
+      } else {
+
+        const container =
+          document.getElementById(
+            "fichaProfessor"
+          );
+
+        if (container) {
+          container.innerHTML = "";
+        }
+
+      }
+
+    } catch (e) {
+
+      console.error(
+        "❌ Erro preview professor:",
+        e
+      );
+
+    }
+
+  }
+
+
+  // ===============================
+  // 🌎 EXPORTAÇÃO GLOBAL
+  // ===============================
+  window.filtrarProfessor =
+    filtrarProfessor;
+
+  window.normalizarProfessor =
+    normalizarProfessor;
+
+  window.gerarGradeProfessor =
+    gerarGradeProfessor;
+
+  window.mostrarFichaProfessorTabela =
+    mostrarFichaProfessorTabela;
+
+  window.gerarPreviewProfessor =
+    gerarPreviewProfessor;
+
+  window.renderProfessor =
+    renderProfessor;
+
+})();
