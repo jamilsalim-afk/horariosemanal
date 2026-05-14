@@ -62,7 +62,6 @@ function obterSabadosSemana() {
   return resultado;
 }
 
-
 // ======================================================
 // 🔥 RENDER ABA SÁBADOS
 // ======================================================
@@ -77,9 +76,13 @@ function renderSabados() {
       document.getElementById("searchSabados")?.value || ""
     );
 
+  // 🔥 sincroniza modalidade principal
   const modalidade =
     document.getElementById("selectModalidadeSabados")?.value ||
     "INTEGRADO";
+
+  // 🔥 troca modalidade REAL do sistema
+  document.getElementById("selectModalidade").value = modalidade;
 
   const sabados = obterSabadosSemana();
 
@@ -103,7 +106,6 @@ function renderSabados() {
 
     const linhasOriginais = sabados[dia];
 
-    // 🔥 FILTRO
     let linhas = linhasOriginais.filter(r => {
 
       if (!busca) return true;
@@ -167,6 +169,10 @@ function renderSabados() {
 
         let classesExtras = [];
 
+        const contemBusca =
+          busca &&
+          valNorm.includes(busca);
+
         regrasDestaque.forEach(regra => {
 
           if (regra.match(valNorm)) {
@@ -182,6 +188,16 @@ function renderSabados() {
           valNorm.includes("INTERVALO")
         ) {
           classesExtras.push("marcacao-extra");
+        }
+
+        // 🔥 mesmo efeito da aba horários
+        if (busca) {
+
+          if (contemBusca) {
+            classesExtras.push("highlight");
+          } else {
+            classesExtras.push("opaco");
+          }
         }
 
         html += `
