@@ -357,8 +357,7 @@ function gerarMapaProfessor(nomeProfessor, semana) {
   const mapa = {};
   const totais = {};
 
-  const dias =
-    semanasAgrupadas?.[semana]?.dias || {};
+  const dias = semanasAgrupadas?.[semana]?.dias || {};
 
   const nomesDias = [
     "DOMINGO",
@@ -370,62 +369,29 @@ function gerarMapaProfessor(nomeProfessor, semana) {
     "SÁBADO"
   ];
 
-  const profNorm = normalizarSeguro(nomeProfessor);
+  // inicializa base de totais
+  nomesDias.forEach(d => totais[d] = 0);
 
-  Object.keys(dias).forEach(data => {
+  const base = window.BASE_UNIFICADA || [];
 
-    const [d, m, a] = data.split('/');
-    const dt = new Date(a, m - 1, d);
+  base.forEach(item => {
 
-    const nomeDia = nomesDias[dt.getDay()];
+    if (item.professor !== nomeProfessor) return;
+
+    const nomeDia = item.dia;
     if (!nomeDia || nomeDia === "DOMINGO") return;
 
-    totais[nomeDia] ||= 0;
+    mapa[item.horario] ||= {};
 
-    dias[data].forEach(r => {
+    mapa[item.horario][nomeDia] = {
+      turma: item.turma,
+      valor: item.valor,
+      origem: item.origem
+    };
 
-      const horario = (r[1] || "").trim();
-      if (!horario) return;
-
-      turmasDaPlanilha.forEach(turma => {
-
-        const idx = dadosGlobais?.[0]?.indexOf(turma);
-        if (idx === -1) return;
-
-        const valor = (r[idx] || "").trim();
-        if (!valor) return;
-
-        const valorNorm = normalizarSeguro(valor);
-
-        // 🔥 MELHORIA CRÍTICA: split por quebra de linha (SUPERIOR costuma vir assim)
-        const blocos = valorNorm.split(/\n|\/| - /g);
-
-        let encontrado = null;
-
-        for (const bloco of blocos) {
-          encontrado = localizarProfessor(bloco);
-          if (encontrado) break;
-        }
-
-        if (!encontrado) return;
-
-        const encontradoNorm = normalizarSeguro(encontrado);
-
-        if (encontradoNorm !== profNorm) return;
-
-        mapa[horario] ||= {};
-        mapa[horario][nomeDia] = {
-          turma,
-          valor
-        };
-
-        if (aulaValida(valor)) {
-          totais[nomeDia]++;
-        }
-
-      });
-
-    });
+    if (aulaValida(item.valor)) {
+      totais[nomeDia]++;
+    }
 
   });
 
@@ -648,6 +614,19 @@ window.popularSemanasProfessor =
 window.preencherSelectProfessores =
   preencherSelectProfessores;
 
+function ehIntervalo(horario) {
+
+  const INTERVALOS = {
+    "09:10 - 09:30": "INTERVALO",
+    "15:30 - 15:50": "INTERVALO",
+    "20:40 - 20:50": "INTERVALO",
+    "12:00 - 13:50": "ALMOÇO",
+    "18:20 - 19:00": "JANTAR"
+  };
+
+  return INTERVALOS[horario] || null;
+}
+
 // ======================================================
 // 📄 EXPORTAR PDF PROFESSOR (PADRÃO SISTEMA)
 // ======================================================
@@ -781,20 +760,12 @@ async function exportarPDFProfessor() {
 
 HORARIOS_FICHA.forEach(horario => {
 
-  const horarioNorm = horario.trim();
+  const intervalo = ehIntervalo(horario);
 
-  // 🔥 DETECÇÃO FLEXÍVEL (resolve falha de string exata)
-  const ehIntervalo =
-    horarioNorm.includes("09:10") && horarioNorm.includes("09:30") ||
-    horarioNorm.includes("15:30") && horarioNorm.includes("15:50") ||
-    horarioNorm.includes("20:40") && horarioNorm.includes("20:50") ||
-    horarioNorm.includes("12:00") && horarioNorm.includes("13:50") ||
-    horarioNorm.includes("18:20") && horarioNorm.includes("19:00");
-
-  if (ehIntervalo) {
+  if (intervalo) {
 
     body.push([
-      `${horario} — INTERVALO / PAUSA`,
+      `${horario} - ${intervalo}`,
       ...diasSemana.map(() => "")
     ]);
 
@@ -805,8 +776,7 @@ HORARIOS_FICHA.forEach(horario => {
 
   diasSemana.forEach(dia => {
 
-    const aula =
-      mapa?.[horario]?.[dia.chave];
+    const aula = mapa?.[horario]?.[dia.chave];
 
     if (!aula) {
       linha.push("");
@@ -819,11 +789,9 @@ HORARIOS_FICHA.forEach(horario => {
     }
 
     linha.push(`${aula.turma}\n${aula.valor}`);
-
   });
 
   body.push(linha);
-
 });
 
     // TOTAL
