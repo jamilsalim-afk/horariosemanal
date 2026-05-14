@@ -800,6 +800,9 @@ async function exportarPDFProfessor() {
   win.document.write(html);
   win.document.close();
 
+  win.document.title =
+  `Ficha_Individual_Professor_Semana_${nome}_${semana}`;
+
   win.focus();
 
   setTimeout(() => {
