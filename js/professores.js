@@ -357,8 +357,6 @@ function gerarMapaProfessor(nomeProfessor, semana) {
   const mapa = {};
   const totais = {};
 
-  const dias = semanasAgrupadas?.[semana]?.dias || {};
-
   const nomesDias = [
     "DOMINGO",
     "SEGUNDA",
@@ -369,16 +367,19 @@ function gerarMapaProfessor(nomeProfessor, semana) {
     "SÁBADO"
   ];
 
-  // inicializa base de totais
-  nomesDias.forEach(d => totais[d] = 0);
-
   const base = window.BASE_UNIFICADA || [];
+
+  const profNormalizado = normalizarSeguro(nomeProfessor);
 
   base.forEach(item => {
 
-    if (item.professor !== nomeProfessor) return;
+    // 🔥 FIX CRÍTICO: normalização real
+    const itemProf = normalizarSeguro(item.professor);
+
+    if (itemProf !== profNormalizado) return;
 
     const nomeDia = item.dia;
+
     if (!nomeDia || nomeDia === "DOMINGO") return;
 
     mapa[item.horario] ||= {};
@@ -390,6 +391,7 @@ function gerarMapaProfessor(nomeProfessor, semana) {
     };
 
     if (aulaValida(item.valor)) {
+      totais[nomeDia] ||= 0;
       totais[nomeDia]++;
     }
 
