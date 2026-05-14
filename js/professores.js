@@ -352,17 +352,13 @@ function renderTabelaProfessorVazia(){
 // ======================================================
 // 🔥 GERAR MAPA PROFESSOR
 // ======================================================
-function gerarMapaProfessor(
-  nomeProfessor,
-  semana
-){
+function gerarMapaProfessor(nomeProfessor, semana) {
 
   const mapa = {};
   const totais = {};
 
   const dias =
-    semanasAgrupadas?.[semana]
-      ?.dias || {};
+    semanasAgrupadas?.[semana]?.dias || {};
 
   const nomesDias = [
     "DOMINGO",
@@ -374,60 +370,51 @@ function gerarMapaProfessor(
     "SÁBADO"
   ];
 
+  const profNorm = normalizarSeguro(nomeProfessor);
+
   Object.keys(dias).forEach(data => {
 
-    const [d,m,a] =
-      data.split('/');
+    const [d, m, a] = data.split('/');
 
-    const dt =
-      new Date(a, m - 1, d);
+    const dt = new Date(a, m - 1, d);
 
-    const nomeDia =
-      nomesDias[dt.getDay()];
+    const nomeDia = nomesDias[dt.getDay()];
 
-    if(nomeDia === "DOMINGO"){
-      return;
-    }
+    if (!nomeDia || nomeDia === "DOMINGO") return;
 
     totais[nomeDia] ||= 0;
 
     dias[data].forEach(r => {
 
-      const horario =
-        (r[1] || "").trim();
-
-      if(!horario) return;
+      const horario = (r[1] || "").trim();
+      if (!horario) return;
 
       turmasDaPlanilha.forEach(turma => {
 
-        const idx =
-          dadosGlobais[0]
-            .indexOf(turma);
+        const idx = dadosGlobais?.[0]?.indexOf(turma);
+        if (idx === -1) return;
 
-        if(idx === -1) return;
+        const valorOriginal = (r[idx] || "").trim();
+        if (!valorOriginal) return;
 
-        const valor =
-          (r[idx] || "").trim();
+        const valorNorm = normalizarSeguro(valorOriginal);
 
-        if(!valor) return;
+        // 🔥 MELHORIA IMPORTANTE: busca mais robusta (inclui superior)
+        const encontrado = localizarProfessor(valorOriginal);
 
-        const encontrado =
-          localizarProfessor(valor);
+        if (!encontrado) return;
 
-        if(
-          encontrado !== nomeProfessor
-        ){
-          return;
-        }
+        const encontradoNorm = normalizarSeguro(encontrado);
+
+        if (encontradoNorm !== profNorm) return;
 
         mapa[horario] ||= {};
-
         mapa[horario][nomeDia] = {
           turma,
-          valor
+          valor: valorOriginal
         };
 
-        if(aulaValida(valor)){
+        if (aulaValida(valorOriginal)) {
           totais[nomeDia]++;
         }
 
@@ -437,12 +424,8 @@ function gerarMapaProfessor(
 
   });
 
-  return {
-    mapa,
-    totais
-  };
+  return { mapa, totais };
 }
-
 
 // ======================================================
 // 🔥 RENDER PROFESSOR
@@ -673,12 +656,8 @@ async function exportarPDFProfessor() {
     }
 
     const { jsPDF } = window.jspdf;
-
     const pdf = new jsPDF("p", "mm", "a4");
 
-    // ===============================
-    // 📌 DADOS
-    // ===============================
     const nome =
       document.getElementById("nomeProfessorFicha")?.innerText || "Professor";
 
@@ -696,6 +675,7 @@ async function exportarPDFProfessor() {
       semanasAgrupadas?.[semana]?.dias || {};
 
     const nomesDias = [
+      "DOMINGO",
       "SEGUNDA",
       "TERÇA",
       "QUARTA",
@@ -712,19 +692,19 @@ async function exportarPDFProfessor() {
 
       const dt = new Date(a, m - 1, d);
 
-      const nomeDia = nomesDias[dt.getDay() - 1];
+      const nomeDia = nomesDias[dt.getDay()];
 
-      if (nomeDia) {
-        diasSemana.push({
-          chave: nomeDia,
-          data
-        });
-      }
+      if (!nomeDia || nomeDia === "DOMINGO") return;
+
+      diasSemana.push({
+        chave: nomeDia,
+        data
+      });
 
     });
 
     // ===============================
-    // ⏱️ INTERVALOS
+    // ⏱️ INTERVALOS / REFEIÇÕES
     // ===============================
     const INTERVALOS = {
       "09:10 - 09:30": "INTERVALO",
@@ -734,16 +714,9 @@ async function exportarPDFProfessor() {
       "18:20 - 19:00": "JANTAR"
     };
 
-    // ===============================
-    // 🧮 CONTADORES
-    // ===============================
     const totaisDia = {};
 
-    // ===============================
-    // 📏 LAYOUT
-    // ===============================
     const pageWidth = pdf.internal.pageSize.getWidth();
-
     const marginLeft = 4;
     const marginRight = 4;
 
@@ -754,7 +727,7 @@ async function exportarPDFProfessor() {
       (usableWidth - firstColWidth) / diasSemana.length;
 
     // ===============================
-    // 🏛️ CABEÇALHO
+    // HEADER
     // ===============================
     pdf.setFontSize(11);
 
@@ -789,7 +762,7 @@ async function exportarPDFProfessor() {
     );
 
     // ===============================
-    // 📊 HEAD
+    // HEAD
     // ===============================
     const head = [[
       "Horário",
@@ -797,21 +770,17 @@ async function exportarPDFProfessor() {
     ]];
 
     // ===============================
-    // 📋 BODY (COM INTERVALOS REAIS)
+    // BODY
     // ===============================
     const body = [];
 
     HORARIOS_FICHA.forEach(horario => {
 
-      // ===============================
-      // ⏱️ INTERVALOS COMO LINHA
-      // ===============================
-      const intervalo = INTERVALOS[horario];
-
-      if (intervalo) {
+      // 🔥 LINHAS ESPECIAIS
+      if (INTERVALOS[horario]) {
 
         body.push([
-          `${horario} - ${intervalo}`,
+          `${horario} - ${INTERVALOS[horario]}`,
           ...diasSemana.map(() => "")
         ]);
 
@@ -830,9 +799,6 @@ async function exportarPDFProfessor() {
           return;
         }
 
-        // ===============================
-        // 🔢 TOTAL POR DIA
-        // ===============================
         if (aulaValida(aula.valor)) {
           totaisDia[dia.chave] =
             (totaisDia[dia.chave] || 0) + 1;
@@ -846,17 +812,12 @@ async function exportarPDFProfessor() {
 
     });
 
-    // ===============================
-    // 📊 LINHA TOTAL
-    // ===============================
+    // TOTAL
     body.push([
       "TOTAL DE AULAS",
       ...diasSemana.map(d => totaisDia[d.chave] || 0)
     ]);
 
-    // ===============================
-    // 📄 TABELA
-    // ===============================
     pdf.autoTable({
 
       head,
@@ -898,63 +859,40 @@ async function exportarPDFProfessor() {
 
         const txt = (data.cell.raw || "").toString();
 
-        // ⭐ REPOSIÇÃO (*)
-        if (txt.includes("*")) {
-
-          data.cell.styles.fillColor = [255, 230, 150];
-          data.cell.styles.fontStyle = "bold";
-
-        }
-
-        // ⏱️ INTERVALOS
-        if (
-          txt.includes("INTERVALO") ||
-          txt.includes("ALMOÇO") ||
-          txt.includes("JANTAR")
-        ) {
+        if (txt.includes("INTERVALO") ||
+            txt.includes("ALMOÇO") ||
+            txt.includes("JANTAR")) {
 
           data.cell.styles.fillColor = [235, 235, 235];
           data.cell.styles.fontStyle = "bold";
-
         }
 
-        // 📊 TOTAL
         if (txt.includes("TOTAL")) {
-
           data.cell.styles.fillColor = [200, 200, 200];
           data.cell.styles.fontStyle = "bold";
-
         }
 
       }
 
     });
 
-    // ===============================
-    // 📍 RODAPÉ
-    // ===============================
+    // FOOTER
     const pageHeight = pdf.internal.pageSize.getHeight();
 
     pdf.setFontSize(8);
 
     pdf.text(
-      "IFRO - Campus Cacoal | BR 364, Km 228, Lote 2-A | (69) 3443-2445 | dape.cacoal@ifro.edu.br",
+      "IFRO - Campus Cacoal | BR 364, Km 228 | dape.cacoal@ifro.edu.br",
       pageWidth / 2,
       pageHeight - 8,
       { align: "center" }
     );
 
-    // ===============================
-    // 💾 SALVAR
-    // ===============================
     pdf.save(`Ficha Professor ${nome} - ${semana}.pdf`);
 
   } catch (e) {
 
     console.error("❌ Erro PDF professor:", e);
-
     alert("Erro ao gerar PDF do professor.");
-
   }
-
 }
