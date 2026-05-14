@@ -669,3 +669,362 @@ function filtrarProfessor() {
     renderProfessor;
 
 })();
+
+// ======================================================
+// 👨‍🏫 PROFESSORES.JS
+// ======================================================
+
+
+// ======================================================
+// 🔥 NORMALIZADOR DE PROFESSOR
+// ======================================================
+function normalizarProfessor(nome){
+
+  return normalizarTexto(nome)
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+
+// ======================================================
+// 🔥 LIMPA FICHA
+// ======================================================
+function limparFichaProfessor(){
+
+  document.getElementById("nomeProfessorFicha").innerText = "—";
+  document.getElementById("semanaProfessorFicha").innerText = "—";
+
+  document.getElementById("tabelaProfessor").innerHTML = `
+    <table>
+
+      <tr class="day-divider">
+        <td colspan="7">
+          FICHA SEMANAL DO PROFESSOR
+        </td>
+      </tr>
+
+      <tr>
+        <th class="time-col">Horário</th>
+        <th>SEGUNDA</th>
+        <th>TERÇA</th>
+        <th>QUARTA</th>
+        <th>QUINTA</th>
+        <th>SEXTA</th>
+        <th>SÁBADO</th>
+      </tr>
+
+      <tr>
+        <td class="time-col">—</td>
+        <td class="aula-cell"></td>
+        <td class="aula-cell"></td>
+        <td class="aula-cell"></td>
+        <td class="aula-cell"></td>
+        <td class="aula-cell"></td>
+        <td class="aula-cell"></td>
+      </tr>
+
+    </table>
+  `;
+}
+
+
+// ======================================================
+// 🔥 DETECTA SE É AULA VÁLIDA
+// ======================================================
+function aulaValida(valor){
+
+  const v = normalizarTexto(valor);
+
+  if(!v) return false;
+
+  if(
+    v.includes("INTERVALO") ||
+    v.includes("RESERVA ENSINO") ||
+    v.includes("PPS/ATENDIMENTO") ||
+    v.includes("ESTUDOS INDIVIDUAIS") ||
+    v.includes("REUNIAO") ||
+    v.includes("CAED") ||
+    v.includes("PRE-CONSELHO") ||
+    v.includes("[+]") ||
+    v.includes("[R]") ||
+    v.includes("*")
+  ){
+    return false;
+  }
+
+  return true;
+}
+
+
+// ======================================================
+// 🔥 GERA MAPA DO PROFESSOR
+// ======================================================
+function gerarMapaProfessor(nomeProfessor, semana){
+
+  const dias = semanasAgrupadas?.[semana]?.dias || {};
+
+  const nomeBusca = normalizarProfessor(nomeProfessor);
+
+  const mapa = {};
+  const totais = {};
+
+  Object.keys(dias).forEach(dia => {
+
+    const [d,m,a] = dia.split('/');
+
+    const dataObj = new Date(a, m - 1, d);
+
+    const nomesDias = [
+      "DOMINGO",
+      "SEGUNDA",
+      "TERÇA",
+      "QUARTA",
+      "QUINTA",
+      "SEXTA",
+      "SÁBADO"
+    ];
+
+    const nomeDia = nomesDias[dataObj.getDay()];
+
+    if(nomeDia === "DOMINGO") return;
+
+    totais[nomeDia] = 0;
+
+    dias[dia].forEach(r => {
+
+      const horario = r[1];
+
+      if(!horario) return;
+
+      turmasDaPlanilha.forEach(turma => {
+
+        const idx = dadosGlobais[0].indexOf(turma);
+
+        if(idx === -1) return;
+
+        const valor = (r[idx] || "").trim();
+
+        const valorNorm = normalizarTexto(valor);
+
+        if(!valorNorm.includes(nomeBusca)) return;
+
+        if(!mapa[horario]){
+          mapa[horario] = {};
+        }
+
+        mapa[horario][nomeDia] = {
+          turma,
+          texto: valor
+        };
+
+        if(aulaValida(valor)){
+          totais[nomeDia]++;
+        }
+
+      });
+
+    });
+
+  });
+
+  return {
+    mapa,
+    totais
+  };
+}
+
+
+// ======================================================
+// 🔥 RENDER PROFESSOR
+// ======================================================
+function renderProfessor(){
+
+  const professor =
+    document.getElementById("searchProf")?.value?.trim();
+
+  const semana =
+    document.getElementById("selectSemanaProfessor")?.value;
+
+  if(!professor || !semana){
+
+    limparFichaProfessor();
+    return;
+  }
+
+  const {
+    mapa,
+    totais
+  } = gerarMapaProfessor(professor, semana);
+
+  document.getElementById("nomeProfessorFicha").innerText =
+    professor;
+
+  document.getElementById("semanaProfessorFicha").innerText =
+    semana;
+
+  const dias = semanasAgrupadas?.[semana]?.dias || {};
+
+  const cabecalhos = [];
+
+  Object.keys(dias).forEach(dia => {
+
+    const [d,m,a] = dia.split('/');
+
+    const dataObj = new Date(a, m - 1, d);
+
+    const nomesDias = [
+      "DOMINGO",
+      "SEGUNDA",
+      "TERÇA",
+      "QUARTA",
+      "QUINTA",
+      "SEXTA",
+      "SÁBADO"
+    ];
+
+    const nomeDia = nomesDias[dataObj.getDay()];
+
+    if(nomeDia === "DOMINGO") return;
+
+    cabecalhos.push({
+      chave: nomeDia,
+      label: `${nomeDia}<br>${dia}`
+    });
+
+  });
+
+  const horarios = Object.keys(mapa).sort((a,b)=>{
+
+    const ha = horaParaMinutos(a.split(" - ")[0]);
+    const hb = horaParaMinutos(b.split(" - ")[0]);
+
+    return ha - hb;
+  });
+
+  let html = `
+    <table>
+
+      <tr class="day-divider">
+        <td colspan="${cabecalhos.length + 1}">
+          FICHA SEMANAL DO PROFESSOR
+        </td>
+      </tr>
+
+      <tr>
+        <th class="time-col">Horário</th>
+  `;
+
+  cabecalhos.forEach(c => {
+    html += `<th>${c.label}</th>`;
+  });
+
+  html += `</tr>`;
+
+  horarios.forEach(horario => {
+
+    html += `
+      <tr>
+        <td class="time-col">
+          ${horario}
+        </td>
+    `;
+
+    cabecalhos.forEach(c => {
+
+      const aula = mapa?.[horario]?.[c.chave];
+
+      if(!aula){
+
+        html += `
+          <td class="aula-cell"></td>
+        `;
+
+        return;
+      }
+
+      html += `
+        <td class="aula-cell">
+
+          <div style="
+            font-weight:800;
+            color:#22c55e;
+            margin-bottom:4px;
+            font-size:11px;
+          ">
+            ${aula.turma}
+          </div>
+
+          <div style="
+            line-height:1.4;
+            font-size:10px;
+          ">
+            ${aula.texto}
+          </div>
+
+        </td>
+      `;
+    });
+
+    html += `</tr>`;
+  });
+
+  // 🔥 TOTAL
+  html += `
+    <tr style="
+      background:
+        linear-gradient(
+          135deg,
+          rgba(34,197,94,0.15),
+          rgba(15,23,42,0.9)
+        );
+      font-weight:800;
+    ">
+      <td class="time-col">
+        TOTAL
+      </td>
+  `;
+
+  cabecalhos.forEach(c => {
+
+    html += `
+      <td class="aula-cell">
+        ${totais[c.chave] || 0}
+      </td>
+    `;
+  });
+
+  html += `
+    </tr>
+  `;
+
+  html += `</table>`;
+
+  document.getElementById("tabelaProfessor").innerHTML =
+    html;
+}
+
+
+// ======================================================
+// 🔥 POPULAR SEMANAS PROFESSOR
+// ======================================================
+function popularSemanasProfessor(){
+
+  const select =
+    document.getElementById("selectSemanaProfessor");
+
+  if(!select) return;
+
+  select.innerHTML =
+    `<option value="">Selecione a semana</option>`;
+
+  ordenarDatasBR(
+    Object.keys(semanasAgrupadas)
+  ).forEach(semana => {
+
+    select.innerHTML += `
+      <option value="${semana}">
+        Semana de ${semana}
+      </option>
+    `;
+  });
+}
