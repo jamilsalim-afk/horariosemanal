@@ -182,21 +182,224 @@ placeholder="🔍 Buscar Professor..." onkeyup="filtrarProfessor();">
 </section>
 
 <!-- ================= ABA PROFESSOR ================= -->
-<section id="aba-professor" class="tab-content" style="display:none;">
+<section div id="aba-professor" style="display:none;">
 
-  <div class="controls-card">
+  <!-- =========================================
+       CONTROLES
+  ========================================= -->
+  <div class="controls-card" style="margin-bottom:18px;">
 
-    <select id="selectProfessor" onchange="renderProfessor()"></select>
+    <!-- 🔎 PROFESSOR -->
+    <input
+      type="text"
+      id="searchProf"
+      class="search-box"
+      placeholder="Digite o nome do professor..."
+      oninput="renderProfessor()"
+      autocomplete="off"
+    >
 
-    <select id="selectSemanaProfessor" onchange="renderProfessor()"></select>
+    <!-- 📅 SEMANA -->
+    <select
+      id="selectSemanaProfessor"
+      class="selectSemana"
+      onchange="renderProfessor()"
+    >
+      <option value="">Selecione a semana</option>
+    </select>
 
-    <button class="btn-pdf" onclick="exportarPDFProfessor()">
-      📄 PDF Professor
+    <!-- 📄 PDF -->
+    <button
+      class="btn-pdf"
+      onclick="exportarPDFProfessor()"
+    >
+      📄 Exportar PDF
     </button>
 
   </div>
 
-  <div id="fichaProfessor"></div>
+  <!-- =========================================
+       CARD DA FICHA
+  ========================================= -->
+  <div
+    class="table-responsive"
+    id="containerProfessor"
+  >
+
+    <!-- =========================================
+         CABEÇALHO DA FICHA
+    ========================================= -->
+    <div
+      id="cabecalhoProfessor"
+      style="
+        display:flex;
+        justify-content:space-between;
+        align-items:center;
+        gap:12px;
+        flex-wrap:wrap;
+        margin-bottom:16px;
+        padding:14px 18px;
+        border-radius:18px;
+        background:
+          linear-gradient(
+            135deg,
+            rgba(34,197,94,0.18),
+            rgba(15,23,42,0.9)
+          );
+        border:1px solid rgba(255,255,255,0.06);
+      "
+    >
+
+      <!-- 👨‍🏫 NOME -->
+      <div>
+
+        <div
+          style="
+            font-size:11px;
+            letter-spacing:1px;
+            color:#94a3b8;
+            margin-bottom:4px;
+            text-transform:uppercase;
+          "
+        >
+          Professor
+        </div>
+
+        <div
+          id="nomeProfessorFicha"
+          style="
+            font-size:24px;
+            font-weight:800;
+            color:white;
+            line-height:1.1;
+          "
+        >
+          —
+        </div>
+
+      </div>
+
+      <!-- 📅 SEMANA -->
+      <div
+        style="
+          text-align:right;
+        "
+      >
+
+        <div
+          style="
+            font-size:11px;
+            letter-spacing:1px;
+            color:#94a3b8;
+            margin-bottom:4px;
+            text-transform:uppercase;
+          "
+        >
+          Semana
+        </div>
+
+        <div
+          id="semanaProfessorFicha"
+          style="
+            font-size:18px;
+            font-weight:700;
+            color:#22c55e;
+          "
+        >
+          —
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- =========================================
+         TABELA DA FICHA
+    ========================================= -->
+    <div id="tabelaProfessor">
+
+      <!-- 🔥 ESTADO INICIAL -->
+      <table>
+
+        <tr class="day-divider">
+          <td colspan="7">
+            FICHA SEMANAL DO PROFESSOR
+          </td>
+        </tr>
+
+        <tr>
+          <th class="time-col">Horário</th>
+          <th>SEGUNDA</th>
+          <th>TERÇA</th>
+          <th>QUARTA</th>
+          <th>QUINTA</th>
+          <th>SEXTA</th>
+          <th>SÁBADO</th>
+        </tr>
+
+        <tr>
+          <td class="time-col">07:30</td>
+          <td class="aula-cell"></td>
+          <td class="aula-cell"></td>
+          <td class="aula-cell"></td>
+          <td class="aula-cell"></td>
+          <td class="aula-cell"></td>
+          <td class="aula-cell"></td>
+        </tr>
+
+        <tr>
+          <td class="time-col">08:20</td>
+          <td class="aula-cell"></td>
+          <td class="aula-cell"></td>
+          <td class="aula-cell"></td>
+          <td class="aula-cell"></td>
+          <td class="aula-cell"></td>
+          <td class="aula-cell"></td>
+        </tr>
+
+        <tr>
+          <td class="time-col">09:10</td>
+          <td class="aula-cell"></td>
+          <td class="aula-cell"></td>
+          <td class="aula-cell"></td>
+          <td class="aula-cell"></td>
+          <td class="aula-cell"></td>
+          <td class="aula-cell"></td>
+        </tr>
+
+        <!-- 🔥 TOTAL -->
+        <tr
+          style="
+            background:
+              linear-gradient(
+                135deg,
+                rgba(34,197,94,0.2),
+                rgba(15,23,42,0.9)
+              );
+            font-weight:800;
+          "
+        >
+
+          <td class="time-col">
+            TOTAL
+          </td>
+
+          <td class="aula-cell">0</td>
+          <td class="aula-cell">0</td>
+          <td class="aula-cell">0</td>
+          <td class="aula-cell">0</td>
+          <td class="aula-cell">0</td>
+          <td class="aula-cell">0</td>
+
+        </tr>
+
+      </table>
+
+    </div>
+
+  </div>
+
+</div>
 
 </section>
 
