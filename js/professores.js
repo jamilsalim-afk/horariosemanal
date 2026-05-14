@@ -419,14 +419,10 @@ function gerarMapaProfessor(nomeProfessor, semana) {
 function renderProfessor(){
 
   const professor =
-    document.getElementById(
-      "selectProfessor"
-    )?.value || "";
+    document.getElementById("selectProfessor")?.value || "";
 
   const semana =
-    document.getElementById(
-      "selectSemanaProfessor"
-    )?.value || "";
+    document.getElementById("selectSemanaProfessor")?.value || "";
 
   if(!professor || !semana){
 
@@ -434,81 +430,67 @@ function renderProfessor(){
     return;
   }
 
-  document.getElementById(
-    "nomeProfessorFicha"
-  ).innerText = professor;
+  document.getElementById("nomeProfessorFicha").innerText = professor;
+  document.getElementById("semanaProfessorFicha").innerText = semana;
 
-  document.getElementById(
-    "semanaProfessorFicha"
-  ).innerText = semana;
+  const { mapa, totais } = gerarMapaProfessor(professor, semana);
 
-  const {
-    mapa,
-    totais
-  } = gerarMapaProfessor(
-    professor,
-    semana
-  );
+  const diasRef =
+    semanasAgrupadas?.[semana]?.dias || {};
 
+  const nomesDias = [
+    "DOMINGO",
+    "SEGUNDA",
+    "TERÇA",
+    "QUARTA",
+    "QUINTA",
+    "SEXTA",
+    "SÁBADO"
+  ];
+
+  // 🔥 monta colunas reais da semana
   const diasSemana = [];
-  const dias =
-    semanasAgrupadas?.[semana]
-      ?.dias || {};
 
-  Object.keys(dias).forEach(data => {
+  Object.keys(diasRef).forEach(data => {
 
-    const [d,m,a] =
-      data.split('/');
+    const [d, m, a] = data.split("/");
+    const dt = new Date(a, m - 1, d);
 
-    const dt =
-      new Date(a, m - 1, d);
+    const nomeDia = nomesDias[dt.getDay()];
 
-    const nomes = [
-      "DOMINGO",
-      "SEGUNDA",
-      "TERÇA",
-      "QUARTA",
-      "QUINTA",
-      "SEXTA",
-      "SÁBADO"
-    ];
-
-    const nomeDia =
-      nomes[dt.getDay()];
-
-    if(nomeDia === "DOMINGO"){
-      return;
-    }
+    if (!nomeDia || nomeDia === "DOMINGO") return;
 
     diasSemana.push({
       chave: nomeDia,
       label: `${nomeDia}<br>${data}`
     });
+
   });
+
+  // 🔥 fallback se semana não tiver estrutura
+  if (diasSemana.length === 0) {
+
+    document.getElementById("tabelaProfessor").innerHTML =
+      `<div style="padding:10px">⚠️ Semana sem dados estruturados</div>`;
+
+    return;
+  }
 
   let html = `
     <table>
 
       <tr class="day-divider">
-        <td colspan="${
-          diasSemana.length + 1
-        }">
+        <td colspan="${diasSemana.length + 1}">
           FICHA SEMANAL DO PROFESSOR
         </td>
       </tr>
 
       <tr>
-
-        <th class="time-col">
-          Horário
-        </th>
+        <th class="time-col">Horário</th>
   `;
 
   diasSemana.forEach(d => {
-
-    html += `
-      <th>${d.label}</th>
-    `;
+    html += `<th>${d.label}</th>`;
   });
 
   html += `</tr>`;
@@ -517,23 +499,15 @@ function renderProfessor(){
 
     html += `
       <tr>
-
-        <td class="time-col">
-          ${horario}
-        </td>
+        <td class="time-col">${horario}</td>
     `;
 
     diasSemana.forEach(d => {
 
-      const aula =
-        mapa?.[horario]?.[d.chave];
+      const aula = mapa?.[horario]?.[d.chave];
 
-      if(!aula){
-
-        html += `
-          <td class="aula-cell"></td>
-        `;
-
+      if (!aula) {
+        html += `<td class="aula-cell"></td>`;
         return;
       }
 
@@ -543,18 +517,28 @@ function renderProfessor(){
           <div style="
             font-weight:800;
             color:#22c55e;
-            margin-bottom:5px;
+            margin-bottom:4px;
             font-size:11px;
           ">
-            ${aula.turma}
+            ${aula.turma || ""}
           </div>
 
           <div style="
-            line-height:1.4;
             font-size:10px;
+            line-height:1.4;
           ">
-            ${aula.valor}
+            ${aula.valor || ""}
           </div>
+
+          ${aula.origem ? `
+            <div style="
+              font-size:9px;
+              opacity:0.6;
+              margin-top:2px;
+            ">
+              ${aula.origem}
+            </div>
+          ` : ""}
 
         </td>
       `;
@@ -566,38 +550,19 @@ function renderProfessor(){
   // 🔥 TOTAL
   html += `
     <tr style="
-      background:
-        linear-gradient(
-          135deg,
-          rgba(34,197,94,0.18),
-          rgba(15,23,42,0.95)
-        );
+      background: linear-gradient(135deg, rgba(34,197,94,0.18), rgba(15,23,42,0.95));
       font-weight:800;
     ">
-
-      <td class="time-col">
-        TOTAL
-      </td>
+      <td class="time-col">TOTAL</td>
   `;
 
   diasSemana.forEach(d => {
-
-    html += `
-      <td class="aula-cell">
-        ${totais[d.chave] || 0}
-      </td>
-    `;
+    html += `<td class="aula-cell">${totais[d.chave] || 0}</td>`;
   });
 
-  html += `
-    </tr>
-  `;
+  html += `</tr></table>`;
 
-  html += `</table>`;
-
-  document.getElementById(
-    "tabelaProfessor"
-  ).innerHTML = html;
+  document.getElementById("tabelaProfessor").innerHTML = html;
 }
 
 
