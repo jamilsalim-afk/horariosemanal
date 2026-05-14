@@ -1,197 +1,574 @@
 // ===============================
-// 📅 ABRIR RELATÓRIO DO DIA
+// 📊 RELATÓRIOS
 // ===============================
-function abrirRelatorioDia(dia) {
 
-  const texto = gerarRelatorioDia(dia);
+(function () {
 
-  // 🔥 agora respeita nova estrutura de painel
-  const container = document.getElementById("painelVagas");
+  // ===============================
+  // 📂 ABRIR PAINEL
+  // ===============================
+  function abrirPainelRelatorio(
+    titulo,
+    texto
+  ) {
 
-  if (!container) return;
+    try {
 
-  document.getElementById("conteudoVagas").innerText = texto;
+      const painel =
+        document.getElementById(
+          "painelVagas"
+        );
 
-  document.querySelector("#painelVagas strong").innerText =
-    "📅 Relatório do Dia";
+      const conteudo =
+        document.getElementById(
+          "conteudoVagas"
+        );
 
-  container.style.display = "block";
-}
+      const tituloEl =
+        document.querySelector(
+          "#painelVagas strong"
+        );
 
-
-// ===============================
-// 📊 ABRIR RELATÓRIO SEMANA
-// ===============================
-function abrirRelatorioSemana() {
-
-  const texto = gerarRelatorioSemanaTexto();
-
-  const container = document.getElementById("painelVagas");
-
-  if (!container) return;
-
-  document.getElementById("conteudoVagas").innerText = texto;
-
-  document.querySelector("#painelVagas strong").innerText =
-    "📊 Relatório da Semana";
-
-  container.style.display = "block";
-}
-
-
-// ===============================
-// 🔘 CRIAR BOTÕES DE DIAS
-// ===============================
-function criarBotoesDias() {
-
-  const sem = window.appState?.semana ||
-    document.getElementById('selectSemana')?.value;
-
-  const dias = semanasAgrupadas?.[sem]?.dias;
-
-  if (!dias) return;
-
-  let html = `
-    <div style="padding:10px;display:flex;gap:10px;flex-wrap:wrap;">
-  `;
-
-  Object.keys(dias).forEach(dia => {
-
-  const [d, m, a] = dia.split('/');
-  const dataObj = new Date(a, m - 1, d);
-  const diaSemana = dataObj.getDay();
-
-  if (diaSemana === 0 || diaSemana === 6) return; // remove dom e sáb
-
-    html += `
-      <button onclick="abrirRelatorioDia('${dia}')"
-        style="
-          padding:10px;
-          background:#2e7d32;
-          color:white;
-          border:none;
-          border-radius:8px;
-          cursor:pointer;
-          font-weight:600;
-        ">
-        📅 ${dia}
-      </button>
-    `;
-  });
-
-  html += `
-    <button onclick="abrirRelatorioSemana()"
-      style="
-        padding:10px;
-        background:#d32f2f;
-        color:white;
-        border:none;
-        border-radius:8px;
-        cursor:pointer;
-        font-weight:600;
-      ">
-      📊 Semana inteira
-    </button>
-  </div>
-  `;
-
-  document.getElementById("botoesRelatorio").innerHTML = html;
-}
-
-function gerarRelatorioDia(dia) {
-
-  const vagas = coletarVagasDoDia(dia);
-
-  let texto = `📅 RELATÓRIO DE AULAS VAGAS DO DIA (${dia})\n\n`;
-
-  if (!vagas.length) {
-    return texto + "Não há aulas vagas neste dia.";
-  }
-
-  const agrupado = {};
-
-  vagas.forEach(v => {
-    if (!agrupado[v.turma]) {
-      agrupado[v.turma] = [];
-    }
-    agrupado[v.turma].push(v.horario);
-  });
-
-  Object.keys(agrupado).forEach(turma => {
-
-    const horarios = [...new Set(agrupado[turma])];
-
-    texto += `🏫 TURMA: ${turma}\n`;
-    texto += `⏰ HORÁRIOS: ${horarios.join(", ")}\n\n`;
-  });
-
-  return texto;
-}
-
-function copiarRelatorioDia(dia) {
-  const texto = gerarRelatorioDia(dia);
-
-  navigator.clipboard.writeText(texto).then(() => {
-    alert("Relatório copiado para área de transferência!");
-  });
-}
-
-function gerarRelatorioSemanaTexto() {
-
-  const sem = getSemanaAtualSelecionada?.() || document.getElementById('selectSemana').value;
-  const dias = semanasAgrupadas[sem]?.dias || {};
-
-  let texto = `📊 RELATÓRIO SEMANAL DE AULAS VAGAS (SEGUNDA À SEXTA)\n\n`;
-
-  const agrupado = {};
-
-  Object.keys(dias).forEach(dia => {
-
-    const vagas = coletarVagasDoDia(dia);
-
-    vagas.forEach(v => {
-
-      const chave = `${dia}__${v.turma}`;
-
-      if (!agrupado[chave]) {
-        agrupado[chave] = {
-          dia,
-          turma: v.turma,
-          horarios: []
-        };
+      if (!painel || !conteudo) {
+        return;
       }
 
-      agrupado[chave].horarios.push(v.horario);
-    });
+      conteudo.innerText =
+        texto || "";
 
-  });
+      if (tituloEl) {
+        tituloEl.innerText = titulo;
+      }
 
-  const listaFinal = Object.values(agrupado);
+      painel.style.display = "block";
 
-  if (listaFinal.length === 0) {
-    return "Não há aulas vagas na semana.";
-  }
+    } catch (e) {
 
-  listaFinal.sort((a, b) => {
-    const [da, ma, aa] = a.dia.split('/');
-    const [db, mb, ab] = b.dia.split('/');
-    return new Date(aa, ma - 1, da) - new Date(ab, mb - 1, db);
-  });
+      console.error(
+        "❌ Erro abrirPainelRelatorio:",
+        e
+      );
 
-  let diaAtual = "";
-
-  listaFinal.forEach(item => {
-
-    if (item.dia !== diaAtual) {
-      texto += `📅 ${item.dia}\n\n`;
-      diaAtual = item.dia;
     }
 
-    const horarios = [...new Set(item.horarios)];
+  }
 
-    texto += `🏫 ${item.turma}\n`;
-    texto += `⏰ ${horarios.join(", ")}\n\n`;
-  });
 
-  return texto;
-}
+  // ===============================
+  // 📅 ABRIR RELATÓRIO DIA
+  // ===============================
+  function abrirRelatorioDia(dia) {
+
+    try {
+
+      const texto =
+        gerarRelatorioDia(dia);
+
+      abrirPainelRelatorio(
+        "📅 Relatório do Dia",
+        texto
+      );
+
+    } catch (e) {
+
+      console.error(
+        "❌ Erro abrirRelatorioDia:",
+        e
+      );
+
+    }
+
+  }
+
+
+  // ===============================
+  // 📊 ABRIR RELATÓRIO SEMANA
+  // ===============================
+  function abrirRelatorioSemana() {
+
+    try {
+
+      const texto =
+        gerarRelatorioSemanaTexto();
+
+      abrirPainelRelatorio(
+        "📊 Relatório da Semana",
+        texto
+      );
+
+    } catch (e) {
+
+      console.error(
+        "❌ Erro abrirRelatorioSemana:",
+        e
+      );
+
+    }
+
+  }
+
+
+  // ===============================
+  // 🔘 CRIAR BOTÕES
+  // ===============================
+  function criarBotoesDias() {
+
+    try {
+
+      const sem =
+
+        window.appState?.semana ||
+
+        window.semanaAtual ||
+
+        document.getElementById(
+          "selectSemana"
+        )?.value;
+
+      const dias =
+        window.semanasAgrupadas?.[sem]
+          ?.dias;
+
+      const container =
+        document.getElementById(
+          "botoesRelatorio"
+        );
+
+      if (!container) return;
+
+      if (!dias) {
+
+        container.innerHTML = "";
+
+        return;
+      }
+
+      let html = `
+
+        <div style="
+          padding:10px;
+          display:flex;
+          gap:10px;
+          flex-wrap:wrap;
+          align-items:center;
+        ">
+
+      `;
+
+      Object.keys(dias)
+        .forEach(dia => {
+
+          try {
+
+            const [d, m, a] =
+              dia.split("/");
+
+            const dataObj =
+              new Date(
+                a,
+                m - 1,
+                d
+              );
+
+            const diaSemana =
+              dataObj.getDay();
+
+            // 🔥 remove domingo e sábado
+            if (
+              diaSemana === 0 ||
+              diaSemana === 6
+            ) {
+              return;
+            }
+
+            html += `
+
+              <button
+                onclick="abrirRelatorioDia('${dia}')"
+
+                style="
+                  padding:10px;
+                  background:#2e7d32;
+                  color:white;
+                  border:none;
+                  border-radius:8px;
+                  cursor:pointer;
+                  font-weight:600;
+                "
+              >
+
+                📅 ${dia}
+
+              </button>
+
+            `;
+
+          } catch (e) {
+
+            console.warn(
+              "⚠️ Erro botão relatório:",
+              e
+            );
+
+          }
+
+        });
+
+      // 🔥 botão semanal
+      html += `
+
+        <button
+          onclick="abrirRelatorioSemana()"
+
+          style="
+            padding:10px;
+            background:#d32f2f;
+            color:white;
+            border:none;
+            border-radius:8px;
+            cursor:pointer;
+            font-weight:600;
+          "
+        >
+
+          📊 Semana inteira
+
+        </button>
+
+      `;
+
+      html += `</div>`;
+
+      container.innerHTML = html;
+
+    } catch (e) {
+
+      console.error(
+        "❌ Erro criarBotoesDias:",
+        e
+      );
+
+    }
+
+  }
+
+
+  // ===============================
+  // 📅 RELATÓRIO DIA
+  // ===============================
+  function gerarRelatorioDia(dia) {
+
+    try {
+
+      if (
+        typeof coletarVagasDoDia !==
+        "function"
+      ) {
+
+        return "Função coletarVagasDoDia não encontrada.";
+
+      }
+
+      const vagas =
+        coletarVagasDoDia(dia) || [];
+
+      let texto = `
+
+📅 RELATÓRIO DE AULAS VAGAS DO DIA (${dia})
+
+`;
+
+      if (!vagas.length) {
+
+        return (
+          texto +
+          "\nNão há aulas vagas neste dia."
+        );
+
+      }
+
+      const agrupado = {};
+
+      vagas.forEach(v => {
+
+        if (!agrupado[v.turma]) {
+
+          agrupado[v.turma] = [];
+
+        }
+
+        agrupado[v.turma]
+          .push(v.horario);
+
+      });
+
+      Object.keys(agrupado)
+        .forEach(turma => {
+
+          const horarios = [
+
+            ...new Set(
+              agrupado[turma]
+            )
+
+          ];
+
+          texto += `
+
+🏫 TURMA: ${turma}
+
+⏰ HORÁRIOS: ${horarios.join(", ")}
+
+`;
+
+        });
+
+      return texto.trim();
+
+    } catch (e) {
+
+      console.error(
+        "❌ Erro gerarRelatorioDia:",
+        e
+      );
+
+      return "Erro ao gerar relatório.";
+
+    }
+
+  }
+
+
+  // ===============================
+  // 📋 COPIAR RELATÓRIO
+  // ===============================
+  function copiarRelatorioDia(dia) {
+
+    try {
+
+      const texto =
+        gerarRelatorioDia(dia);
+
+      navigator.clipboard
+        .writeText(texto)
+        .then(() => {
+
+          alert(
+            "Relatório copiado!"
+          );
+
+        });
+
+    } catch (e) {
+
+      console.error(
+        "❌ Erro copiarRelatorioDia:",
+        e
+      );
+
+    }
+
+  }
+
+
+  // ===============================
+  // 📊 RELATÓRIO SEMANA
+  // ===============================
+  function gerarRelatorioSemanaTexto() {
+
+    try {
+
+      const sem =
+
+        (
+          typeof getSemanaAtualSelecionada ===
+          "function"
+        )
+
+          ? getSemanaAtualSelecionada()
+
+          : document.getElementById(
+              "selectSemana"
+            )?.value;
+
+      const dias =
+
+        window.semanasAgrupadas?.[sem]
+          ?.dias || {};
+
+      let texto = `
+
+📊 RELATÓRIO SEMANAL DE AULAS VAGAS
+(SEGUNDA À SEXTA)
+
+`;
+
+      const agrupado = {};
+
+      Object.keys(dias)
+        .forEach(dia => {
+
+          try {
+
+            const vagas =
+              typeof coletarVagasDoDia ===
+              "function"
+
+                ? coletarVagasDoDia(dia)
+
+                : [];
+
+            vagas.forEach(v => {
+
+              const chave =
+                `${dia}__${v.turma}`;
+
+              if (!agrupado[chave]) {
+
+                agrupado[chave] = {
+
+                  dia,
+
+                  turma: v.turma,
+
+                  horarios: []
+
+                };
+
+              }
+
+              agrupado[chave]
+                .horarios
+                .push(v.horario);
+
+            });
+
+          } catch (e) {
+
+            console.warn(
+              "⚠️ Erro vagas semana:",
+              e
+            );
+
+          }
+
+        });
+
+      const listaFinal =
+        Object.values(agrupado);
+
+      if (
+        listaFinal.length === 0
+      ) {
+
+        return (
+          texto +
+          "\nNão há aulas vagas na semana."
+        );
+
+      }
+
+      // 🔥 ordena por data
+      listaFinal.sort((a, b) => {
+
+        const [da, ma, aa] =
+          a.dia.split("/");
+
+        const [db, mb, ab] =
+          b.dia.split("/");
+
+        return (
+
+          new Date(
+            aa,
+            ma - 1,
+            da
+          )
+
+          -
+
+          new Date(
+            ab,
+            mb - 1,
+            db
+          )
+
+        );
+
+      });
+
+      let diaAtual = "";
+
+      listaFinal
+        .forEach(item => {
+
+          if (
+            item.dia !== diaAtual
+          ) {
+
+            texto += `
+
+📅 ${item.dia}
+
+`;
+
+            diaAtual = item.dia;
+
+          }
+
+          const horarios = [
+
+            ...new Set(
+              item.horarios
+            )
+
+          ];
+
+          texto += `
+
+🏫 ${item.turma}
+
+⏰ ${horarios.join(", ")}
+
+`;
+
+        });
+
+      return texto.trim();
+
+    } catch (e) {
+
+      console.error(
+        "❌ Erro gerarRelatorioSemanaTexto:",
+        e
+      );
+
+      return "Erro ao gerar relatório semanal.";
+
+    }
+
+  }
+
+
+  // ===============================
+  // 🌎 EXPORTAÇÃO GLOBAL
+  // ===============================
+  window.abrirRelatorioDia =
+    abrirRelatorioDia;
+
+  window.abrirRelatorioSemana =
+    abrirRelatorioSemana;
+
+  window.criarBotoesDias =
+    criarBotoesDias;
+
+  window.gerarRelatorioDia =
+    gerarRelatorioDia;
+
+  window.copiarRelatorioDia =
+    copiarRelatorioDia;
+
+  window.gerarRelatorioSemanaTexto =
+    gerarRelatorioSemanaTexto;
+
+})();
