@@ -666,54 +666,35 @@ window.preencherSelectProfessores =
 async function exportarPDFProfessor() {
 
   const container = document.getElementById("containerProfessor");
+  if (!container) return;
 
   const nome = document.getElementById("nomeProfessorFicha")?.innerText || "Professor";
   const semana = document.getElementById("semanaProfessorFicha")?.innerText || "";
 
-  if (!container) return;
+  const clone = container.cloneNode(true);
+
+  const wrapper = document.createElement("div");
+
+  // 🔥 mantém padrão visual do sistema inteiro
+  wrapper.innerHTML = `
+    <div class="ifro-header"></div>
+    <div class="ifro-header-content"></div>
+  `;
+
+  wrapper.appendChild(clone);
 
   const opt = {
-    margin: 0.4,
+    margin: 0.3,
     filename: `Ficha_Individual_Professor_Semana.pdf`,
     image: { type: 'jpeg', quality: 0.98 },
-    html2canvas: {
-      scale: 2,
-      useCORS: true,
-      scrollY: 0
-    },
+    html2canvas: { scale: 2, useCORS: true },
     jsPDF: {
       unit: 'cm',
       format: 'a4',
       orientation: 'portrait'
     },
-    pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+    pagebreak: { mode: ['css', 'legacy'] }
   };
-
-  // 🔥 clone para não afetar tela
-  const clone = container.cloneNode(true);
-
-  // 🔥 cria header igual ao sistema
-  const header = document.createElement("div");
-  header.style.textAlign = "center";
-  header.style.marginBottom = "10px";
-  header.style.fontFamily = "Inter, sans-serif";
-
-  header.innerHTML = `
-    <div style="font-size:14px;font-weight:800;">
-      FICHA INDIVIDUAL DO PROFESSOR
-    </div>
-    <div style="font-size:12px;margin-top:4px;">
-      ${nome} - ${semana}
-    </div>
-  `;
-
-  const wrapper = document.createElement("div");
-  wrapper.style.padding = "20px";
-  wrapper.style.background = "#ffffff";
-  wrapper.style.color = "#000";
-
-  wrapper.appendChild(header);
-  wrapper.appendChild(clone);
 
   document.body.appendChild(wrapper);
 
