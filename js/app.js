@@ -420,35 +420,87 @@ function getEventoGeral(dia, horario) {
 
 }
 
-async function carregarBaseUnificada() {
+// ===============================
+// 📦 HEADERS DAS PLANILHAS
+// ===============================
+window.headerIntegrado = [];
+window.headerSuperior = [];
 
-  const integrado = await carregarCSVIntegrado();
-  const superior  = await carregarCSVSuperior();
+// ===============================
+// 🌍 BASE UNIFICADA GLOBAL
+// ===============================
+window.BASE_UNIFICADA = [];
 
-  const base = [
-    ...normalizarBase(integrado, "integrado"),
-    ...normalizarBase(superior, "superior")
-  ];
+// ===============================
+// 📥 CARREGAR CSV INTEGRADO
+// ===============================
+async function carregarCSVIntegrado() {
 
-  window.BASE_UNIFICADA = base;
+  const url =
+    `https://docs.google.com/spreadsheets/d/${SHEETS.INTEGRADO.id}/export?format=csv&gid=${SHEETS.INTEGRADO.gid}`;
 
-  console.log("✅ BASE UNIFICADA:", base.length);
+  const res = await fetch(url);
+  if (!res.ok) throw new Error("Erro integrado");
+
+  const texto = await res.text();
+  const dados = parseCSV(texto);
+
+  window.headerIntegrado = dados[0] || [];
+
+  return dados;
 }
 
+// ===============================
+// 📥 CARREGAR CSV SUPERIOR
+// ===============================
+async function carregarCSVSuperior() {
+
+  const url =
+    `https://docs.google.com/spreadsheets/d/${SHEETS.SUPERIOR.id}/export?format=csv&gid=${SHEETS.SUPERIOR.gid}`;
+
+  const res = await fetch(url);
+  if (!res.ok) throw new Error("Erro superior");
+
+  const texto = await res.text();
+  const dados = parseCSV(texto);
+
+  window.headerSuperior = dados[0] || [];
+
+  return dados;
+}
+
+// ===============================
+// 🔥 NORMALIZAR BASE (CORRIGIDO)
+// ===============================
 function normalizarBase(dados, origem) {
 
   const saida = [];
 
+  const header =
+    origem === "integrado"
+      ? window.headerIntegrado
+      : window.headerSuperior;
+
+  const nomesDias = [
+    "DOMINGO",
+    "SEGUNDA",
+    "TERÇA",
+    "QUARTA",
+    "QUINTA",
+    "SEXTA",
+    "SÁBADO"
+  ];
+
   dados.forEach(linha => {
 
-    const data = linha.data;
+    const data = linha[0];
     const horario = (linha[1] || "").trim();
 
     if (!data || !horario) return;
 
     turmasDaPlanilha.forEach(turma => {
 
-      const idx = dadosGlobais[0].indexOf(turma);
+      const idx = header.indexOf(turma);
       if (idx === -1) return;
 
       const valor = (linha[idx] || "").trim();
@@ -457,19 +509,12 @@ function normalizarBase(dados, origem) {
       const prof = localizarProfessor(valor);
       if (!prof) return;
 
-      const dt = new Date(data.split("/")[2], data.split("/")[1] - 1, data.split("/")[0]);
-
-      const nomesDias = [
-        "DOMINGO",
-        "SEGUNDA",
-        "TERÇA",
-        "QUARTA",
-        "QUINTA",
-        "SEXTA",
-        "SÁBADO"
-      ];
+      const [d, m, a] = data.split("/");
+      const dt = new Date(a, m - 1, d);
 
       const dia = nomesDias[dt.getDay()];
+
+      if (dia === "DOMINGO") return;
 
       saida.push({
         data,
@@ -486,6 +531,24 @@ function normalizarBase(dados, origem) {
   });
 
   return saida;
+}
+
+// ===============================
+// 🔥 CARREGAR BASE UNIFICADA
+// ===============================
+async function carregarBaseUnificada() {
+
+  const integrado = await carregarCSVIntegrado();
+  const superior = await carregarCSVSuperior();
+
+  const base = [
+    ...normalizarBase(integrado, "integrado"),
+    ...normalizarBase(superior, "superior")
+  ];
+
+  window.BASE_UNIFICADA = base;
+
+  console.log("✅ BASE UNIFICADA CARREGADA:", base.length);
 }
 
 // ===============================
