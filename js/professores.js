@@ -659,3 +659,151 @@ window.popularSemanasProfessor =
 
 window.preencherSelectProfessores =
   preencherSelectProfessores;
+
+// ======================================================
+// 📄 EXPORTAR PDF PROFESSOR (PADRÃO SISTEMA)
+// ======================================================
+async function exportarPDFProfessor() {
+
+  const nome =
+    document.getElementById("nomeProfessorFicha")?.innerText || "Professor";
+
+  const semana =
+    document.getElementById("semanaProfessorFicha")?.innerText || "";
+
+  const container =
+    document.getElementById("tabelaProfessor");
+
+  if (!container) {
+    alert("Ficha do professor não encontrada.");
+    return;
+  }
+
+  const conteudo = container.innerHTML;
+
+  // ======================================================
+  // 🔥 CABEÇALHO PADRÃO (IGUAL AO HORÁRIO)
+  // ======================================================
+  const header = `
+    <div style="
+      text-align:center;
+      padding:18px 10px;
+      border-bottom:2px solid #22c55e;
+      margin-bottom:14px;
+    ">
+      <div style="font-size:12px; color:#94a3b8;">
+        IFRO - SISTEMA DE HORÁRIOS
+      </div>
+
+      <div style="font-size:20px; font-weight:800; color:#111827;">
+        FICHA SEMANAL DO PROFESSOR
+      </div>
+
+      <div style="margin-top:6px; font-size:14px; font-weight:700;">
+        ${nome}
+      </div>
+
+      <div style="font-size:12px; color:#64748b;">
+        ${semana}
+      </div>
+    </div>
+  `;
+
+  // ======================================================
+  // 🔥 RODAPÉ PADRÃO
+  // ======================================================
+  const footer = `
+    <div style="
+      position:fixed;
+      bottom:0;
+      left:0;
+      right:0;
+      text-align:center;
+      font-size:10px;
+      color:#94a3b8;
+      padding:10px;
+      border-top:1px solid #e5e7eb;
+    ">
+      Gerado automaticamente pelo sistema de horários IFRO
+    </div>
+  `;
+
+  // ======================================================
+  // 🔥 HTML FINAL
+  // ======================================================
+  const html = `
+    <html>
+      <head>
+        <title>Ficha Professor</title>
+
+        <style>
+          @page {
+            size: A4 portrait;
+            margin: 15mm;
+          }
+
+          body {
+            font-family: Arial, sans-serif;
+            color: #111827;
+          }
+
+          table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 10px;
+          }
+
+          th, td {
+            border: 1px solid #ddd;
+            padding: 6px;
+            text-align: center;
+          }
+
+          th {
+            background: #111827;
+            color: white;
+            font-size: 10px;
+          }
+
+          .time-col {
+            font-weight: bold;
+            background: #f3f4f6;
+          }
+
+          .aula-cell {
+            font-size: 9px;
+          }
+
+          .day-divider td {
+            background: #22c55e;
+            color: white;
+            font-weight: bold;
+            font-size: 11px;
+          }
+        </style>
+      </head>
+
+      <body>
+
+        ${header}
+
+        ${conteudo}
+
+        ${footer}
+
+      </body>
+    </html>
+  `;
+
+  const win = window.open("", "", "width=900,height=700");
+
+  win.document.write(html);
+  win.document.close();
+
+  win.focus();
+
+  setTimeout(() => {
+    win.print();
+    win.close();
+  }, 500);
+}
