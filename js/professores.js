@@ -920,6 +920,18 @@ async function exportarPDFProfessor() {
 
     });
 
+    const pageHeight = pdf.internal.pageSize.getHeight();
+const pageWidth = pdf.internal.pageSize.getWidth();
+
+pdf.setFontSize(8);
+
+pdf.text(
+  "IFRO - Campus Cacoal | BR 364, Km 228, Lote 2-A | (69) 3443-2445 | dape.cacoal@ifro.edu.br",
+  pageWidth / 2,
+  pageHeight - 10,
+  { align: "center" }
+);
+
     // ===============================
     // 💾 SALVAR
     // ===============================
