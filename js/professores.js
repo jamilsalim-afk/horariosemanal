@@ -674,6 +674,7 @@ async function exportarPDFProfessor() {
 
     const { jsPDF } = window.jspdf;
 
+    // 📄 retrato A4
     const pdf = new jsPDF("p", "mm", "a4");
 
     // ===============================
@@ -690,9 +691,7 @@ async function exportarPDFProfessor() {
       return;
     }
 
-    const { mapa, totais } = gerarMapaProfessor(nome, semana);
-
-    const diasSemana = [];
+    const { mapa } = gerarMapaProfessor(nome, semana);
 
     const dias =
       semanasAgrupadas?.[semana]?.dias || {};
@@ -706,6 +705,8 @@ async function exportarPDFProfessor() {
       "SÁBADO"
     ];
 
+    const diasSemana = [];
+
     Object.keys(dias).forEach(data => {
 
       const [d, m, a] = data.split("/");
@@ -715,16 +716,13 @@ async function exportarPDFProfessor() {
       const nomeDia = nomesDias[dt.getDay() - 1];
 
       if (nomeDia) {
-        diasSemana.push({
-          chave: nomeDia,
-          data
-        });
+        diasSemana.push({ chave: nomeDia, data });
       }
 
     });
 
     // ===============================
-    // ⏱️ HORÁRIOS + INTERVALOS
+    // ⏱️ INTERVALOS
     // ===============================
     const INTERVALOS = {
       "09:10 - 09:30": "INTERVALO",
@@ -735,15 +733,28 @@ async function exportarPDFProfessor() {
     };
 
     // ===============================
-    // 🧮 CONTADOR POR DIA
+    // 🧮 CONTADORES
     // ===============================
     const totaisDia = {};
 
     // ===============================
-    // 🏛️ CABEÇALHO
+    // 📏 LAYOUT (IMPORTANTE)
     // ===============================
     const pageWidth = pdf.internal.pageSize.getWidth();
 
+    const marginLeft = 4;
+    const marginRight = 4;
+
+    const usableWidth = pageWidth - marginLeft - marginRight;
+
+    const firstColWidth = 18;
+
+    const otherColsWidth =
+      (usableWidth - firstColWidth) / diasSemana.length;
+
+    // ===============================
+    // 🏛️ CABEÇALHO
+    // ===============================
     pdf.setFontSize(11);
 
     pdf.text(
@@ -777,7 +788,7 @@ async function exportarPDFProfessor() {
     );
 
     // ===============================
-    // 📊 HEAD (com data)
+    // 📊 HEAD
     // ===============================
     const head = [[
       "Horário",
@@ -789,41 +800,23 @@ async function exportarPDFProfessor() {
     // ===============================
     const body = HORARIOS_FICHA.map(horario => {
 
-      // ===============================
-      // 🔁 INTERVALOS FIXOS
-      // ===============================
-      if (INTERVALOS[horario]) {
-
-        return [
-          `${horario} - ${INTERVALOS[horario]}`,
-          ...diasSemana.map(() => "")
-        ];
-
-      }
-
       const linha = [horario];
 
       diasSemana.forEach(dia => {
 
-        const aula =
-          mapa?.[horario]?.[dia.chave];
+        const aula = mapa?.[horario]?.[dia.chave];
 
         if (!aula) {
           linha.push("");
           return;
         }
 
-        // ===============================
-        // 🔢 CONTA TOTAL POR DIA
-        // ===============================
         if (aulaValida(aula.valor)) {
           totaisDia[dia.chave] =
             (totaisDia[dia.chave] || 0) + 1;
         }
 
-        linha.push(
-          `${aula.turma}\n${aula.valor}`
-        );
+        linha.push(`${aula.turma}\n${aula.valor}`);
 
       });
 
@@ -849,6 +842,11 @@ async function exportarPDFProfessor() {
 
       startY: 32,
 
+      margin: {
+        left: marginLeft,
+        right: marginRight
+      },
+
       theme: "grid",
 
       styles: {
@@ -864,80 +862,67 @@ async function exportarPDFProfessor() {
         fontStyle: "bold"
       },
 
+      // ===============================
+      // 📏 LARGURAS DAS COLUNAS
+      // ===============================
       columnStyles: {
-        0: { cellWidth: 22 }
+        0: { cellWidth: firstColWidth },
+        1: { cellWidth: otherColsWidth },
+        2: { cellWidth: otherColsWidth },
+        3: { cellWidth: otherColsWidth },
+        4: { cellWidth: otherColsWidth },
+        5: { cellWidth: otherColsWidth },
+        6: { cellWidth: otherColsWidth }
       },
 
       didParseCell: (data) => {
 
-        const txt =
-          (data.cell.raw || "").toString();
+        const txt = (data.cell.raw || "").toString();
 
-        // ===============================
-        // ⭐ REPOSIÇÃO (*)
-        // ===============================
+        // ⭐ REPOSIÇÃO
         if (txt.includes("*")) {
-
-          data.cell.styles.fillColor =
-            [255, 230, 150];
-
-          data.cell.styles.fontStyle =
-            "bold";
-
+          data.cell.styles.fillColor = [255, 230, 150];
+          data.cell.styles.fontStyle = "bold";
         }
 
-        // ===============================
         // ⏱️ INTERVALOS
-        // ===============================
         if (
           txt.includes("INTERVALO") ||
           txt.includes("ALMOÇO") ||
           txt.includes("JANTAR")
         ) {
-
-          data.cell.styles.fillColor =
-            [235, 235, 235];
-
-          data.cell.styles.fontStyle =
-            "bold";
-
+          data.cell.styles.fillColor = [235, 235, 235];
+          data.cell.styles.fontStyle = "bold";
         }
 
-        // ===============================
-        // 📉 TOTAL
-        // ===============================
+        // 📊 TOTAL
         if (txt === "TOTAL") {
-
-          data.cell.styles.fillColor =
-            [200, 200, 200];
-
-          data.cell.styles.fontStyle =
-            "bold";
-
+          data.cell.styles.fillColor = [200, 200, 200];
+          data.cell.styles.fontStyle = "bold";
         }
 
       }
 
     });
 
+    // ===============================
+    // 📍 RODAPÉ
+    // ===============================
     const pageHeight = pdf.internal.pageSize.getHeight();
-const pageWidth = pdf.internal.pageSize.getWidth();
 
-pdf.setFontSize(8);
+    pdf.setFontSize(8);
 
-pdf.text(
-  "IFRO - Campus Cacoal | BR 364, Km 228, Lote 2-A | (69) 3443-2445 | dape.cacoal@ifro.edu.br",
-  pageWidth / 2,
-  pageHeight - 10,
-  { align: "center" }
-);
+    pdf.text(
+      "IFRO - Campus Cacoal | BR 364, Km 228, Lote 2-A | (69) 3443-2445 | dape.cacoal@ifro.edu.br",
+      pageWidth / 2,
+      pageHeight - 8,
+      { align: "center" }
+    );
 
     // ===============================
     // 💾 SALVAR
     // ===============================
-    pdf.save(
-      `Ficha Professor ${nome} - ${semana}.pdf`
-    );
+    pdf.save(`Ficha Professor ${nome} - ${semana}.pdf`);
 
   } catch (e) {
 
