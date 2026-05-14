@@ -105,25 +105,38 @@ function processarDados() {
     document.getElementById("selectModalidade");
 
   if (selectModalidade) {
+
     window.appState.modalidade =
       selectModalidade.value;
   }
 
+  // 🔥 RENDER PRINCIPAL
   renderizarTabela();
 
+  // 🔥 BOTÕES RELATÓRIOS
   if (typeof criarBotoesDias === "function") {
     criarBotoesDias();
   }
 
-  if (typeof preencherSelectProfessores === "function") {
-    preencherSelectProfessores();
+  // 🔥 ABA PROFESSOR
+  if (typeof popularProfessores === "function") {
+    popularProfessores();
   }
 
+  if (typeof popularSemanasProfessor === "function") {
+    popularSemanasProfessor();
+  }
+
+  // 🔥 ABA TURMAS
   if (typeof preencherSelectTurmas === "function") {
     preencherSelectTurmas();
   }
-}
 
+  // 🔥 FILTRO
+  if (typeof filtrarProfessor === "function") {
+    filtrarProfessor();
+  }
+}
 
 // ======================================================
 // 🔥 TURMAS ATIVAS
