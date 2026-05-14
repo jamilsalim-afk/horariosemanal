@@ -182,22 +182,26 @@ placeholder="🔍 Buscar Professor..." onkeyup="filtrarProfessor();">
 </section>
 
 <!-- ================= ABA PROFESSOR ================= -->
-<section div id="aba-professor" style="display:none;">
+<section id="aba-professor" style="display:none;">
 
   <!-- =========================================
        CONTROLES
   ========================================= -->
-  <div class="controls-card" style="margin-bottom:18px;">
+  <div
+    class="controls-card"
+    style="margin-bottom:18px;"
+  >
 
-    <!-- 🔎 PROFESSOR -->
-    <input
-      type="text"
-      id="searchProf"
+    <!-- 👨‍🏫 PROFESSOR -->
+    <select
+      id="selectProfessor"
       class="search-box"
-      placeholder="Digite o nome do professor..."
-      oninput="renderProfessor()"
-      autocomplete="off"
+      onchange="renderProfessor()"
     >
+      <option value="">
+        Selecione o professor
+      </option>
+    </select>
 
     <!-- 📅 SEMANA -->
     <select
@@ -205,7 +209,9 @@ placeholder="🔍 Buscar Professor..." onkeyup="filtrarProfessor();">
       class="selectSemana"
       onchange="renderProfessor()"
     >
-      <option value="">Selecione a semana</option>
+      <option value="">
+        Selecione a semana
+      </option>
     </select>
 
     <!-- 📄 PDF -->
@@ -227,7 +233,7 @@ placeholder="🔍 Buscar Professor..." onkeyup="filtrarProfessor();">
   >
 
     <!-- =========================================
-         CABEÇALHO DA FICHA
+         CABEÇALHO
     ========================================= -->
     <div
       id="cabecalhoProfessor"
@@ -235,22 +241,23 @@ placeholder="🔍 Buscar Professor..." onkeyup="filtrarProfessor();">
         display:flex;
         justify-content:space-between;
         align-items:center;
-        gap:12px;
+        gap:14px;
         flex-wrap:wrap;
-        margin-bottom:16px;
-        padding:14px 18px;
-        border-radius:18px;
+        margin-bottom:18px;
+        padding:18px 22px;
+        border-radius:22px;
         background:
           linear-gradient(
             135deg,
             rgba(34,197,94,0.18),
-            rgba(15,23,42,0.9)
+            rgba(15,23,42,0.92)
           );
-        border:1px solid rgba(255,255,255,0.06);
+        border:
+          1px solid rgba(255,255,255,0.06);
       "
     >
 
-      <!-- 👨‍🏫 NOME -->
+      <!-- 👨‍🏫 PROFESSOR -->
       <div>
 
         <div
@@ -314,7 +321,7 @@ placeholder="🔍 Buscar Professor..." onkeyup="filtrarProfessor();">
     </div>
 
     <!-- =========================================
-         TABELA DA FICHA
+         TABELA
     ========================================= -->
     <div id="tabelaProfessor">
 
@@ -337,69 +344,11 @@ placeholder="🔍 Buscar Professor..." onkeyup="filtrarProfessor();">
           <th>SÁBADO</th>
         </tr>
 
-        <tr>
-          <td class="time-col">07:30</td>
-          <td class="aula-cell"></td>
-          <td class="aula-cell"></td>
-          <td class="aula-cell"></td>
-          <td class="aula-cell"></td>
-          <td class="aula-cell"></td>
-          <td class="aula-cell"></td>
-        </tr>
-
-        <tr>
-          <td class="time-col">08:20</td>
-          <td class="aula-cell"></td>
-          <td class="aula-cell"></td>
-          <td class="aula-cell"></td>
-          <td class="aula-cell"></td>
-          <td class="aula-cell"></td>
-          <td class="aula-cell"></td>
-        </tr>
-
-        <tr>
-          <td class="time-col">09:10</td>
-          <td class="aula-cell"></td>
-          <td class="aula-cell"></td>
-          <td class="aula-cell"></td>
-          <td class="aula-cell"></td>
-          <td class="aula-cell"></td>
-          <td class="aula-cell"></td>
-        </tr>
-
-        <!-- 🔥 TOTAL -->
-        <tr
-          style="
-            background:
-              linear-gradient(
-                135deg,
-                rgba(34,197,94,0.2),
-                rgba(15,23,42,0.9)
-              );
-            font-weight:800;
-          "
-        >
-
-          <td class="time-col">
-            TOTAL
-          </td>
-
-          <td class="aula-cell">0</td>
-          <td class="aula-cell">0</td>
-          <td class="aula-cell">0</td>
-          <td class="aula-cell">0</td>
-          <td class="aula-cell">0</td>
-          <td class="aula-cell">0</td>
-
-        </tr>
-
       </table>
 
     </div>
 
   </div>
-
-</div>
 
 </section>
 
