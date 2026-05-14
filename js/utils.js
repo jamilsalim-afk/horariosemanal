@@ -2,16 +2,29 @@
 // 🔥 FERIADOS
 // ======================================================
 const FERIADOS = [
-"01/01/2026","16/02/2026","17/02/2026","18/02/2026","03/04/2026","20/04/2026","21/04/2026","01/05/2026",
-"04/06/2026","05/06/2026","07/09/2026","12/10/2026","02/11/2026",
-"15/11/2026","25/12/2026"
+  "01/01/2026",
+  "16/02/2026",
+  "17/02/2026",
+  "18/02/2026",
+  "03/04/2026",
+  "20/04/2026",
+  "21/04/2026",
+  "01/05/2026",
+  "04/06/2026",
+  "05/06/2026",
+  "07/09/2026",
+  "12/10/2026",
+  "02/11/2026",
+  "15/11/2026",
+  "25/12/2026"
 ];
 
 
 // ======================================================
-// 🔥 NORMALIZAÇÃO (ESSENCIAL DO SISTEMA)
+// 🔥 NORMALIZAR TEXTO
 // ======================================================
-function normalizarTexto(txt){
+function normalizarTexto(txt) {
+
   return (txt || "")
     .toString()
     .normalize("NFD")
@@ -23,61 +36,99 @@ function normalizarTexto(txt){
 
 
 // ======================================================
-// 🔥 FERIADO
+// 🔥 VERIFICA FERIADO
 // ======================================================
-function isFeriado(d){
-  return FERIADOS.includes(d);
+function isFeriado(data) {
+
+  if (!data) return false;
+
+  return FERIADOS.includes(data);
 }
 
 
 // ======================================================
-// 🔥 CSV MAIS SEGURO (GOOGLE SHEETS)
+// 🔥 PARSER CSV ROBUSTO
 // ======================================================
-function parseCSV(text){
+function parseCSV(texto) {
 
-  const linhas = text.split(/\r?\n/);
+  if (!texto) return [];
+
+  const linhas = texto
+    .replace(/\r/g, "")
+    .split("\n")
+    .filter(l => l.trim() !== "");
 
   return linhas.map(linha => {
 
     const resultado = [];
+
     let atual = "";
+
     let dentroAspas = false;
 
-    for(let i=0;i<linha.length;i++){
+    for (let i = 0; i < linha.length; i++) {
 
       const ch = linha[i];
 
-      if(ch === '"'){
+      // 🔥 trata aspas escapadas ""
+      if (
+        ch === '"' &&
+        linha[i + 1] === '"'
+      ) {
+        atual += '"';
+        i++;
+        continue;
+      }
+
+      if (ch === '"') {
         dentroAspas = !dentroAspas;
         continue;
       }
 
-      if(ch === "," && !dentroAspas){
+      if (
+        ch === "," &&
+        !dentroAspas
+      ) {
         resultado.push(atual.trim());
         atual = "";
-      } else {
-        atual += ch;
+        continue;
       }
+
+      atual += ch;
     }
 
     resultado.push(atual.trim());
+
     return resultado;
   });
 }
 
 
 // ======================================================
-// 🔥 ORDENA DATAS BR
+// 🔥 ORDENAR DATAS BR
 // ======================================================
-function ordenarDatasBR(arr){
+function ordenarDatasBR(arr = []) {
 
-  return arr.sort((a,b)=>{
+  return [...arr].sort((a, b) => {
+
+    if (!a || !b) return 0;
 
     const pa = a.split('/');
     const pb = b.split('/');
 
-    return new Date(pa[2],pa[1]-1,pa[0]) -
-           new Date(pb[2],pb[1]-1,pb[0]);
+    const da = new Date(
+      pa[2],
+      pa[1] - 1,
+      pa[0]
+    );
+
+    const db = new Date(
+      pb[2],
+      pb[1] - 1,
+      pb[0]
+    );
+
+    return da - db;
   });
 }
 
@@ -85,21 +136,33 @@ function ordenarDatasBR(arr){
 // ======================================================
 // 🔥 SEMANA ATUAL (SEGUNDA-FEIRA)
 // ======================================================
-function getSemanaAtual(){
+function getSemanaAtual() {
 
   const hoje = new Date();
 
-  const dia = hoje.getDay(); // 0 domingo
+  const copia = new Date(hoje);
 
-  const diff = hoje.getDate() - dia + (dia === 0 ? -6 : 1);
+  const diaSemana = copia.getDay();
 
-  const segunda = new Date(hoje);
+  const diff =
+    diaSemana === 0
+      ? -6
+      : 1 - diaSemana;
 
-  segunda.setDate(diff);
+  copia.setDate(
+    copia.getDate() + diff
+  );
 
-  const d = String(segunda.getDate()).padStart(2,'0');
-  const m = String(segunda.getMonth()+1).padStart(2,'0');
-  const a = segunda.getFullYear();
+  const d =
+    String(copia.getDate())
+      .padStart(2, '0');
+
+  const m =
+    String(copia.getMonth() + 1)
+      .padStart(2, '0');
+
+  const a =
+    copia.getFullYear();
 
   return `${d}/${m}/${a}`;
 }
