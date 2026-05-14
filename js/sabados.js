@@ -1,16 +1,13 @@
 // ======================================================
 // 🔥 SÁBADOS LETIVOS
 // ======================================================
-
-
 // ======================================================
 // 🔥 OBTÉM APENAS SÁBADOS
 // ======================================================
+// ======================================================
+// 🔥 OBTÉM APENAS SÁBADOS COM AULAS
+// ======================================================
 function obterSabadosSemana() {
-
-  const modalidade =
-    document.getElementById("selectModalidadeSabados")?.value ||
-    "INTEGRADO";
 
   const resultado = {};
 
@@ -23,9 +20,39 @@ function obterSabadosSemana() {
       const [d, m, a] = dia.split('/');
       const dataObj = new Date(a, m - 1, d);
 
-      // sábado = 6
-      if (dataObj.getDay() === 6) {
-        resultado[dia] = dias[dia];
+      // 🔥 apenas sábado
+      if (dataObj.getDay() !== 6) return;
+
+      const linhas = dias[dia];
+
+      // 🔥 verifica se existe aula real
+      const possuiAula = linhas.some(r => {
+
+        return r.slice(2).some(celula => {
+
+          const val = normalizarTexto(celula || "");
+
+          // ignora vazios
+          if (!val) return false;
+
+          // ignora intervalos/marcações
+          if (
+            val.includes("INTERVALO") ||
+            val.includes("[+]") ||
+            val.includes("[R]") ||
+            val === "*"
+          ) {
+            return false;
+          }
+
+          return true;
+        });
+
+      });
+
+      // 🔥 só adiciona se realmente houver aula
+      if (possuiAula) {
+        resultado[dia] = linhas;
       }
 
     });
