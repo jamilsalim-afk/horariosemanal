@@ -233,9 +233,8 @@ function renderSabados() {
   container.innerHTML = html;
 }
 
-
 // ======================================================
-// 🔥 EXPORTAR PDF SÁBADOS
+// 🔥 EXPORTAR PDF SÁBADOS (PADRÃO HORÁRIOS)
 // ======================================================
 function exportarPDFSabados() {
 
@@ -254,6 +253,12 @@ function exportarPDFSabados() {
       ? getTurmasAtivasNaSemana(sabados)
       : turmasDaPlanilha;
 
+  const nomes = [
+    "DOMINGO","SEGUNDA-FEIRA","TERÇA-FEIRA",
+    "QUARTA-FEIRA","QUINTA-FEIRA",
+    "SEXTA-FEIRA","SÁBADO"
+  ];
+
   let pagina = 0;
 
   Object.keys(sabados).forEach(dia => {
@@ -268,21 +273,53 @@ function exportarPDFSabados() {
 
     const pageWidth = pdf.internal.pageSize.getWidth();
 
-    pdf.setFontSize(10);
+    // ======================================================
+    // 🔥 CABEÇALHO
+    // ======================================================
+
+    pdf.setFontSize(9);
 
     pdf.text(
       "INSTITUTO FEDERAL DE EDUCAÇÃO, CIÊNCIA E TECNOLOGIA DE RONDÔNIA - IFRO",
       pageWidth / 2,
-      10,
+      8,
       { align: 'center' }
     );
 
     pdf.text(
-      `SÁBADO LETIVO - ${dia}`,
+      "CAMPUS CACOAL - Departamento de Apoio ao Ensino - DAPE",
       pageWidth / 2,
-      18,
+      12,
       { align: 'center' }
     );
+
+    pdf.text(
+      `SÁBADOS LETIVOS - ${modalidade}`,
+      pageWidth / 2,
+      16,
+      { align: 'center' }
+    );
+
+    const p = dia.split('/');
+    const dObj = new Date(p[2], p[1] - 1, p[0]);
+
+    pdf.setFontSize(14);
+    pdf.setTextColor(46, 125, 50);
+    pdf.setFont(undefined, 'bold');
+
+    pdf.text(
+      `${nomes[dObj.getDay()]} - ${dia}`,
+      pageWidth / 2,
+      24,
+      { align: 'center' }
+    );
+
+    pdf.setTextColor(0, 0, 0);
+    pdf.setFont(undefined, 'normal');
+
+    // ======================================================
+    // 🔥 TABELA
+    // ======================================================
 
     const body = linhas.map(r => {
 
@@ -297,7 +334,6 @@ function exportarPDFSabados() {
       });
 
       return line;
-
     });
 
     pdf.autoTable({
@@ -306,21 +342,107 @@ function exportarPDFSabados() {
 
       body,
 
-      startY: 25,
+      startY: 28,
 
       theme: 'grid',
 
+      margin: {
+        top: 28,
+        left: 2,
+        right: 2,
+        bottom: 2
+      },
+
+      tableLineColor: [200, 200, 200],
+      tableLineWidth: 0.1,
+
       styles: {
-        fontSize: 5,
+        fontSize: 4.5,
         halign: 'center',
-        valign: 'middle'
+        valign: 'middle',
+        cellPadding: 1
       },
 
       headStyles: {
-        fillColor: [46, 125, 50]
-      }
+        fillColor: [46, 125, 50],
+        textColor: [0, 0, 0],
+        fontStyle: 'bold',
+        lineColor: [200, 200, 200],
+        lineWidth: 0.1
+      },
 
+      columnStyles: {
+        0: { cellWidth: 16 }
+      },
+
+      didParseCell: (data) => {
+
+        const col = data.column.index;
+
+        // 🔥 cor das turmas
+        if (col > 0) {
+
+          const curso = getCursoInfo(turmasAtivas[col - 1]);
+
+          data.cell.styles.fillColor = curso.rgb;
+        }
+
+        const txt = (data.cell.raw || "").toString();
+
+        const classe = detectarClasse(txt);
+
+        // 🔥 cores especiais
+        if (classe && coresPDF[classe]) {
+
+          data.cell.styles.fillColor = coresPDF[classe];
+
+          if (
+            classe === "pps" ||
+            classe === "reposicao"
+          ) {
+            data.cell.styles.textColor = [255, 255, 255];
+            data.cell.styles.fontStyle = "bold";
+          }
+        }
+
+        // 🔥 linhas vazias
+        const vazio = data.row.raw
+          .slice(1)
+          .every(v => !v || v.trim() === "");
+
+        if (vazio) {
+
+          data.cell.styles.minCellHeight = 1.5;
+          data.cell.styles.fontSize = 3.5;
+        }
+
+        const t = txt.toUpperCase();
+
+        // 🔥 marcações especiais
+        if (
+          t.includes("INTERVALO") ||
+          t.includes("[+]") ||
+          t.includes("*") ||
+          t.includes("[R]")
+        ) {
+
+          data.cell.styles.fillColor = [235, 235, 235];
+        }
+      }
     });
+
+    // ======================================================
+    // 🔥 RODAPÉ
+    // ======================================================
+
+    pdf.setFontSize(8);
+
+    pdf.text(
+      "IFRO - Campus Cacoal | BR 364, Km 228, Lote 2-A | (69) 3443-2445 | dape.cacoal@ifro.edu.br",
+      pageWidth / 2,
+      205,
+      { align: 'center' }
+    );
 
   });
 
