@@ -674,10 +674,10 @@ async function exportarPDFProfessor() {
 
     const { jsPDF } = window.jspdf;
 
-    const pdf = new jsPDF("p", "mm", "a4"); // 📄 RETRATO
+    const pdf = new jsPDF("p", "mm", "a4");
 
     // ===============================
-    // 📌 DADOS GLOBAIS
+    // 📌 DADOS
     // ===============================
     const nome =
       document.getElementById("nomeProfessorFicha")?.innerText || "Professor";
@@ -690,13 +690,7 @@ async function exportarPDFProfessor() {
       return;
     }
 
-    // ===============================
-    // 📊 REGERA DADOS DA TABELA
-    // ===============================
-    const {
-      mapa,
-      totais
-    } = gerarMapaProfessor(nome, semana);
+    const { mapa, totais } = gerarMapaProfessor(nome, semana);
 
     const diasSemana = [];
 
@@ -720,16 +714,30 @@ async function exportarPDFProfessor() {
 
       const nomeDia = nomesDias[dt.getDay() - 1];
 
-      if (nomeDia && nomeDia !== "DOMINGO") {
-
+      if (nomeDia) {
         diasSemana.push({
           chave: nomeDia,
           data
         });
-
       }
 
     });
+
+    // ===============================
+    // ⏱️ HORÁRIOS + INTERVALOS
+    // ===============================
+    const INTERVALOS = {
+      "09:10 - 09:30": "INTERVALO",
+      "15:30 - 15:50": "INTERVALO",
+      "20:40 - 20:50": "INTERVALO",
+      "12:00 - 13:50": "ALMOÇO",
+      "18:20 - 19:00": "JANTAR"
+    };
+
+    // ===============================
+    // 🧮 CONTADOR POR DIA
+    // ===============================
+    const totaisDia = {};
 
     // ===============================
     // 🏛️ CABEÇALHO
@@ -769,16 +777,29 @@ async function exportarPDFProfessor() {
     );
 
     // ===============================
-    // 📊 HEAD DA TABELA
+    // 📊 HEAD (com data)
     // ===============================
-    const head = [
-      ["Horário", ...diasSemana.map(d => d.chave)]
-    ];
+    const head = [[
+      "Horário",
+      ...diasSemana.map(d => `${d.chave}\n${d.data}`)
+    ]];
 
     // ===============================
-    // 📋 BODY DA TABELA
+    // 📋 BODY
     // ===============================
     const body = HORARIOS_FICHA.map(horario => {
+
+      // ===============================
+      // 🔁 INTERVALOS FIXOS
+      // ===============================
+      if (INTERVALOS[horario]) {
+
+        return [
+          `${horario} - ${INTERVALOS[horario]}`,
+          ...diasSemana.map(() => "")
+        ];
+
+      }
 
       const linha = [horario];
 
@@ -792,6 +813,14 @@ async function exportarPDFProfessor() {
           return;
         }
 
+        // ===============================
+        // 🔢 CONTA TOTAL POR DIA
+        // ===============================
+        if (aulaValida(aula.valor)) {
+          totaisDia[dia.chave] =
+            (totaisDia[dia.chave] || 0) + 1;
+        }
+
         linha.push(
           `${aula.turma}\n${aula.valor}`
         );
@@ -803,7 +832,15 @@ async function exportarPDFProfessor() {
     });
 
     // ===============================
-    // 📊 TABELA (AUTO TABLE)
+    // 📊 LINHA TOTAL
+    // ===============================
+    body.push([
+      "TOTAL",
+      ...diasSemana.map(d => totaisDia[d.chave] || 0)
+    ]);
+
+    // ===============================
+    // 📄 TABELA
     // ===============================
     pdf.autoTable({
 
@@ -815,25 +852,16 @@ async function exportarPDFProfessor() {
       theme: "grid",
 
       styles: {
-
         fontSize: 6,
-
         cellPadding: 2,
-
         halign: "center",
-
         valign: "middle"
-
       },
 
       headStyles: {
-
         fillColor: [34, 197, 94],
-
         textColor: 0,
-
         fontStyle: "bold"
-
       },
 
       columnStyles: {
@@ -842,10 +870,49 @@ async function exportarPDFProfessor() {
 
       didParseCell: (data) => {
 
-        // 🎯 quebra linha automática mais limpa
-        if (data.section === "body") {
+        const txt =
+          (data.cell.raw || "").toString();
 
-          data.cell.styles.fontSize = 5.5;
+        // ===============================
+        // ⭐ REPOSIÇÃO (*)
+        // ===============================
+        if (txt.includes("*")) {
+
+          data.cell.styles.fillColor =
+            [255, 230, 150];
+
+          data.cell.styles.fontStyle =
+            "bold";
+
+        }
+
+        // ===============================
+        // ⏱️ INTERVALOS
+        // ===============================
+        if (
+          txt.includes("INTERVALO") ||
+          txt.includes("ALMOÇO") ||
+          txt.includes("JANTAR")
+        ) {
+
+          data.cell.styles.fillColor =
+            [235, 235, 235];
+
+          data.cell.styles.fontStyle =
+            "bold";
+
+        }
+
+        // ===============================
+        // 📉 TOTAL
+        // ===============================
+        if (txt === "TOTAL") {
+
+          data.cell.styles.fillColor =
+            [200, 200, 200];
+
+          data.cell.styles.fontStyle =
+            "bold";
 
         }
 
@@ -856,10 +923,9 @@ async function exportarPDFProfessor() {
     // ===============================
     // 💾 SALVAR
     // ===============================
-    const nomeArquivo =
-      `FICHA PROFESSOR ${nome} - SEMANA ${semana}.pdf`;
-
-    pdf.save(nomeArquivo);
+    pdf.save(
+      `Ficha Professor ${nome} - ${semana}.pdf`
+    );
 
   } catch (e) {
 
