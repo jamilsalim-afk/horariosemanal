@@ -665,40 +665,208 @@ window.preencherSelectProfessores =
 // ======================================================
 async function exportarPDFProfessor() {
 
-  const container = document.getElementById("containerProfessor");
-  if (!container) return;
+  try {
 
-  const nome = document.getElementById("nomeProfessorFicha")?.innerText || "Professor";
-  const semana = document.getElementById("semanaProfessorFicha")?.innerText || "";
+    if (!window.jspdf?.jsPDF) {
+      console.error("❌ jsPDF não carregado.");
+      return;
+    }
 
-  const clone = container.cloneNode(true);
+    const { jsPDF } = window.jspdf;
 
-  const wrapper = document.createElement("div");
+    const pdf = new jsPDF("p", "mm", "a4"); // 📄 RETRATO
 
-  // 🔥 mantém padrão visual do sistema inteiro
-  wrapper.innerHTML = `
-    <div class="ifro-header"></div>
-    <div class="ifro-header-content"></div>
-  `;
+    // ===============================
+    // 📌 DADOS GLOBAIS
+    // ===============================
+    const nome =
+      document.getElementById("nomeProfessorFicha")?.innerText || "Professor";
 
-  wrapper.appendChild(clone);
+    const semana =
+      document.getElementById("semanaProfessorFicha")?.innerText || "";
 
-  const opt = {
-    margin: 0.3,
-    filename: `Ficha_Individual_Professor_Semana.pdf`,
-    image: { type: 'jpeg', quality: 0.98 },
-    html2canvas: { scale: 2, useCORS: true },
-    jsPDF: {
-      unit: 'cm',
-      format: 'a4',
-      orientation: 'portrait'
-    },
-    pagebreak: { mode: ['css', 'legacy'] }
-  };
+    if (!nome || !semana) {
+      alert("Selecione professor e semana.");
+      return;
+    }
 
-  document.body.appendChild(wrapper);
+    // ===============================
+    // 📊 REGERA DADOS DA TABELA
+    // ===============================
+    const {
+      mapa,
+      totais
+    } = gerarMapaProfessor(nome, semana);
 
-  await html2pdf().from(wrapper).set(opt).save();
+    const diasSemana = [];
 
-  document.body.removeChild(wrapper);
+    const dias =
+      semanasAgrupadas?.[semana]?.dias || {};
+
+    const nomesDias = [
+      "SEGUNDA",
+      "TERÇA",
+      "QUARTA",
+      "QUINTA",
+      "SEXTA",
+      "SÁBADO"
+    ];
+
+    Object.keys(dias).forEach(data => {
+
+      const [d, m, a] = data.split("/");
+
+      const dt = new Date(a, m - 1, d);
+
+      const nomeDia = nomesDias[dt.getDay() - 1];
+
+      if (nomeDia && nomeDia !== "DOMINGO") {
+
+        diasSemana.push({
+          chave: nomeDia,
+          data
+        });
+
+      }
+
+    });
+
+    // ===============================
+    // 🏛️ CABEÇALHO
+    // ===============================
+    const pageWidth = pdf.internal.pageSize.getWidth();
+
+    pdf.setFontSize(11);
+
+    pdf.text(
+      "INSTITUTO FEDERAL DE EDUCAÇÃO, CIÊNCIA E TECNOLOGIA DE RONDÔNIA - IFRO",
+      pageWidth / 2,
+      10,
+      { align: "center" }
+    );
+
+    pdf.setFontSize(10);
+
+    pdf.text(
+      "CAMPUS CACOAL - DAPE",
+      pageWidth / 2,
+      15,
+      { align: "center" }
+    );
+
+    pdf.text(
+      `FICHA SEMANAL DO PROFESSOR`,
+      pageWidth / 2,
+      20,
+      { align: "center" }
+    );
+
+    pdf.text(
+      `Professor: ${nome} | Semana: ${semana}`,
+      pageWidth / 2,
+      25,
+      { align: "center" }
+    );
+
+    // ===============================
+    // 📊 HEAD DA TABELA
+    // ===============================
+    const head = [
+      ["Horário", ...diasSemana.map(d => d.chave)]
+    ];
+
+    // ===============================
+    // 📋 BODY DA TABELA
+    // ===============================
+    const body = HORARIOS_FICHA.map(horario => {
+
+      const linha = [horario];
+
+      diasSemana.forEach(dia => {
+
+        const aula =
+          mapa?.[horario]?.[dia.chave];
+
+        if (!aula) {
+          linha.push("");
+          return;
+        }
+
+        linha.push(
+          `${aula.turma}\n${aula.valor}`
+        );
+
+      });
+
+      return linha;
+
+    });
+
+    // ===============================
+    // 📊 TABELA (AUTO TABLE)
+    // ===============================
+    pdf.autoTable({
+
+      head,
+      body,
+
+      startY: 32,
+
+      theme: "grid",
+
+      styles: {
+
+        fontSize: 6,
+
+        cellPadding: 2,
+
+        halign: "center",
+
+        valign: "middle"
+
+      },
+
+      headStyles: {
+
+        fillColor: [34, 197, 94],
+
+        textColor: 0,
+
+        fontStyle: "bold"
+
+      },
+
+      columnStyles: {
+        0: { cellWidth: 22 }
+      },
+
+      didParseCell: (data) => {
+
+        // 🎯 quebra linha automática mais limpa
+        if (data.section === "body") {
+
+          data.cell.styles.fontSize = 5.5;
+
+        }
+
+      }
+
+    });
+
+    // ===============================
+    // 💾 SALVAR
+    // ===============================
+    const nomeArquivo =
+      `FICHA PROFESSOR ${nome} - SEMANA ${semana}.pdf`;
+
+    pdf.save(nomeArquivo);
+
+  } catch (e) {
+
+    console.error("❌ Erro PDF professor:", e);
+
+    alert("Erro ao gerar PDF do professor.");
+
+  }
+
 }
