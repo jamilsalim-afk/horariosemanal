@@ -40,6 +40,19 @@ const HORARIOS_FICHA = [
   "21:40 - 22:30"
 ];
 
+function ehIntervalo(horario) {
+
+  const INTERVALOS = {
+    "09:10 - 09:30": "INTERVALO",
+    "15:30 - 15:50": "INTERVALO",
+    "20:40 - 20:50": "INTERVALO",
+    "12:00 - 13:50": "ALMOÇO",
+    "18:20 - 19:00": "JANTAR"
+  };
+
+  return INTERVALOS[horario] || null;
+}
+
 // ======================================================
 // 🔥 CARREGAR PROFESSORES
 // ======================================================
