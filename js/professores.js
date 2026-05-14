@@ -29,112 +29,108 @@
 
   }
 
+// ===============================
+// 🔍 FILTRO DE PROFESSOR (INTELIGENTE)
+// ===============================
+function filtrarProfessor() {
 
-  // ===============================
-  // 🔍 FILTRO DE PROFESSOR
-  // ===============================
-  function filtrarProfessor() {
+  const input = document.getElementById('searchProf');
 
-    try {
+  if (!input) return;
 
-      const input =
-        document.getElementById(
-          "searchProf"
-        );
+  const termo = normalizarTexto(input.value);
 
-      if (!input) return;
+  const container = document.getElementById('tabelaHorario');
 
-      const termo =
-        input.value.toUpperCase().trim();
+  if (!container) return;
 
-      // 🔥 tabela principal
-      const tabela =
-        document.getElementById(
-          "tabelaHorario"
-        );
+  const tabelas = container.querySelectorAll('table');
 
-      if (!tabela) return;
+  tabelas.forEach(tb => {
 
-      const celulas =
-        tabela.getElementsByTagName("td");
+    let tabelaTemResultado = false;
 
-      for (let i = 0; i < celulas.length; i++) {
+    const linhas = tb.querySelectorAll('tr');
 
-        const td = celulas[i];
+    linhas.forEach(tr => {
 
-        const txt =
-          td.innerText.toUpperCase();
+      // 🔥 mantém cabeçalhos
+      if (
+        tr.classList.contains('day-divider') ||
+        tr.querySelector('th')
+      ) {
+        tr.style.display = '';
+        return;
+      }
+
+      const celulas = tr.querySelectorAll('td');
+
+      let linhaTemResultado = false;
+
+      celulas.forEach(td => {
 
         // 🔥 ignora coluna horário
-        if (
-
-          td.classList.contains(
-            "time-col"
-          ) ||
-
-          td.classList.contains(
-            "horario-col"
-          ) ||
-
-          td.parentElement?.classList.contains(
-            "day-divider"
-          )
-
-        ) {
-
-          td.classList.remove(
-            "highlight",
-            "opaco"
-          );
-
-          continue;
+        if (td.classList.contains('time-col')) {
+          td.classList.remove('highlight', 'opaco');
+          return;
         }
 
-        // 🔥 destaque
-        if (
-          termo &&
-          txt.includes(termo)
-        ) {
+        const txt = normalizarTexto(td.innerText);
 
-          td.classList.add("highlight");
+        if (termo) {
 
-          td.classList.remove("opaco");
+          if (txt.includes(termo)) {
+
+            td.classList.add('highlight');
+            td.classList.remove('opaco');
+
+            linhaTemResultado = true;
+            tabelaTemResultado = true;
+
+          } else {
+
+            td.classList.remove('highlight');
+            td.classList.add('opaco');
+
+          }
+
+        } else {
+
+          td.classList.remove('highlight', 'opaco');
 
         }
 
-        // 🔥 opaco
-        else if (termo) {
+      });
 
-          td.classList.remove(
-            "highlight"
-          );
+      // 🔥 esconde linhas sem resultado
+      if (termo) {
 
-          td.classList.add("opaco");
+        tr.style.display =
+          linhaTemResultado ? '' : 'none';
 
-        }
+      } else {
 
-        // 🔥 limpa
-        else {
-
-          td.classList.remove(
-            "highlight",
-            "opaco"
-          );
-
-        }
+        tr.style.display = '';
 
       }
 
-    } catch (e) {
+    });
 
-      console.error(
-        "❌ Erro em filtrarProfessor:",
-        e
-      );
+    // 🔥 esconde tabela inteira sem ocorrência
+    if (termo) {
+
+      tb.style.display =
+        tabelaTemResultado ? '' : 'none';
+
+    } else {
+
+      tb.style.display = '';
 
     }
 
-  }
+  });
+
+}
 
 
   // ===============================
