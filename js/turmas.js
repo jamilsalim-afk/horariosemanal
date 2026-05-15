@@ -1,98 +1,204 @@
 // ======================================================
-// 🔥 GERAR FICHA DA TURMA
+// 🏫 TURMAS.JS
 // ======================================================
-function gerarFichaTurma(nomeTurma) {
 
-  const sem =
-    getSemanaAtualSelecionada?.() ||
-    document.getElementById('selectSemanaTurma')?.value ||
-    document.getElementById('selectSemana')?.value;
 
-  const dias =
-    semanasAgrupadas?.[sem]?.dias || {};
+// ======================================================
+// 🔥 POPULAR TURMAS
+// ======================================================
+function preencherSelectTurmasFicha() {
 
-  let resultado = [];
+  const select =
+    document.getElementById(
+      "selectTurmaFicha"
+    );
 
-  Object.keys(dias).forEach(dia => {
+  if (!select) return;
 
-    dias[dia].forEach(r => {
+  const modalidade =
+    document.getElementById(
+      "selectModalidadeTurma"
+    )?.value || "";
 
-      const horario = r[1];
+  select.innerHTML =
+    `<option value="">Selecione a turma</option>`;
 
-      const idx =
-        dadosGlobais[0].indexOf(nomeTurma);
+  if (!modalidade) return;
 
-      if (idx === -1) return;
+  let turmas = [];
 
-      const val =
-        (r[idx] || "").trim();
+  if (modalidade === "INTEGRADO") {
 
-      if (
-        val &&
-        val !== "-" &&
-        !normalizarTexto(horario)
-          .includes("INTERVALO")
-      ) {
+    turmas =
+      window.headerIntegrado
+        ?.slice(2)
+        ?.filter(t => t && t.trim()) || [];
 
-        resultado.push({
-          dia,
-          horario,
-          aula: val
-        });
-      }
+  } else {
+
+    turmas =
+      window.headerSuperior
+        ?.slice(2)
+        ?.filter(t => t && t.trim()) || [];
+
+  }
+
+  turmas
+    .sort((a,b)=>a.localeCompare(b))
+    .forEach(turma => {
+
+      select.innerHTML += `
+        <option value="${turma}">
+          ${turma}
+        </option>
+      `;
+
     });
-  });
 
-  return resultado;
 }
 
 
 // ======================================================
-// 🔥 PREENCHER SELECT TURMAS
+// 🔥 POPULAR SEMANAS
 // ======================================================
-function preencherSelectTurmas() {
+function popularSemanasTurma() {
 
-  const selectTurma =
-    document.getElementById("selectTurma");
+  const select =
+    document.getElementById(
+      "selectSemanaTurma"
+    );
 
-  const selectSemana =
-    document.getElementById("selectSemanaTurma");
+  if (!select) return;
 
-  if (!selectTurma || !selectSemana) return;
-
-  selectTurma.innerHTML = "";
-
-  turmasDaPlanilha.forEach(turma => {
-
-    selectTurma.innerHTML += `
-      <option value="${turma}">
-        ${turma}
-      </option>
-    `;
-  });
-
-  selectSemana.innerHTML = "";
+  select.innerHTML =
+    `<option value="">Selecione a semana</option>`;
 
   const semanas =
     ordenarDatasBR(
-      Object.keys(semanasAgrupadas)
+      Object.keys(semanasAgrupadas || {})
     );
 
-  semanas.forEach(semana => {
+  semanas.forEach(sem => {
 
-    selectSemana.innerHTML += `
-      <option value="${semana}">
-        Semana de ${semana}
+    select.innerHTML += `
+      <option value="${sem}">
+        Semana de ${sem}
       </option>
     `;
+
   });
 
-  const semanaAtual =
-    document.getElementById("selectSemana")?.value;
+}
 
-  if (semanaAtual) {
-    selectSemana.value = semanaAtual;
-  }
+
+// ======================================================
+// 🔥 LIMPAR FICHA
+// ======================================================
+function limparFichaTurma() {
+
+  document.getElementById(
+    "nomeTurmaFicha"
+  ).innerText = "—";
+
+  document.getElementById(
+    "semanaTurmaFicha"
+  ).innerText = "—";
+
+  renderTabelaTurmaVazia();
+
+}
+
+
+// ======================================================
+// 🔥 TABELA VAZIA
+// ======================================================
+function renderTabelaTurmaVazia() {
+
+  document.getElementById(
+    "tabelaTurma"
+  ).innerHTML = "";
+
+}
+
+
+// ======================================================
+// 🔥 GERAR MAPA TURMA
+// ======================================================
+function gerarMapaTurma(
+  turmaSelecionada,
+  semana
+) {
+
+  const mapa = {};
+
+  const totais = {};
+
+  const dias =
+    semanasAgrupadas?.[semana]?.dias || {};
+
+  const nomesDias = [
+    "DOMINGO",
+    "SEGUNDA",
+    "TERÇA",
+    "QUARTA",
+    "QUINTA",
+    "SEXTA",
+    "SÁBADO"
+  ];
+
+  Object.keys(dias).forEach(data => {
+
+    const linhas = dias[data];
+
+    const [d, m, a] = data.split("/");
+
+    const dt =
+      new Date(a, m - 1, d);
+
+    const nomeDia =
+      nomesDias[dt.getDay()];
+
+    linhas.forEach(r => {
+
+      const horario =
+        (r[1] || "").trim();
+
+      if (!horario) return;
+
+      const idx =
+        dadosGlobais[0]
+          .indexOf(turmaSelecionada);
+
+      if (idx === -1) return;
+
+      const valor =
+        (r[idx] || "").trim();
+
+      if (!valor) return;
+
+      mapa[horario] ||= {};
+
+      mapa[horario][nomeDia] = {
+
+        valor,
+        data
+
+      };
+
+      if (aulaValida(valor)) {
+
+        totais[nomeDia] ||= 0;
+
+        totais[nomeDia]++;
+
+      }
+
+    });
+
+  });
+
+  return { mapa, totais };
+
 }
 
 
@@ -101,160 +207,585 @@ function preencherSelectTurmas() {
 // ======================================================
 function renderTurma() {
 
-  const selectTurma =
-    document.getElementById("selectTurma");
-
-  const selectSemana =
-    document.getElementById("selectSemanaTurma");
-
-  const container =
-    document.getElementById("fichaTurma");
-
-  if (
-    !selectTurma ||
-    !selectSemana ||
-    !container
-  ) return;
+  const modalidade =
+    document.getElementById(
+      "selectModalidadeTurma"
+    )?.value || "";
 
   const turma =
-    selectTurma.value;
+    document.getElementById(
+      "selectTurmaFicha"
+    )?.value || "";
 
   const semana =
-    selectSemana.value;
+    document.getElementById(
+      "selectSemanaTurma"
+    )?.value || "";
 
-  if (!turma || !semana) {
-    container.innerHTML = "";
-    return;
-  }
+  preencherSelectTurmasFicha();
 
-  window.appState = window.appState || {};
+  if (
+    !modalidade ||
+    !turma ||
+    !semana
+  ) {
 
-  window.appState.semana = semana;
-
-  const registros =
-    gerarFichaTurma(turma);
-
-  if (!registros.length) {
-
-    container.innerHTML = `
-      <div style="
-        padding:20px;
-        background:white;
-        border-radius:10px;
-        box-shadow:0 2px 10px rgba(0,0,0,0.1);
-      ">
-        Nenhum horário encontrado.
-      </div>
-    `;
+    limparFichaTurma();
 
     return;
+
   }
+
+  // 🔥 sincroniza sistema
+  document.getElementById(
+    "selectModalidade"
+  ).value = modalidade;
+
+  document.getElementById(
+    "nomeTurmaFicha"
+  ).innerText = turma;
+
+  document.getElementById(
+    "semanaTurmaFicha"
+  ).innerText = semana;
+
+  const { mapa, totais } =
+    gerarMapaTurma(
+      turma,
+      semana
+    );
+
+  const diasRef =
+    semanasAgrupadas?.[semana]?.dias || {};
+
+  const nomesDias = [
+    "DOMINGO",
+    "SEGUNDA",
+    "TERÇA",
+    "QUARTA",
+    "QUINTA",
+    "SEXTA",
+    "SÁBADO"
+  ];
+
+  const diasSemana = [];
+
+  Object.keys(diasRef).forEach(data => {
+
+    const [d, m, a] =
+      data.split("/");
+
+    const dt =
+      new Date(a, m - 1, d);
+
+    const nomeDia =
+      nomesDias[dt.getDay()];
+
+    if (
+      !nomeDia ||
+      nomeDia === "DOMINGO"
+    ) return;
+
+    diasSemana.push({
+
+      chave: nomeDia,
+
+      label:
+        `${nomeDia}<br>${data}`
+
+    });
+
+  });
 
   let html = `
-    <div style="
-      background:white;
-      padding:20px;
-      border-radius:10px;
-      box-shadow:0 2px 10px rgba(0,0,0,0.1);
-      overflow:auto;
-    ">
+    <table>
 
-    <h2 style="margin-bottom:15px;">
-      🏫 TURMA: ${turma}
-    </h2>
+      <tr class="day-divider">
+        <td colspan="${diasSemana.length + 1}">
+          FICHA SEMANAL DA TURMA
+        </td>
+      </tr>
 
-    <table style="
-      width:100%;
-      border-collapse:collapse;
-      font-size:13px;
-    ">
-      <thead>
-        <tr style="background:#2e7d32;color:white;">
-          <th style="padding:10px;border:1px solid #ddd;">Dia</th>
-          <th style="padding:10px;border:1px solid #ddd;">Horário</th>
-          <th style="padding:10px;border:1px solid #ddd;">Aula</th>
-        </tr>
-      </thead>
+      <tr>
 
-      <tbody>
+        <th class="time-col">
+          Horário
+        </th>
   `;
 
-  registros.forEach(item => {
+  diasSemana.forEach(d => {
+
+    html += `<th>${d.label}</th>`;
+
+  });
+
+  html += `</tr>`;
+
+  HORARIOS_FICHA.forEach(horario => {
 
     html += `
       <tr>
-        <td style="padding:8px;border:1px solid #ddd;">
-          ${item.dia}
-        </td>
 
-        <td style="padding:8px;border:1px solid #ddd;">
-          ${item.horario}
+        <td class="time-col">
+          ${horario}
         </td>
-
-        <td style="padding:8px;border:1px solid #ddd;">
-          ${item.aula}
-        </td>
-      </tr>
     `;
+
+    diasSemana.forEach(d => {
+
+      const aula =
+        mapa?.[horario]?.[d.chave];
+
+      if (!aula) {
+
+        html += `
+          <td class="aula-cell"></td>
+        `;
+
+        return;
+
+      }
+
+      html += `
+        <td class="aula-cell">
+
+          <div style="
+            font-size:11px;
+            line-height:1.4;
+          ">
+            ${aula.valor || ""}
+          </div>
+
+        </td>
+      `;
+
+    });
+
+    html += `</tr>`;
+
   });
 
+  // 🔥 TOTAL
   html += `
-      </tbody>
-    </table>
-    </div>
+    <tr style="
+      background:
+      linear-gradient(
+        135deg,
+        rgba(34,197,94,0.18),
+        rgba(15,23,42,0.95)
+      );
+      font-weight:800;
+    ">
+
+      <td class="time-col">
+        TOTAL
+      </td>
   `;
 
-  container.innerHTML = html;
-}
+  diasSemana.forEach(d => {
 
+    html += `
+      <td class="aula-cell">
+        ${totais[d.chave] || 0}
+      </td>
+    `;
 
-// ======================================================
-// 🔥 EXPORTAR PDF TURMA
-// ======================================================
-function exportarPDFTurma() {
-
-  const turma =
-    document.getElementById("selectTurma")?.value;
-
-  if (!turma) return;
-
-  const registros =
-    gerarFichaTurma(turma);
-
-  if (!registros.length) {
-    alert("Nenhum dado encontrado.");
-    return;
-  }
-
-  const { jsPDF } = window.jspdf;
-
-  const pdf = new jsPDF();
-
-  pdf.setFontSize(16);
-
-  pdf.text(
-    `Ficha da Turma - ${turma}`,
-    14,
-    20
-  );
-
-  const body = registros.map(r => [
-    r.dia,
-    r.horario,
-    r.aula
-  ]);
-
-  pdf.autoTable({
-    startY: 30,
-
-    head: [[
-      "Dia",
-      "Horário",
-      "Aula"
-    ]],
-
-    body
   });
 
-  pdf.save(`turma_${turma}.pdf`);
+  html += `</tr></table>`;
+
+  document.getElementById(
+    "tabelaTurma"
+  ).innerHTML = html;
+
 }
+
+
+// ======================================================
+// 🔥 INIT
+// ======================================================
+window.addEventListener(
+  "DOMContentLoaded",
+  () => {
+
+    popularSemanasTurma();
+
+    renderTabelaTurmaVazia();
+
+  }
+);
+
+// ======================================================
+// 📄 EXPORTAR PDF TURMA
+// ======================================================
+async function exportarPDFTurma() {
+
+  try {
+
+    if (!window.jspdf?.jsPDF) {
+      console.error("❌ jsPDF não carregado.");
+      return;
+    }
+
+    const modalidade =
+      document.getElementById("selectModalidadeTurma")?.value || "";
+
+    const turma =
+      document.getElementById("selectTurmaFicha")?.value || "";
+
+    const semana =
+      document.getElementById("selectSemanaTurma")?.value || "";
+
+    if (!modalidade || !turma || !semana) {
+
+      alert(
+        "Selecione modalidade, turma e semana."
+      );
+
+      return;
+    }
+
+    const { jsPDF } = window.jspdf;
+
+    const pdf =
+      new jsPDF("p", "mm", "a4");
+
+    const diasRef =
+      semanasAgrupadas?.[semana]?.dias || {};
+
+    const nomesDias = [
+      "DOMINGO",
+      "SEGUNDA",
+      "TERÇA",
+      "QUARTA",
+      "QUINTA",
+      "SEXTA",
+      "SÁBADO"
+    ];
+
+    const diasSemana = [];
+
+    Object.keys(diasRef).forEach(data => {
+
+      const [d, m, a] =
+        data.split("/");
+
+      const dt =
+        new Date(a, m - 1, d);
+
+      const nomeDia =
+        nomesDias[dt.getDay()];
+
+      if (
+        !nomeDia ||
+        nomeDia === "DOMINGO"
+      ) return;
+
+      diasSemana.push({
+        chave: nomeDia,
+        data
+      });
+
+    });
+
+    // ======================================================
+    // 🔥 GERA MAPA
+    // ======================================================
+    const mapa = {};
+    const totaisDia = {};
+
+    const idxTurma =
+      dadosGlobais[0]
+        .indexOf(turma);
+
+    Object.keys(diasRef).forEach(data => {
+
+      const linhas =
+        diasRef[data] || [];
+
+      const [d, m, a] =
+        data.split("/");
+
+      const dt =
+        new Date(a, m - 1, d);
+
+      const nomeDia =
+        nomesDias[dt.getDay()];
+
+      linhas.forEach(r => {
+
+        const horario =
+          (r[1] || "").trim();
+
+        if (!horario) return;
+
+        const valor =
+          (r[idxTurma] || "").trim();
+
+        if (!valor) return;
+
+        mapa[horario] ||= {};
+
+        mapa[horario][nomeDia] = valor;
+
+        if (aulaValida(valor)) {
+
+          totaisDia[nomeDia] =
+            (totaisDia[nomeDia] || 0) + 1;
+
+        }
+
+      });
+
+    });
+
+    // ======================================================
+    // 🔥 LAYOUT
+    // ======================================================
+    const pageWidth =
+      pdf.internal.pageSize.getWidth();
+
+    const pageHeight =
+      pdf.internal.pageSize.getHeight();
+
+    const marginLeft = 4;
+    const marginRight = 4;
+
+    const usableWidth =
+      pageWidth - marginLeft - marginRight;
+
+    const firstColWidth = 18;
+
+    const otherColsWidth =
+      (usableWidth - firstColWidth)
+      / diasSemana.length;
+
+    // ======================================================
+    // 🔥 HEADER
+    // ======================================================
+    pdf.setFontSize(11);
+
+    pdf.text(
+      "INSTITUTO FEDERAL DE EDUCAÇÃO, CIÊNCIA E TECNOLOGIA DE RONDÔNIA - IFRO",
+      pageWidth / 2,
+      10,
+      { align: "center" }
+    );
+
+    pdf.setFontSize(10);
+
+    pdf.text(
+      "CAMPUS CACOAL - Departamento de Apoio ao Ensino",
+      pageWidth / 2,
+      15,
+      { align: "center" }
+    );
+
+    pdf.text(
+      "FICHA SEMANAL DA TURMA",
+      pageWidth / 2,
+      20,
+      { align: "center" }
+    );
+
+    pdf.text(
+      `Turma: ${turma} | Semana: ${semana} | Modalidade: ${modalidade}`,
+      pageWidth / 2,
+      25,
+      { align: "center" }
+    );
+
+    // ======================================================
+    // 🔥 HEAD
+    // ======================================================
+    const head = [[
+      "Horário",
+      ...diasSemana.map(
+        d => `${d.chave}\n${d.data}`
+      )
+    ]];
+
+    // ======================================================
+    // 🔥 BODY
+    // ======================================================
+    const body = [];
+
+    HORARIOS_FICHA.forEach(horario => {
+
+      const intervalo =
+        ehIntervalo(horario);
+
+      if (intervalo) {
+
+        body.push([
+          `${horario} - ${intervalo}`,
+          ...diasSemana.map(() => "")
+        ]);
+
+        return;
+      }
+
+      const linha = [horario];
+
+      diasSemana.forEach(dia => {
+
+        const valor =
+          mapa?.[horario]?.[dia.chave] || "";
+
+        linha.push(valor);
+
+      });
+
+      body.push(linha);
+
+    });
+
+    // ======================================================
+    // 🔥 TOTAL
+    // ======================================================
+    body.push([
+
+      "TOTAL DE AULAS",
+
+      ...diasSemana.map(
+        d => totaisDia[d.chave] || 0
+      )
+
+    ]);
+
+    // ======================================================
+    // 🔥 TABELA
+    // ======================================================
+    pdf.autoTable({
+
+      head,
+      body,
+
+      startY: 32,
+
+      margin: {
+        left: marginLeft,
+        right: marginRight
+      },
+
+      theme: "grid",
+
+      styles: {
+        fontSize: 6,
+        cellPadding: 2,
+        halign: "center",
+        valign: "middle"
+      },
+
+      headStyles: {
+        fillColor: [34, 197, 94],
+        textColor: 0,
+        fontStyle: "bold"
+      },
+
+      columnStyles: {
+        0: {
+          cellWidth: firstColWidth
+        },
+        1: {
+          cellWidth: otherColsWidth
+        },
+        2: {
+          cellWidth: otherColsWidth
+        },
+        3: {
+          cellWidth: otherColsWidth
+        },
+        4: {
+          cellWidth: otherColsWidth
+        },
+        5: {
+          cellWidth: otherColsWidth
+        },
+        6: {
+          cellWidth: otherColsWidth
+        }
+      },
+
+      didParseCell: (data) => {
+
+        const txt =
+          (data.cell.raw || "")
+            .toString();
+
+        if (
+          txt.includes("INTERVALO") ||
+          txt.includes("ALMOÇO") ||
+          txt.includes("JANTAR")
+        ) {
+
+          data.cell.styles.fillColor =
+            [235, 235, 235];
+
+          data.cell.styles.fontStyle =
+            "bold";
+        }
+
+        if (
+          txt.includes("TOTAL")
+        ) {
+
+          data.cell.styles.fillColor =
+            [200, 200, 200];
+
+          data.cell.styles.fontStyle =
+            "bold";
+        }
+
+      }
+
+    });
+
+    // ======================================================
+    // 🔥 FOOTER
+    // ======================================================
+    pdf.setFontSize(8);
+
+    pdf.text(
+      "IFRO - Campus Cacoal | BR 364, Km 228 | dape.cacoal@ifro.edu.br",
+      pageWidth / 2,
+      pageHeight - 8,
+      { align: "center" }
+    );
+
+    pdf.save(
+      `Ficha Turma ${turma} - ${semana}.pdf`
+    );
+
+  } catch (e) {
+
+    console.error(
+      "❌ Erro PDF turma:",
+      e
+    );
+
+    alert(
+      "Erro ao gerar PDF da turma."
+    );
+
+  }
+
+}
+
+// ======================================================
+// 🌎 EXPORTAÇÃO GLOBAL
+// ======================================================
+window.exportarPDFTurma =
+  exportarPDFTurma;
+
+// ======================================================
+// 🌎 EXPORTA
+// ======================================================
+window.renderTurma =
+  renderTurma;
+
+window.popularSemanasTurma =
+  popularSemanasTurma;
+
+window.preencherSelectTurmasFicha =
+  preencherSelectTurmasFicha;
