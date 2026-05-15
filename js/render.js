@@ -211,6 +211,9 @@ function abreviarTurma(nome) {
 // ======================================================
 // 🔥 RENDER PRINCIPAL
 // ======================================================
+// ======================================================
+// 🔥 RENDER PRINCIPAL
+// ======================================================
 function renderizarTabela() {
 
   const selectSemana =
@@ -232,9 +235,18 @@ function renderizarTabela() {
 
   if (!container) return;
 
+  // ======================================================
+  // 🔍 BUSCA PROFESSOR
+  // ======================================================
+  const busca =
+    normalizarTexto(
+      document.getElementById("searchProf")?.value || ""
+    );
+
   window.appState = window.appState || {};
 
   window.appState.semana = sem;
+
   window.appState.modalidade =
     selectModalidade.value;
 
@@ -256,12 +268,32 @@ function renderizarTabela() {
   let html = "";
 
   const regrasDestaque = [
-    { match: v => v.includes("RESERVA ENSINO"), classe: "reserva-ensino" },
-    { match: v => v.includes("PPS/ATENDIMENTO"), classe: "pps" },
-    { match: v => v.includes("ESTUDOS INDIVIDUAIS"), classe: "estudos" },
-    { match: v => v.includes("REUNIAO DE SERVIDORES"), classe: "reuniao" },
-    { match: v => v.includes("CAED") || v.includes("PRE-CONSELHO"), classe: "caed" },
-    { match: v => v.includes("_REP -"), classe: "reposicao" }
+    {
+      match: v => v.includes("RESERVA ENSINO"),
+      classe: "reserva-ensino"
+    },
+    {
+      match: v => v.includes("PPS/ATENDIMENTO"),
+      classe: "pps"
+    },
+    {
+      match: v => v.includes("ESTUDOS INDIVIDUAIS"),
+      classe: "estudos"
+    },
+    {
+      match: v => v.includes("REUNIAO DE SERVIDORES"),
+      classe: "reuniao"
+    },
+    {
+      match: v =>
+        v.includes("CAED") ||
+        v.includes("PRE-CONSELHO"),
+      classe: "caed"
+    },
+    {
+      match: v => v.includes("_REP -"),
+      classe: "reposicao"
+    }
   ];
 
   Object.keys(dias).forEach(dia => {
@@ -274,10 +306,17 @@ function renderizarTabela() {
       p[0]
     );
 
-    if (typeof isFeriado === "function" && isFeriado(dia)) {
+    // ======================================================
+    // 🔥 FERIADO
+    // ======================================================
+    if (
+      typeof isFeriado === "function" &&
+      isFeriado(dia)
+    ) {
 
       html += `
         <table>
+
           <tr class="day-divider">
             <td colspan="${turmasAtivas.length + 1}">
               ${nomes[dObj.getDay()]} - ${dia}
@@ -285,19 +324,48 @@ function renderizarTabela() {
           </tr>
 
           <tr>
-            <td colspan="${turmasAtivas.length + 1}" class="feriado">
+            <td
+              colspan="${turmasAtivas.length + 1}"
+              class="feriado"
+            >
               FERIADO
             </td>
           </tr>
+
         </table>
+
         <br>
       `;
 
       return;
     }
 
+    // ======================================================
+    // 🔍 FILTRO PROFESSOR
+    // ======================================================
+    const linhasOriginais = dias[dia];
+
+    let linhas = linhasOriginais.filter(r => {
+
+      if (!busca) return true;
+
+      return r.some(c =>
+        normalizarTexto(c || "")
+          .includes(busca)
+      );
+
+    });
+
+    // 🔥 não renderiza dia vazio
+    if (!linhas.length) {
+      return;
+    }
+
     html += `<table>`;
 
+    // ======================================================
+    // 🔥 CABEÇALHO DIA
+    // ======================================================
     html += `
       <tr class="day-divider">
         <td colspan="${turmasAtivas.length + 1}">
@@ -308,7 +376,10 @@ function renderizarTabela() {
 
     html += `
       <tr>
-        <th class="time-col">Horário</th>
+
+        <th class="time-col">
+          Horário
+        </th>
     `;
 
     turmasAtivas.forEach(t => {
@@ -325,8 +396,6 @@ function renderizarTabela() {
 
     html += `</tr>`;
 
-    let linhas = dias[dia];
-
     let i = 0;
 
     while (i < linhas.length) {
@@ -335,6 +404,9 @@ function renderizarTabela() {
 
       const horario = r[1] || "";
 
+      // ======================================================
+      // 🔥 EVENTO GERAL
+      // ======================================================
       const eventoGeral =
         typeof getEventoGeral === "function"
           ? getEventoGeral(dia, horario)
@@ -356,7 +428,9 @@ function renderizarTabela() {
 
           if (
             proxEvento === eventoGeral ||
-            proxHorario.toUpperCase().includes("INTERVALO")
+            proxHorario
+              .toUpperCase()
+              .includes("INTERVALO")
           ) {
             fim++;
           } else {
@@ -369,6 +443,7 @@ function renderizarTabela() {
 
         html += `
           <tr class="evento-geral">
+
             <td class="time-col">
               ${linhas[inicio][1]}
             </td>
@@ -380,6 +455,7 @@ function renderizarTabela() {
             >
               ${eventoGeral}
             </td>
+
           </tr>
         `;
 
@@ -388,6 +464,9 @@ function renderizarTabela() {
         continue;
       }
 
+      // ======================================================
+      // 🔥 LINHA
+      // ======================================================
       const isInt =
         horario.toUpperCase()
           .includes("INTERVALO");
@@ -397,7 +476,13 @@ function renderizarTabela() {
           .every(v => !v || !v.trim());
 
       html += `
-        <tr class="${isInt ? 'intervalo' : ''} ${linhaVazia ? 'linha-vazia' : ''}">
+        <tr
+          class="
+            ${isInt ? 'intervalo' : ''}
+            ${linhaVazia ? 'linha-vazia' : ''}
+          "
+        >
+
           <td class="time-col">
             ${horario}
           </td>
@@ -416,11 +501,15 @@ function renderizarTabela() {
         const valNorm =
           normalizarTexto(val);
 
+        // ======================================================
+        // 🔥 REGRAS VISUAIS
+        // ======================================================
         regrasDestaque.forEach(regra => {
 
           if (regra.match(valNorm)) {
             classesExtras.push(regra.classe);
           }
+
         });
 
         if (
@@ -432,8 +521,33 @@ function renderizarTabela() {
           classesExtras.push("marcacao-extra");
         }
 
+        // ======================================================
+        // 🔍 HIGHLIGHT BUSCA
+        // ======================================================
+        const contemBusca =
+          busca &&
+          valNorm.includes(busca);
+
+        if (busca) {
+
+          if (contemBusca) {
+
+            classesExtras.push("highlight");
+
+          } else {
+
+            classesExtras.push("opaco");
+          }
+        }
+
         html += `
-          <td class="aula-cell ${getCursoInfo(t).cl} ${classesExtras.join(" ")}">
+          <td
+            class="
+              aula-cell
+              ${getCursoInfo(t).cl}
+              ${classesExtras.join(" ")}
+            "
+          >
             ${val}
           </td>
         `;
@@ -447,17 +561,34 @@ function renderizarTabela() {
     html += `</table><br>`;
   });
 
+  // ======================================================
+  // 🔥 SEM RESULTADOS
+  // ======================================================
+  if (!html) {
+
+    html = `
+      <div style="
+        padding:20px;
+        border-radius:18px;
+        background:rgba(15,23,42,0.92);
+        text-align:center;
+        font-weight:700;
+        color:white;
+      ">
+        Nenhum professor encontrado.
+      </div>
+    `;
+  }
+
   container.innerHTML = html;
 
+  // ======================================================
+  // 🔥 RELATÓRIOS
+  // ======================================================
   if (typeof criarBotoesDias === "function") {
     criarBotoesDias();
   }
-
-  if (typeof filtrarProfessor === "function") {
-    filtrarProfessor();
-  }
 }
-
 
 // ======================================================
 // 🔥 COLETAR VAGAS
@@ -515,3 +646,9 @@ function coletarVagasDoDia(dia) {
 
   return vagas;
 }
+
+function filtrarProfessor() {
+  renderizarTabela();
+}
+
+window.filtrarProfessor = filtrarProfessor;
