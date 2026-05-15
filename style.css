@@ -665,9 +665,9 @@ th.time-col{
 
   color:#f8fafc;
 
-  font-size:12px;
+  font-size:9px;
 
-  line-height:1.55;
+  line-height:1.35;
 }
 
 .aula-cell:hover{
@@ -917,11 +917,11 @@ th.time-col{
   }
 
   .aula-cell{
-    font-size:12px;
+    font-size:9px;
   }
 
   th{
-    font-size:12px;
+    font-size:10px;
   }
 
   .time-col{
@@ -932,7 +932,7 @@ th.time-col{
 
     max-width:96px !important;
 
-    font-size:11px;
+    font-size:9px;
   }
 
   .day-divider td{
@@ -1013,7 +1013,7 @@ th.time-col{
 
     height:42px;
 
-    font-size:12px;
+    font-size:10px;
   }
 
   .btn-pdf{
