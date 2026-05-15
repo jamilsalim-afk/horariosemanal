@@ -289,7 +289,7 @@ function verificarMudancaAoAbrir({
 
 let alteracoes =
   compararMapas(
-    antigo?.mapa || {},
+    antigo?.m || {},
     mapaAtual
   );
 
