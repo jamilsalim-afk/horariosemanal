@@ -41,6 +41,9 @@
 // ===============================
 // 💾 SALVAR SNAPSHOT
 // ===============================
+// ===============================
+// 💾 SALVAR SNAPSHOT
+// ===============================
 function salvarSnapshotAtual() {
 
   try {
@@ -65,6 +68,9 @@ function salvarSnapshotAtual() {
       return;
     }
 
+    // 🔥 limpa snapshots antigos
+    limparSnapshotsAntigos();
+
     const chave = `snapshot_${mod}_${sem}`;
 
     const mapaOriginal =
@@ -78,36 +84,35 @@ function salvarSnapshotAtual() {
 
       mapaCompacto[k] = {
 
-        dia: item?.dia || "",
+        // 🔥 chaves compactas
+        d: item?.dia || "",
 
-        horario: item?.horario || "",
+        h: item?.horario || "",
 
-        turma: item?.turma || "",
+        t: item?.turma || "",
 
-        valorOriginal:
+        v:
           typeof normalizarTexto === "function"
-            ? normalizarTexto(item?.valorOriginal || "")
-            : String(item?.valorOriginal || "").trim(),
-
-        valorNormalizado:
-          typeof normalizarTexto === "function"
-            ? normalizarTexto(item?.valorNormalizado || "")
-            : String(item?.valorNormalizado || "").trim()
+            ? normalizarTexto(
+                item?.valorNormalizado ||
+                item?.valorOriginal ||
+                ""
+              )
+            : String(
+                item?.valorNormalizado ||
+                item?.valorOriginal ||
+                ""
+              ).trim()
 
       };
 
     });
 
     const snapshot = {
-
       tempo: Date.now(),
-
       mapa: mapaCompacto
-
     };
 
-    limparSnapshotsAntigos();
-    
     localStorage.setItem(
       chave,
       JSON.stringify(snapshot)
