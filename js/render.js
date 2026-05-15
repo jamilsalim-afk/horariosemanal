@@ -120,7 +120,7 @@ function processarDados() {
 
   // 🔥 ABA PROFESSOR
   if (typeof popularProfessores === "function") {
-    popularProfessores();
+    carregarProfessores();
   }
 
   if (typeof popularSemanasProfessor === "function") {
