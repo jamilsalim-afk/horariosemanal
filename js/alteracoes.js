@@ -166,6 +166,38 @@ function salvarSnapshotAtual() {
   }
 
 // ===============================
+// 🔥 FILTRAR ALTERAÇÕES FUTURAS
+// ===============================
+function filtrarAlteracoesSemanaAtual(lista = []) {
+
+  const hoje = new Date();
+
+  hoje.setHours(0, 0, 0, 0);
+
+  return lista.filter(item => {
+
+    if (!item?.dia) return false;
+
+    const p = item.dia.split('/');
+
+    if (p.length !== 3) return false;
+
+    const dataItem = new Date(
+      p[2],
+      p[1] - 1,
+      p[0]
+    );
+
+    dataItem.setHours(0, 0, 0, 0);
+
+    // 🔥 apenas hoje pra frente
+    return dataItem >= hoje;
+
+  });
+
+}
+  
+// ===============================
 // 🔥 VERIFICAR ALTERAÇÕES
 // ===============================
 function verificarMudancaAoAbrir({
@@ -263,11 +295,17 @@ function verificarMudancaAoAbrir({
       return;
     }
 
-    const alteracoes =
-      compararMapas(
-        antigo?.mapa || {},
-        mapaAtual
-      );
+let alteracoes =
+  compararMapas(
+    antigo?.mapa || {},
+    mapaAtual
+  );
+
+// 🔥 mantém apenas hoje em diante
+alteracoes =
+  filtrarAlteracoesSemanaAtual(
+    alteracoes
+  );
 
     console.log(
       "🔍 Alterações encontradas:",
