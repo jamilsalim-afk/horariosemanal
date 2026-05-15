@@ -145,19 +145,19 @@ function compararMapas(
 
     const todasChaves = new Set([
 
-      ...Object.keys(mapaAntigo || {}),
+      ...Object.keys(mapaAntigo),
 
-      ...Object.keys(mapaNovo || {})
+      ...Object.keys(mapaNovo)
 
     ]);
 
     todasChaves.forEach(chave => {
 
       const antigo =
-        mapaAntigo?.[chave];
+        mapaAntigo[chave];
 
       const novo =
-        mapaNovo?.[chave];
+        mapaNovo[chave];
 
       // ===============================
       // 🔴 REMOVIDO
@@ -168,15 +168,13 @@ function compararMapas(
 
           tipo: "REMOVIDO",
 
-          dia: antigo?.dia || "",
+          dia: antigo[0],
 
-          horario: antigo?.horario || "",
+          horario: antigo[1],
 
-          turma: antigo?.turma || "",
+          turma: antigo[2],
 
-          antes:
-            antigo?.valorOriginal ||
-            "(vazio)",
+          antes: antigo[3],
 
           depois: "(vazio)"
 
@@ -194,17 +192,15 @@ function compararMapas(
 
           tipo: "ADICIONADO",
 
-          dia: novo?.dia || "",
+          dia: novo[0],
 
-          horario: novo?.horario || "",
+          horario: novo[1],
 
-          turma: novo?.turma || "",
+          turma: novo[2],
 
           antes: "(vazio)",
 
-          depois:
-            novo?.valorOriginal ||
-            "(vazio)"
+          depois: novo[3]
 
         });
 
@@ -214,21 +210,14 @@ function compararMapas(
       // ===============================
       // 🟡 ALTERADO
       // ===============================
+      const valorAntigo =
+        antigo?.[3] || "";
 
-      // 🔥 compatibilidade total
-      const antigoValor =
-        antigo?.valorNormalizado ??
-        antigo?.valor ??
-        "";
-
-      const novoValor =
-        novo?.valorNormalizado ??
-        novo?.valor ??
-        "";
+      const valorNovo =
+        novo?.[3] || "";
 
       if (
-        String(antigoValor).trim() !==
-        String(novoValor).trim()
+        valorAntigo !== valorNovo
       ) {
 
         alteracoes.push({
@@ -236,29 +225,23 @@ function compararMapas(
           tipo: "ALTERADO",
 
           dia:
-            novo?.dia ||
-            antigo?.dia ||
+            novo?.[0] ||
+            antigo?.[0] ||
             "",
 
           horario:
-            novo?.horario ||
-            antigo?.horario ||
+            novo?.[1] ||
+            antigo?.[1] ||
             "",
 
           turma:
-            novo?.turma ||
-            antigo?.turma ||
+            novo?.[2] ||
+            antigo?.[2] ||
             "",
 
-          antes:
-            antigo?.valorOriginal ||
-            antigoValor ||
-            "(vazio)",
+          antes: valorAntigo,
 
-          depois:
-            novo?.valorOriginal ||
-            novoValor ||
-            "(vazio)"
+          depois: valorNovo
 
         });
 
