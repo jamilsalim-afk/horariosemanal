@@ -86,10 +86,39 @@ function renderSabados() {
 
   const sabados = obterSabadosSemana();
 
-  const turmasAtivas =
-    modalidade === "SUPERIOR"
-      ? getTurmasAtivasNaSemana(sabados)
-      : turmasDaPlanilha;
+  let turmasAtivas =
+  modalidade === "SUPERIOR"
+    ? getTurmasAtivasNaSemana(sabados)
+    : turmasDaPlanilha;
+
+
+// ======================================================
+// 🔥 FILTRO - OCULTAR COLUNAS SEM O PROFESSOR
+// ======================================================
+
+if (busca) {
+
+  turmasAtivas = turmasAtivas.filter(turma => {
+
+    const idx =
+      dadosGlobais[0].indexOf(turma);
+
+    return Object.values(sabados).some(linhas => {
+
+      return linhas.some(r => {
+
+        const val =
+          normalizarTexto(r[idx] || "");
+
+        return val.includes(busca);
+
+      });
+
+    });
+
+  });
+
+}
 
   let html = "";
 
