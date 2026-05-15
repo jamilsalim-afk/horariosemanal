@@ -41,25 +41,28 @@
 // ===============================
 // 💾 SALVAR SNAPSHOT
 // ===============================
-// ===============================
-// 💾 SALVAR SNAPSHOT
-// ===============================
-function salvarSnapshotAtual() {
+function salvarSnapshotAtual({
+  dados,
+  semana,
+  modalidade
+}) {
 
   try {
 
+    limparSnapshotsAntigos();
+
     const sem =
-      window.semanaAtual ||
+      semana ||
       document.getElementById("selectSemana")?.value;
 
     const mod =
-      window.modalidadeAtual ||
+      modalidade ||
       document.getElementById("selectModalidade")?.value;
 
     if (!sem || !mod) return;
 
-    if (!window.dadosGlobais) {
-      console.warn("⚠️ dadosGlobais não carregado.");
+    if (!dados) {
+      console.warn("⚠️ dados ausentes.");
       return;
     }
 
@@ -68,13 +71,12 @@ function salvarSnapshotAtual() {
       return;
     }
 
-    // 🔥 limpa snapshots antigos
-    limparSnapshotsAntigos();
+    const chave =
+      `snapshot_${mod}_${sem}`;
 
-    const chave = `snapshot_${mod}_${sem}`;
-
+    // 🔥 GERA DO MESMO DADO
     const mapaOriginal =
-      gerarMapaDados(window.dadosGlobais);
+      gerarMapaDados(dados);
 
     const mapaCompacto = {};
 
@@ -84,33 +86,31 @@ function salvarSnapshotAtual() {
 
       mapaCompacto[k] = {
 
-        // 🔥 chaves compactas
-        d: item?.dia || "",
+        dia:
+          item?.dia || "",
 
-        h: item?.horario || "",
+        horario:
+          item?.horario || "",
 
-        t: item?.turma || "",
+        turma:
+          item?.turma || "",
 
-        v:
-          typeof normalizarTexto === "function"
-            ? normalizarTexto(
-                item?.valorNormalizado ||
-                item?.valorOriginal ||
-                ""
-              )
-            : String(
-                item?.valorNormalizado ||
-                item?.valorOriginal ||
-                ""
-              ).trim()
+        valorOriginal:
+          item?.valorOriginal || "",
+
+        valorNormalizado:
+          item?.valorNormalizado || ""
 
       };
 
     });
 
     const snapshot = {
+
       tempo: Date.now(),
+
       mapa: mapaCompacto
+
     };
 
     localStorage.setItem(
@@ -118,7 +118,10 @@ function salvarSnapshotAtual() {
       JSON.stringify(snapshot)
     );
 
-    console.log("💾 Snapshot salvo:", chave);
+    console.log(
+      "💾 Snapshot salvo:",
+      chave
+    );
 
   } catch (e) {
 
@@ -126,14 +129,6 @@ function salvarSnapshotAtual() {
       "⚠️ Erro ao salvar snapshot:",
       e
     );
-
-    try {
-
-      Object.keys(localStorage)
-        .filter(k => k.startsWith("snapshot_"))
-        .forEach(k => localStorage.removeItem(k));
-
-    } catch (_) {}
 
   }
 
