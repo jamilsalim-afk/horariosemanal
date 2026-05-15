@@ -950,78 +950,57 @@ th.time-col{
 
 @media(max-width:768px){
 
-  /* ================= HEADER ================= */
+  /* HEADER MENOR */
 
   .ifro-header-content{
-    padding:16px 12px 12px;
+
+    padding:10px 10px 8px;
   }
 
-  .ifro-linha1,
-  .ifro-linha3{
+  .ifro-linha1{
+
     display:none;
   }
 
   .ifro-linha2{
 
-    font-size:28px;
+    font-size:19px;
 
-    line-height:1.1;
+    line-height:1.2;
+  }
 
-    font-weight:900;
+  .ifro-linha3{
+
+    display:none;
   }
 
   .ifro-linha4{
 
-    margin-top:10px;
+    margin-top:8px;
 
-    padding:10px 18px;
+    padding:7px 12px;
 
-    font-size:14px;
-
-    font-weight:800;
+    font-size:10px;
   }
 
-  /* ================= ABAS ================= */
+  /* CONTROLES FIXOS */
 
-  .tabs{
+  .header-sticky{
+
+    padding:6px;
+  }
+
+  .controls-card{
+
+    display:grid;
+
+    grid-template-columns:1fr 1fr;
 
     gap:8px;
 
     padding:10px;
 
-    overflow-x:auto;
-
-    flex-wrap:nowrap;
-
-    justify-content:flex-start;
-  }
-
-  .tab{
-
-    flex:none;
-
-    min-width:100px;
-
-    text-align:center;
-
-    font-size:13px;
-
-    padding:11px 14px;
-  }
-
-  /* ================= CONTROLES ================= */
-
-  .controls-card{
-
-    display:flex;
-
-    flex-direction:column;
-
-    gap:12px;
-
-    padding:14px;
-
-    border-radius:20px;
+    border-radius:18px;
   }
 
   select,
@@ -1032,103 +1011,79 @@ th.time-col{
 
     min-width:unset;
 
-    height:52px;
+    height:42px;
 
-    font-size:15px;
-
-    border-radius:16px;
+    font-size:12px;
   }
 
-  /* ================= BOTÕES ================= */
+  .btn-pdf{
 
-  #botoesRelatorio > div{
-
-    display:grid;
-
-    grid-template-columns:1fr 1fr;
-
-    gap:10px;
+    grid-column:span 2;
   }
 
-  #botoesRelatorio button{
-
-    width:100%;
-
-    height:50px;
-
-    font-size:14px;
-  }
-
-  /* ================= TABELA ================= */
+  /* TABELA */
 
   .table-responsive{
+
     padding:8px;
   }
 
   th,
   td{
 
-    width:165px;
+    width:110px;
 
-    min-width:165px;
+    min-width:110px;
 
-    max-width:165px;
+    max-width:110px;
 
-    padding:10px 8px;
+    padding:5px 4px;
   }
 
   .aula-cell{
 
-    font-size:13px;
+    font-size:8px;
 
-    line-height:1.5;
+    line-height:1.3;
   }
 
   th{
 
-    font-size:12px;
-
-    line-height:1.4;
+    font-size:8px;
   }
 
   .time-col{
 
-    width:92px !important;
+    width:68px !important;
 
-    min-width:92px !important;
+    min-width:68px !important;
 
-    max-width:92px !important;
+    max-width:68px !important;
 
-    font-size:11px;
+    font-size:7px;
   }
 
   .day-divider td{
 
-    font-size:15px;
+    font-size:11px;
 
-    padding:14px;
-  }
-
-  /* ================= EVENTOS ================= */
-
-  .evento-bloco{
-    font-size:16px;
+    padding:10px;
   }
 
   .feriado{
 
-    font-size:32px;
+    font-size:26px;
 
-    height:130px;
+    letter-spacing:3px;
+
+    height:120px;
   }
-
-  /* ================= FOOTER ================= */
 
   .ifro-footer{
 
-    font-size:12px;
+    font-size:11px;
 
-    line-height:1.6;
+    line-height:1.5;
   }
 }
 
