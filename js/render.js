@@ -260,11 +260,6 @@ function renderizarTabela() {
 // 🔥 FILTRO PROFESSOR (OCULTAR COLUNAS)
 // ======================================================
 
-const busca =
-  normalizarTexto(
-    document.getElementById("searchProf")?.value || ""
-  );
-
 if (busca) {
 
   turmasAtivas = turmasAtivas.filter(turma => {
