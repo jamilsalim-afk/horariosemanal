@@ -41,40 +41,43 @@
 // ===============================
 // 💾 SALVAR SNAPSHOT
 // ===============================
-function salvarSnapshotAtual({
-  dados,
-  semana,
-  modalidade
-}) {
+function salvarSnapshotAtual(config = {}) {
 
   try {
 
     limparSnapshotsAntigos();
 
+    const dados =
+      config.dados ||
+      window.dadosGlobais;
+
     const sem =
-      semana ||
+      config.semana ||
+      window.semanaAtual ||
       document.getElementById("selectSemana")?.value;
 
     const mod =
-      modalidade ||
+      config.modalidade ||
+      window.modalidadeAtual ||
       document.getElementById("selectModalidade")?.value;
 
-    if (!sem || !mod) return;
-
-    if (!dados) {
-      console.warn("⚠️ dados ausentes.");
+    if (!sem || !mod || !dados) {
+      console.warn(
+        "⚠️ Dados insuficientes para snapshot."
+      );
       return;
     }
 
     if (typeof gerarMapaDados !== "function") {
-      console.warn("⚠️ gerarMapaDados não encontrado.");
+      console.warn(
+        "⚠️ gerarMapaDados não encontrado."
+      );
       return;
     }
 
     const chave =
       `snapshot_${mod}_${sem}`;
 
-    // 🔥 GERA DO MESMO DADO
     const mapaOriginal =
       gerarMapaDados(dados);
 
