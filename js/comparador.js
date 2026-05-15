@@ -131,10 +131,6 @@
     return mapa;
   }
 
-
-  // ===============================
-  // ⚖️ COMPARAÇÃO DE MAPAS
-  // ===============================
 // ===============================
 // ⚖️ COMPARAÇÃO DE MAPAS
 // ===============================
@@ -172,14 +168,15 @@ function compararMapas(
 
           tipo: "REMOVIDO",
 
-          dia: antigo?.d || "",
+          dia: antigo?.dia || "",
 
-          horario: antigo?.h || "",
+          horario: antigo?.horario || "",
 
-          turma: antigo?.t || "",
+          turma: antigo?.turma || "",
 
           antes:
-            antigo?.v || "(vazio)",
+            antigo?.valorOriginal ||
+            "(vazio)",
 
           depois: "(vazio)"
 
@@ -197,16 +194,17 @@ function compararMapas(
 
           tipo: "ADICIONADO",
 
-          dia: novo?.d || "",
+          dia: novo?.dia || "",
 
-          horario: novo?.h || "",
+          horario: novo?.horario || "",
 
-          turma: novo?.t || "",
+          turma: novo?.turma || "",
 
           antes: "(vazio)",
 
           depois:
-            novo?.v || "(vazio)"
+            novo?.valorOriginal ||
+            "(vazio)"
 
         });
 
@@ -216,43 +214,50 @@ function compararMapas(
       // ===============================
       // 🟡 ALTERADO
       // ===============================
+
+      // 🔥 compatibilidade total
       const antigoValor =
-        normalizarTexto(
-          antigo?.v || ""
-        );
+        antigo?.valorNormalizado ??
+        antigo?.valor ??
+        "";
 
       const novoValor =
-        normalizarTexto(
-          novo?.v || ""
-        );
+        novo?.valorNormalizado ??
+        novo?.valor ??
+        "";
 
-      if (antigoValor !== novoValor) {
+      if (
+        String(antigoValor).trim() !==
+        String(novoValor).trim()
+      ) {
 
         alteracoes.push({
 
           tipo: "ALTERADO",
 
           dia:
-            novo?.d ||
-            antigo?.d ||
+            novo?.dia ||
+            antigo?.dia ||
             "",
 
           horario:
-            novo?.h ||
-            antigo?.h ||
+            novo?.horario ||
+            antigo?.horario ||
             "",
 
           turma:
-            novo?.t ||
-            antigo?.t ||
+            novo?.turma ||
+            antigo?.turma ||
             "",
 
           antes:
-            antigo?.v ||
+            antigo?.valorOriginal ||
+            antigoValor ||
             "(vazio)",
 
           depois:
-            novo?.v ||
+            novo?.valorOriginal ||
+            novoValor ||
             "(vazio)"
 
         });
@@ -272,8 +277,7 @@ function compararMapas(
 
   return alteracoes;
 }
-
-
+  
   // ===============================
   // 🌎 EXPORTAÇÃO GLOBAL
   // ===============================
