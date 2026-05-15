@@ -232,7 +232,8 @@
       if (typeof init === "function") {
 
         await init();
-
+carregarBaseUnificada()
+        
       }
 
       // 🔥 abre aba inicial
