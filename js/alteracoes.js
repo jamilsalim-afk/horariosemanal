@@ -106,6 +106,8 @@ function salvarSnapshotAtual() {
 
     };
 
+    limparSnapshotsAntigos();
+    
     localStorage.setItem(
       chave,
       JSON.stringify(snapshot)
@@ -132,10 +134,9 @@ function salvarSnapshotAtual() {
 
 }
 
-
-  // ===============================
-  // 📥 OBTER SNAPSHOT
-  // ===============================
+// ===============================
+// 📥 OBTER SNAPSHOT
+// ===============================
   function obterSnapshotAntigo() {
 
     try {
@@ -379,6 +380,57 @@ alteracoes =
 
   }
 
+  // ===============================
+// 🔥 LIMPAR SNAPSHOTS ANTIGOS
+// ===============================
+function limparSnapshotsAntigos() {
+
+  try {
+
+    const semanaAtual =
+      document.getElementById("selectSemana")?.value;
+
+    const modalidadeAtual =
+      document.getElementById("selectModalidade")?.value;
+
+    if (!semanaAtual || !modalidadeAtual) {
+      return;
+    }
+
+    Object.keys(localStorage).forEach(chave => {
+
+      // 🔥 não é snapshot
+      if (!chave.startsWith("snapshot_")) {
+        return;
+      }
+
+      // 🔥 mantém apenas semana/modalidade atual
+      const chaveAtual =
+        `snapshot_${modalidadeAtual}_${semanaAtual}`;
+
+      if (chave !== chaveAtual) {
+
+        localStorage.removeItem(chave);
+
+        console.log(
+          "🗑️ Snapshot removido:",
+          chave
+        );
+
+      }
+
+    });
+
+  } catch (e) {
+
+    console.warn(
+      "⚠️ Erro ao limpar snapshots:",
+      e
+    );
+
+  }
+
+}
 
   // ===============================
   // ❌ FECHAR
