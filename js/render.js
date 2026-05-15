@@ -250,10 +250,44 @@ function renderizarTabela() {
   window.appState.modalidade =
     selectModalidade.value;
 
-  const turmasAtivas =
-    selectModalidade.value === "SUPERIOR"
-      ? getTurmasAtivasNaSemana(dias)
-      : turmasDaPlanilha;
+  let turmasAtivas =
+  selectModalidade.value === "SUPERIOR"
+    ? getTurmasAtivasNaSemana(dias)
+    : turmasDaPlanilha;
+
+
+// ======================================================
+// 🔥 FILTRO PROFESSOR (OCULTAR COLUNAS)
+// ======================================================
+
+const busca =
+  normalizarTexto(
+    document.getElementById("searchProf")?.value || ""
+  );
+
+if (busca) {
+
+  turmasAtivas = turmasAtivas.filter(turma => {
+
+    const idx =
+      dadosGlobais[0].indexOf(turma);
+
+    return Object.values(dias).some(linhas => {
+
+      return linhas.some(r => {
+
+        const val =
+          normalizarTexto(r[idx] || "");
+
+        return val.includes(busca);
+
+      });
+
+    });
+
+  });
+
+}
 
   const nomes = [
     "DOMINGO",
