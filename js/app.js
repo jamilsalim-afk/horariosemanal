@@ -552,6 +552,19 @@ async function carregarBaseUnificada() {
 }
 
 // ===============================
+// 🧹 LIMPAR SNAPSHOTS
+// ===============================
+function limparSnapshots() {
+
+  Object.keys(localStorage)
+    .filter(k => k.startsWith("snapshot_"))
+    .forEach(k => localStorage.removeItem(k));
+
+  console.log("🧹 Snapshots removidos.");
+
+}
+
+// ===============================
 // 🌎 EXPORTAÇÃO GLOBAL
 // ===============================
 window.SHEETS = SHEETS;
