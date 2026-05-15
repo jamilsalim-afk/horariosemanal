@@ -61,14 +61,14 @@ function preencherSelectTurmasFicha() {
 // ======================================================
 // 🔥 POPULAR SEMANAS
 // ======================================================
-function popularSemanasTurma() {
+function popularSemanasTurma(){
 
   const select =
     document.getElementById(
       "selectSemanaTurma"
     );
 
-  if (!select) return;
+  if(!select) return;
 
   select.innerHTML =
     `<option value="">Selecione a semana</option>`;
@@ -85,11 +85,8 @@ function popularSemanasTurma() {
         Semana de ${sem}
       </option>
     `;
-
   });
-
 }
-
 
 // ======================================================
 // 🔥 LIMPAR FICHA
