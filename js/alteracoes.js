@@ -38,84 +38,99 @@
     return normalizarTexto(t1) !== normalizarTexto(t2);
   }
 
+// ===============================
+// 💾 SALVAR SNAPSHOT
+// ===============================
+function salvarSnapshotAtual() {
 
-  // ===============================
-  // 💾 SALVAR SNAPSHOT
-  // ===============================
-  function salvarSnapshotAtual() {
+  try {
 
-    try {
+    const sem =
+      window.semanaAtual ||
+      document.getElementById("selectSemana")?.value;
 
-      const sem =
-        window.semanaAtual ||
-        document.getElementById("selectSemana")?.value;
+    const mod =
+      window.modalidadeAtual ||
+      document.getElementById("selectModalidade")?.value;
 
-      const mod =
-        window.modalidadeAtual ||
-        document.getElementById("selectModalidade")?.value;
+    if (!sem || !mod) return;
 
-      if (!sem || !mod) return;
+    if (!window.dadosGlobais) {
+      console.warn("⚠️ dadosGlobais não carregado.");
+      return;
+    }
 
-      if (!window.dadosGlobais) {
-        console.warn("⚠️ dadosGlobais não carregado.");
-        return;
-      }
+    if (typeof gerarMapaDados !== "function") {
+      console.warn("⚠️ gerarMapaDados não encontrado.");
+      return;
+    }
 
-      if (typeof gerarMapaDados !== "function") {
-        console.warn("⚠️ gerarMapaDados não encontrado.");
-        return;
-      }
+    const chave = `snapshot_${mod}_${sem}`;
 
-      const chave = `snapshot_${mod}_${sem}`;
+    const mapaOriginal =
+      gerarMapaDados(window.dadosGlobais);
 
-      const mapaOriginal = gerarMapaDados(window.dadosGlobais);
+    const mapaCompacto = {};
 
-      const mapaCompacto = {};
+    Object.keys(mapaOriginal).forEach(k => {
 
-      Object.keys(mapaOriginal).forEach(k => {
+      const item = mapaOriginal[k];
 
-        const item = mapaOriginal[k];
+      mapaCompacto[k] = {
 
-        mapaCompacto[k] = {
-          dia: item?.dia || "",
-          horario: item?.horario || "",
-          turma: item?.turma || "",
-          valorOriginal: typeof normalizarTexto === "function"
+        dia: item?.dia || "",
+
+        horario: item?.horario || "",
+
+        turma: item?.turma || "",
+
+        valorOriginal:
+          typeof normalizarTexto === "function"
             ? normalizarTexto(item?.valorOriginal || "")
             : String(item?.valorOriginal || "").trim(),
 
-          valorNormalizado: typeof normalizarTexto === "function"
+        valorNormalizado:
+          typeof normalizarTexto === "function"
             ? normalizarTexto(item?.valorNormalizado || "")
             : String(item?.valorNormalizado || "").trim()
-        };
 
-      });
-
-      const snapshot = {
-        tempo: Date.now(),
-        mapa: mapaCompacto
       };
 
-      localStorage.setItem(
-        chave,
-        JSON.stringify(snapshot)
-      );
+    });
 
-    } catch (e) {
+    const snapshot = {
 
-      console.warn("⚠️ Erro ao salvar snapshot:", e);
+      tempo: Date.now(),
 
-      try {
+      mapa: mapaCompacto
 
-        Object.keys(localStorage)
-          .filter(k => k.startsWith("snapshot_"))
-          .forEach(k => localStorage.removeItem(k));
+    };
 
-      } catch (_) {}
+    localStorage.setItem(
+      chave,
+      JSON.stringify(snapshot)
+    );
 
-    }
+    console.log("💾 Snapshot salvo:", chave);
+
+  } catch (e) {
+
+    console.warn(
+      "⚠️ Erro ao salvar snapshot:",
+      e
+    );
+
+    try {
+
+      Object.keys(localStorage)
+        .filter(k => k.startsWith("snapshot_"))
+        .forEach(k => localStorage.removeItem(k));
+
+    } catch (_) {}
 
   }
+
+}
 
 
   // ===============================
@@ -150,123 +165,139 @@
 
   }
 
+// ===============================
+// 🔥 VERIFICAR ALTERAÇÕES
+// ===============================
+function verificarMudancaAoAbrir({
+  dados,
+  getSemana,
+  getModalidade
+}) {
 
-  // ===============================
-  // 🔥 VERIFICAR ALTERAÇÕES
-  // ===============================
-  function verificarMudancaAoAbrir({
-    dados,
-    getSemana,
-    getModalidade
-  }) {
+  try {
 
-    try {
+    // 🔥 trava fora da aba horários
+    if (
+      window.abaAtiva &&
+      window.abaAtiva !== "horarios"
+    ) {
+      return;
+    }
 
-      // 🔥 trava fora da aba horários
-      if (
-        window.abaAtiva &&
-        window.abaAtiva !== "horarios"
-      ) {
-        return;
-      }
+    if (!dados) return;
 
-      if (!dados) return;
+    if (typeof gerarMapaDados !== "function") {
+      console.warn("⚠️ gerarMapaDados não encontrado.");
+      return;
+    }
 
-      if (typeof gerarMapaDados !== "function") {
-        console.warn("⚠️ gerarMapaDados não encontrado.");
-        return;
-      }
+    if (typeof compararMapas !== "function") {
+      console.warn("⚠️ compararMapas não encontrado.");
+      return;
+    }
 
-      if (typeof compararMapas !== "function") {
-        console.warn("⚠️ compararMapas não encontrado.");
-        return;
-      }
+    const sem = getSemana?.();
 
-      const sem = getSemana?.();
+    const mod = getModalidade?.();
 
-      const mod = getModalidade?.();
+    if (!sem || !mod) return;
 
-      if (!sem || !mod) return;
+    const chave = `snapshot_${mod}_${sem}`;
 
-      const semanaAtual = obterSemanaAtual();
+    const antigoRaw =
+      localStorage.getItem(chave);
 
-      // 🔥 mantém sua lógica original
-      if (sem !== semanaAtual) return;
+    const mapaNovo =
+      gerarMapaDados(dados);
 
-      const chave = `snapshot_${mod}_${sem}`;
+    const mapaAtual = {};
 
-      const antigoRaw = localStorage.getItem(chave);
+    Object.keys(mapaNovo).forEach(k => {
 
-      const mapaNovo = gerarMapaDados(dados);
+      const item = mapaNovo[k];
 
-      const mapaAtual = {};
+      mapaAtual[k] = {
 
-      Object.keys(mapaNovo).forEach(k => {
+        dia: item?.dia || "",
 
-        const item = mapaNovo[k];
+        horario: item?.horario || "",
 
-        mapaAtual[k] = {
-          dia: item?.dia || "",
-          horario: item?.horario || "",
-          turma: item?.turma || "",
-          valor: typeof normalizarTexto === "function"
+        turma: item?.turma || "",
+
+        valorOriginal:
+          typeof normalizarTexto === "function"
+            ? normalizarTexto(item?.valorOriginal || "")
+            : String(item?.valorOriginal || "").trim(),
+
+        valorNormalizado:
+          typeof normalizarTexto === "function"
             ? normalizarTexto(item?.valorNormalizado || "")
             : String(item?.valorNormalizado || "").trim()
-        };
 
-      });
+      };
 
-      // 🔥 primeira abertura
-      if (!antigoRaw) {
+    });
 
-        salvarSnapshotAtual();
-
-        console.log("📌 Primeira abertura: snapshot criado.");
-
-        return;
-      }
-
-      let antigo;
-
-      try {
-
-        antigo = JSON.parse(antigoRaw);
-
-      } catch (_) {
-
-        salvarSnapshotAtual();
-
-        return;
-      }
-
-      const alteracoes =
-        compararMapas(
-          antigo?.mapa || {},
-          mapaAtual
-        );
-
-      if (
-        Array.isArray(alteracoes) &&
-        alteracoes.length > 0
-      ) {
-
-        mostrarAvisoAlteracoesRobusto(alteracoes);
-
-      }
+    // 🔥 primeira abertura
+    if (!antigoRaw) {
 
       salvarSnapshotAtual();
 
-    } catch (e) {
+      console.log(
+        "📌 Primeira abertura: snapshot criado."
+      );
 
-      console.warn(
-        "⚠️ Erro em verificarMudancaAoAbrir:",
-        e
+      return;
+    }
+
+    let antigo;
+
+    try {
+
+      antigo = JSON.parse(antigoRaw);
+
+    } catch (_) {
+
+      salvarSnapshotAtual();
+
+      return;
+    }
+
+    const alteracoes =
+      compararMapas(
+        antigo?.mapa || {},
+        mapaAtual
+      );
+
+    console.log(
+      "🔍 Alterações encontradas:",
+      alteracoes
+    );
+
+    if (
+      Array.isArray(alteracoes) &&
+      alteracoes.length > 0
+    ) {
+
+      mostrarAvisoAlteracoesRobusto(
+        alteracoes
       );
 
     }
 
+    // 🔥 atualiza snapshot
+    salvarSnapshotAtual();
+
+  } catch (e) {
+
+    console.warn(
+      "⚠️ Erro em verificarMudancaAoAbrir:",
+      e
+    );
+
   }
 
+}
 
   // ===============================
   // ⚠️ MOSTRAR AVISO
