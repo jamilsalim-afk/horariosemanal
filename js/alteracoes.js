@@ -72,8 +72,26 @@ function salvarSnapshotAtual(config = {}) {
     const chave =
       `snapshot_${mod}_${sem}`;
 
-    const mapaOriginal =
-      gerarMapaDados(dados);
+    // 🔥 DADOS APENAS DA SEMANA SELECIONADA
+const diasSemana =
+  semanasAgrupadas?.[sem]?.dias || {};
+
+const dadosSemana = [
+  dados[0] // cabeçalho
+];
+
+Object.values(diasSemana).forEach(linhas => {
+
+  linhas.forEach(l => {
+
+    dadosSemana.push(l);
+
+  });
+
+});
+
+const mapaOriginal =
+  gerarMapaDados(dadosSemana);
 
     // 🔥 SNAPSHOT SUPER COMPACTO
     const mapaCompacto = {};
