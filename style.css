@@ -44,7 +44,6 @@ body{
    HEADER PRINCIPAL
 ========================================= */
 
-.ifro-header,
 .ifro-header{
 
   position:relative;
@@ -1091,63 +1090,59 @@ th.time-col{
    MOBILE PEQUENO
 ========================================= */
 
-/* =========================================
-   MOBILE PEQUENO
-========================================= */
-
 @media(max-width:480px){
 
   .ifro-linha2{
-    font-size:34px;
+    font-size:18px;
   }
 
   .ifro-linha4{
 
-    font-size:17px;
+    font-size:9px;
 
-    padding:12px 22px;
+    padding:6px 10px;
   }
 
   select,
   .search-box,
   .btn-pdf{
 
-    height:58px;
+    height:40px;
 
-    font-size:18px;
+    font-size:10px;
   }
 
   th,
   td{
 
-    width:200px;
+    width:105px;
 
-    min-width:200px;
+    min-width:105px;
 
-    max-width:200px;
+    max-width:105px;
   }
 
   .aula-cell{
-    font-size:16px;
+    font-size:7px;
   }
 
   th{
-    font-size:15px;
+    font-size:7px;
   }
 
   .time-col{
 
-    width:110px !important;
+    width:64px !important;
 
-    min-width:110px !important;
+    min-width:64px !important;
 
-    max-width:110px !important;
+    max-width:64px !important;
 
-    font-size:14px;
+    font-size:6px;
   }
 
   .day-divider td{
-    font-size:18px;
+    font-size:10px;
   }
 
   #botoesRelatorio > div{
