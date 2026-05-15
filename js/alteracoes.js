@@ -62,16 +62,10 @@ function salvarSnapshotAtual(config = {}) {
       document.getElementById("selectModalidade")?.value;
 
     if (!sem || !mod || !dados) {
-      console.warn(
-        "⚠️ Dados insuficientes para snapshot."
-      );
       return;
     }
 
     if (typeof gerarMapaDados !== "function") {
-      console.warn(
-        "⚠️ gerarMapaDados não encontrado."
-      );
       return;
     }
 
@@ -81,38 +75,32 @@ function salvarSnapshotAtual(config = {}) {
     const mapaOriginal =
       gerarMapaDados(dados);
 
+    // 🔥 SNAPSHOT SUPER COMPACTO
     const mapaCompacto = {};
 
     Object.keys(mapaOriginal).forEach(k => {
 
       const item = mapaOriginal[k];
 
-      mapaCompacto[k] = {
+      mapaCompacto[k] = [
 
-        dia:
-          item?.dia || "",
+        item?.dia || "",
 
-        horario:
-          item?.horario || "",
+        item?.horario || "",
 
-        turma:
-          item?.turma || "",
+        item?.turma || "",
 
-        valorOriginal:
-          item?.valorOriginal || "",
+        item?.valorNormalizado || ""
 
-        valorNormalizado:
-          item?.valorNormalizado || ""
-
-      };
+      ];
 
     });
 
     const snapshot = {
 
-      tempo: Date.now(),
+      t: Date.now(),
 
-      mapa: mapaCompacto
+      m: mapaCompacto
 
     };
 
