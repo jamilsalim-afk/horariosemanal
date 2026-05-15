@@ -147,7 +147,7 @@ if (busca) {
 
     if (!linhas.length) return;
 
-    html += `<table class="sabado-table">`;
+    html += `<table>`;
 
     html += `
       <tr class="day-divider">
