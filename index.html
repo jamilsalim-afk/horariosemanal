@@ -364,17 +364,31 @@ placeholder="🔍 Buscar Professor..." onkeyup="filtrarProfessor();">
 
   <div class="controls-card">
 
-    <select id="selectTurma" onchange="renderTurma()"></select>
+   <select id="selectModalidadeTurma" onchange="renderTurma()">
+  <option value="">Modalidade</option>
+  <option value="INTEGRADO">INTEGRADO</option>
+  <option value="SUPERIOR">SUPERIOR</option>
+</select>
 
-    <select id="selectSemanaTurma" onchange="renderTurma()"></select>
+<select id="selectTurmaFicha" onchange="renderTurma()">
+  <option value="">Selecione a turma</option>
+</select>
 
-    <button class="btn-pdf" onclick="exportarPDFTurma()">
+<select id="selectSemanaTurma" onchange="renderTurma()">
+  <option value="">Selecione a semana</option>
+</select>
+
+<button class="btn-pdf" onclick="exportarPDFTurma()">
       📄 PDF Turma
     </button>
 
   </div>
 
-  <div id="fichaTurma"></div>
+<div id="nomeTurmaFicha">—</div>
+
+<div id="semanaTurmaFicha">—</div>
+
+<div id="tabelaTurma"></div>
 
 </section>
 
