@@ -135,134 +135,143 @@
   // ===============================
   // ⚖️ COMPARAÇÃO DE MAPAS
   // ===============================
-  function compararMapas(
-    mapaAntigo = {},
-    mapaNovo = {}
-  ) {
+// ===============================
+// ⚖️ COMPARAÇÃO DE MAPAS
+// ===============================
+function compararMapas(
+  mapaAntigo = {},
+  mapaNovo = {}
+) {
 
-    const alteracoes = [];
+  const alteracoes = [];
 
-    try {
+  try {
 
-      const todasChaves = new Set([
+    const todasChaves = new Set([
 
-        ...Object.keys(mapaAntigo || {}),
+      ...Object.keys(mapaAntigo || {}),
 
-        ...Object.keys(mapaNovo || {})
+      ...Object.keys(mapaNovo || {})
 
-      ]);
+    ]);
 
-      todasChaves.forEach(chave => {
+    todasChaves.forEach(chave => {
 
-        const antigo = mapaAntigo?.[chave];
+      const antigo =
+        mapaAntigo?.[chave];
 
-        const novo = mapaNovo?.[chave];
+      const novo =
+        mapaNovo?.[chave];
 
-        // ===============================
-        // 🔴 REMOVIDO
-        // ===============================
-        if (antigo && !novo) {
+      // ===============================
+      // 🔴 REMOVIDO
+      // ===============================
+      if (antigo && !novo) {
 
-          alteracoes.push({
+        alteracoes.push({
 
-            tipo: "REMOVIDO",
+          tipo: "REMOVIDO",
 
-            dia: antigo?.dia || "",
+          dia: antigo?.d || "",
 
-            horario: antigo?.horario || "",
+          horario: antigo?.h || "",
 
-            turma: antigo?.turma || "",
+          turma: antigo?.t || "",
 
-            antes:
-              antigo?.valorOriginal || "(vazio)",
+          antes:
+            antigo?.v || "(vazio)",
 
-            depois: "(vazio)"
+          depois: "(vazio)"
 
-          });
+        });
 
-          return;
-        }
+        return;
+      }
 
-        // ===============================
-        // 🟢 ADICIONADO
-        // ===============================
-        if (!antigo && novo) {
+      // ===============================
+      // 🟢 ADICIONADO
+      // ===============================
+      if (!antigo && novo) {
 
-          alteracoes.push({
+        alteracoes.push({
 
-            tipo: "ADICIONADO",
+          tipo: "ADICIONADO",
 
-            dia: novo?.dia || "",
+          dia: novo?.d || "",
 
-            horario: novo?.horario || "",
+          horario: novo?.h || "",
 
-            turma: novo?.turma || "",
+          turma: novo?.t || "",
 
-            antes: "(vazio)",
+          antes: "(vazio)",
 
-            depois:
-              novo?.valorOriginal || "(vazio)"
+          depois:
+            novo?.v || "(vazio)"
 
-          });
+        });
 
-          return;
-        }
+        return;
+      }
 
-        // ===============================
-        // 🟡 ALTERADO
-        // ===============================
-        const antigoValor =
-          antigo?.valorNormalizado || "";
+      // ===============================
+      // 🟡 ALTERADO
+      // ===============================
+      const antigoValor =
+        normalizarTexto(
+          antigo?.v || ""
+        );
 
-        const novoValor =
-          novo?.valorNormalizado || "";
+      const novoValor =
+        normalizarTexto(
+          novo?.v || ""
+        );
 
-        if (antigoValor !== novoValor) {
+      if (antigoValor !== novoValor) {
 
-          alteracoes.push({
+        alteracoes.push({
 
-            tipo: "ALTERADO",
+          tipo: "ALTERADO",
 
-            dia:
-              novo?.dia ||
-              antigo?.dia ||
-              "",
+          dia:
+            novo?.d ||
+            antigo?.d ||
+            "",
 
-            horario:
-              novo?.horario ||
-              antigo?.horario ||
-              "",
+          horario:
+            novo?.h ||
+            antigo?.h ||
+            "",
 
-            turma:
-              novo?.turma ||
-              antigo?.turma ||
-              "",
+          turma:
+            novo?.t ||
+            antigo?.t ||
+            "",
 
-            antes:
-              antigo?.valorOriginal ||
-              "(vazio)",
+          antes:
+            antigo?.v ||
+            "(vazio)",
 
-            depois:
-              novo?.valorOriginal ||
-              "(vazio)"
+          depois:
+            novo?.v ||
+            "(vazio)"
 
-          });
+        });
 
-        }
+      }
 
-      });
+    });
 
-    } catch (e) {
+  } catch (e) {
 
-      console.error(
-        "❌ Erro em compararMapas:",
-        e
-      );
+    console.error(
+      "❌ Erro em compararMapas:",
+      e
+    );
 
-    }
-
-    return alteracoes;
   }
+
+  return alteracoes;
+}
 
 
   // ===============================
