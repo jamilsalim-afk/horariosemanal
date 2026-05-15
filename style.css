@@ -948,72 +948,98 @@ th.time-col{
    CELULAR
 ========================================= */
 
+/* =========================================
+   CELULAR MELHORADO
+========================================= */
+
 @media(max-width:768px){
 
-  .ifro-header-content{
-
-    padding:14px 12px 10px;
+  body{
+    zoom:1;
   }
 
-  .ifro-linha1{
+  /* ================= HEADER ================= */
+
+  .ifro-header-content{
+    padding:20px 14px 14px;
+  }
+
+  .ifro-linha1,
+  .ifro-linha3{
     display:none;
   }
 
   .ifro-linha2{
 
-    font-size:22px;
+    font-size:42px;
 
-    line-height:1.2;
-  }
+    line-height:1.05;
 
-  .ifro-linha3{
+    font-weight:900;
 
-    display:none;
+    letter-spacing:-1px;
   }
 
   .ifro-linha4{
 
-    margin-top:8px;
+    margin-top:14px;
 
-    padding:8px 14px;
+    padding:14px 26px;
 
-    font-size:11px;
+    font-size:20px;
+
+    border-radius:999px;
+
+    font-weight:800;
   }
+
+  /* ================= ABAS ================= */
 
   .tabs{
-
-    gap:6px;
-
-    padding:10px 8px;
-  }
-
-  .tab{
-
-    flex:1 1 calc(50% - 6px);
-
-    text-align:center;
-
-    font-size:13px;
-
-    padding:12px 8px;
-  }
-
-  .header-sticky{
-
-    padding:6px;
-  }
-
-  .controls-card{
-
-    display:grid;
-
-    grid-template-columns:1fr;
 
     gap:10px;
 
     padding:12px;
 
-    border-radius:18px;
+    overflow-x:auto;
+
+    flex-wrap:nowrap;
+
+    justify-content:flex-start;
+  }
+
+  .tab{
+
+    flex:none;
+
+    min-width:120px;
+
+    text-align:center;
+
+    font-size:16px;
+
+    padding:14px 18px;
+
+    border-radius:16px;
+  }
+
+  /* ================= CONTROLES ================= */
+
+  .header-sticky{
+    padding:10px;
+  }
+
+  .controls-card{
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:16px;
+
+    padding:20px;
+
+    border-radius:26px;
   }
 
   select,
@@ -1024,86 +1050,136 @@ th.time-col{
 
     min-width:unset;
 
-    height:48px;
+    height:64px;
 
-    font-size:14px;
+    font-size:22px;
+
+    border-radius:18px;
+
+    padding:0 20px;
   }
 
-  .table-responsive{
-
-    padding:8px;
+  .btn-pdf{
+    font-weight:800;
   }
 
-  th,
-  td{
+  /* ================= RELATÓRIOS ================= */
 
-    width:135px;
+  #botoesRelatorio{
 
-    min-width:135px;
-
-    max-width:135px;
-
-    padding:8px 6px;
+    margin-top:10px;
   }
 
-  .aula-cell{
+  #botoesRelatorio > div{
 
-    font-size:11px;
+    display:grid;
 
-    line-height:1.5;
-  }
+    grid-template-columns:1fr 1fr;
 
-  th{
-
-    font-size:11px;
-
-    line-height:1.4;
-  }
-
-  .time-col{
-
-    width:84px !important;
-
-    min-width:84px !important;
-
-    max-width:84px !important;
-
-    font-size:10px;
-
-    line-height:1.35;
-  }
-
-  .day-divider td{
-
-    font-size:13px;
-
-    padding:12px;
+    gap:14px;
   }
 
   #botoesRelatorio button{
 
     width:100%;
+
+    height:62px;
+
+    font-size:18px;
+
+    border-radius:18px !important;
   }
 
-  .evento-bloco{
+  /* ================= TABELA ================= */
+
+  .table-responsive{
+
+    padding:10px;
+
+    border-radius:24px;
+  }
+
+  table{
+
+    min-width:max-content;
+  }
+
+  th,
+  td{
+
+    width:220px;
+
+    min-width:220px;
+
+    max-width:220px;
+
+    padding:16px 12px;
+  }
+
+  .aula-cell{
+
+    font-size:18px;
+
+    line-height:1.6;
+
+    font-weight:500;
+  }
+
+  th{
+
+    font-size:17px;
+
+    line-height:1.5;
+
+    font-weight:800;
+  }
+
+  .time-col{
+
+    width:120px !important;
+
+    min-width:120px !important;
+
+    max-width:120px !important;
 
     font-size:15px;
+
+    line-height:1.5;
+
+    font-weight:800;
+  }
+
+  .day-divider td{
+
+    font-size:22px;
+
+    padding:18px;
+  }
+
+  /* ================= EVENTOS ================= */
+
+  .evento-bloco{
+    font-size:20px;
   }
 
   .feriado{
 
-    font-size:30px;
+    font-size:42px;
 
-    letter-spacing:3px;
+    letter-spacing:4px;
 
-    height:120px;
+    height:160px;
   }
+
+  /* ================= FOOTER ================= */
 
   .ifro-footer{
 
-    font-size:12px;
+    font-size:15px;
 
-    line-height:1.6;
+    line-height:1.8;
+
+    padding:30px 20px;
   }
 }
 
@@ -1111,56 +1187,67 @@ th.time-col{
    MOBILE PEQUENO
 ========================================= */
 
+/* =========================================
+   MOBILE PEQUENO
+========================================= */
+
 @media(max-width:480px){
 
-  th,
-  td{
-
-    width:150px;
-
-    min-width:150px;
-
-    max-width:150px;
+  .ifro-linha2{
+    font-size:34px;
   }
 
-  .aula-cell{
+  .ifro-linha4{
 
-    font-size:12px;
+    font-size:17px;
 
-    line-height:1.6;
-  }
-
-  th{
-
-    font-size:12px;
-  }
-
-  .time-col{
-
-    width:92px !important;
-
-    min-width:92px !important;
-
-    max-width:92px !important;
-
-    font-size:11px;
-  }
-
-  .day-divider td{
-
-    font-size:14px;
-  }
-
-  .controls-card{
-
-    padding:10px;
+    padding:12px 22px;
   }
 
   select,
   .search-box,
   .btn-pdf{
 
+    height:58px;
+
+    font-size:18px;
+  }
+
+  th,
+  td{
+
+    width:200px;
+
+    min-width:200px;
+
+    max-width:200px;
+  }
+
+  .aula-cell{
+    font-size:16px;
+  }
+
+  th{
     font-size:15px;
+  }
+
+  .time-col{
+
+    width:110px !important;
+
+    min-width:110px !important;
+
+    max-width:110px !important;
+
+    font-size:14px;
+  }
+
+  .day-divider td{
+    font-size:18px;
+  }
+
+  #botoesRelatorio > div{
+    grid-template-columns:1fr;
   }
 }
 
