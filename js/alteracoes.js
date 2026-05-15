@@ -494,5 +494,6 @@ function limparSnapshotsAntigos() {
   window.mostrarAvisoAlteracoesRobusto = mostrarAvisoAlteracoesRobusto;
   window.fecharPainel = fecharPainel;
   window.copiarAlteracoes = copiarAlteracoes;
+  window.limparSnapshots = limparSnapshots;
 
 })();
