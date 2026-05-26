@@ -377,3 +377,5 @@ document.addEventListener("DOMContentLoaded", () => {
   debug("Sistema iniciado.");
 
 });
+
+window.AppState = window.appState;
