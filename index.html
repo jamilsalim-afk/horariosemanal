@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+
+  <meta charset="UTF-8" />
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+  />
+
+  <title>IFRO • Horários Acadêmicos 2026</title>
+
+  <link rel="stylesheet" href="style.css" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet"
+  >
+
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+  />
+
+  <meta name="theme-color" content="#0f172a" />
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+  <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+
+</head>
+
+<body class="theme-dark">
+
+<div class="app-shell">
+
+  <aside class="sidebar" id="sidebar">
+
+    <div class="sidebar-top">
+
+      <div class="logo-wrap">
+
+        <div class="logo-icon">
+          <i class="fa-solid fa-graduation-cap"></i>
+        </div>
+
+        <div class="logo-text">
+
+          <div class="logo-title">
+            IFRO
+          </div>
+
+          <div class="logo-subtitle">
+            Horários Acadêmicos
+          </div>
+
+        </div>
+
+      </div>
+
+      <button
+        class="icon-btn mobile-close"
+        onclick="toggleSidebar()"
+      >
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+
+    </div>
+
+    <nav class="sidebar-menu">
+
+      <button
+        class="menu-item active"
+        data-tab="horarios"
+        onclick="abrirAba('horarios')"
+      >
+        <i class="fa-solid fa-table"></i>
+        <span>Horários</span>
+      </button>
+
+      <button
+        class="menu-item"
+        data-tab="sabados"
+        onclick="abrirAba('sabados')"
+      >
+        <i class="fa-solid fa-calendar-days"></i>
+        <span>Sábados Letivos</span>
+      </button>
+
+      <button
+        class="menu-item"
+        data-tab="professor"
+        onclick="abrirAba('professor')"
+      >
+        <i class="fa-solid fa-user-tie"></i>
+        <span>Professor</span>
+      </button>
+
+      <button
+        class="menu-item"
+        data-tab="turma"
+        onclick="abrirAba('turma')"
+      >
+        <i class="fa-solid fa-users"></i>
+        <span>Turma</span>
+      </button>
+
+      <button
+        class="menu-item"
+        data-tab="relatorios"
+        onclick="abrirAba('relatorios')"
+      >
+        <i class="fa-solid fa-chart-column"></i>
+        <span>Relatórios</span>
+      </button>
+
+    </nav>
+
+    <div class="sidebar-footer">
+
+      <button
+        class="theme-toggle"
+        onclick="toggleTheme()"
+      >
+
+        <div class="theme-toggle-icon">
+          <i class="fa-solid fa-moon"></i>
+        </div>
+
+        <div class="theme-toggle-text">
+
+          <strong>Tema</strong>
+
+          <small>
+            Claro / Escuro
+          </small>
+
+        </div>
+
+      </button>
+
+      <div class="sidebar-info">
+
+        <div>
+          IFRO Campus Cacoal
+        </div>
+
+        <small>
+          Departamento de Apoio ao Ensino
+        </small>
+
+      </div>
+
+    </div>
+
+  </aside>
+
+  <div
+    class="sidebar-overlay"
+    id="sidebarOverlay"
+    onclick="toggleSidebar()"
+  ></div>
+
+  <main class="main-content">
+
+    <header class="topbar">
+
+      <button
+        class="icon-btn mobile-menu"
+        onclick="toggleSidebar()"
+      >
+        <i class="fa-solid fa-bars"></i>
+      </button>
+
+      <button
+       id="btnToggleTheme"
+        class="btn-icon"
+        onclick="themeManager.toggleTema()"
+      >
+       🌙
+      </button>
+
+      <button
+  id="btnMenuMobile"
+  class="btn-icon mobile-only"
+>
+☰
+</button>
+
+      <div class="topbar-title-wrap">
+
+        <h1 id="tituloPagina">
+          Horários Acadêmicos
+        </h1>
+
+        <p>
+          Instituto Federal de Rondônia • Campus Cacoal
+        </p>
+
+      </div>
+
+      <div class="topbar-actions">
+
+        <div class="status-chip">
+
+          <span class="status-dot"></span>
+
+          <span>
+            Sistema Online
+          </span>
+
+        </div>
+
+      </div>
+
+    </header>
+
+    <div class="page-content">
+
+      <section
+        id="aba-horarios"
+        class="tab-content active"
+      >
+
+        <div class="controls-grid">
+
+          <div class="control-box">
+
+            <label>
+              Modalidade
+            </label>
+
+            <select
+              id="selectModalidade"
+              onchange="trocarModalidade()"
+            >
+
+              <option value="INTEGRADO">
+                Cursos Técnicos Integrados
+              </option>
+
+              <option value="SUPERIOR1">
+                Superior 1º Semestre
+              </option>
+
+              <option value="SUPERIOR2">
+                Superior 2º Semestre
+              </option>
+
+            </select>
+
+          </div>
+
+          <div class="control-box">
+
+            <label>
+              Semana
+            </label>
+
+            <select
+              id="selectSemana"
+              onchange="trocarSemana()"
+            ></select>
+
+          </div>
+
+          <div class="control-box control-grow">
+
+            <label>
+              Busca Inteligente
+            </label>
+
+            <input
+              type="text"
+              id="searchProf"
+              class="search-input"
+              placeholder="Professor, disciplina ou turma..."
+              onkeyup="filtrarProfessor()"
+            />
+
+          </div>
+
+          <button
+            class="action-btn"
+            onclick="exportarPDF()"
+          >
+
+            <i class="fa-solid fa-file-pdf"></i>
+
+            <span>
+              PDF
+            </span>
+
+          </button>
+
+        </div>
+
+        <div class="quick-filters">
+
+          <button onclick="buscarAulasVagas('SEGUNDA')">
+            Segunda
+          </button>
+
+          <button onclick="buscarAulasVagas('TERCA')">
+            Terça
+          </button>
+
+          <button onclick="buscarAulasVagas('QUARTA')">
+            Quarta
+          </button>
+
+          <button onclick="buscarAulasVagas('QUINTA')">
+            Quinta
+          </button>
+
+          <button onclick="buscarAulasVagas('SEXTA')">
+            Sexta
+          </button>
+
+          <button
+            class="highlight-green"
+            onclick="buscarAulasVagas('SEMANA')"
+          >
+            Semana Inteira
+          </button>
+
+        </div>
+
+        <div class="alerts-grid">
+
+          <div
+            id="painelAlteracoes"
+            class="alert-card alert-red"
+            style="display:none;"
+          >
+
+            <div class="alert-header">
+
+              <div class="alert-title">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+                Alterações Detectadas
+              </div>
+
+              <button onclick="fecharPainel()">
+                <i class="fa-solid fa-xmark"></i>
+              </button>
+
+            </div>
+
+            <div
+              id="conteudoAlteracoes"
+              class="alert-content"
+            ></div>
+
+            <button
+              class="copy-btn"
+              onclick="copiarAlteracoes()"
+            >
+              <i class="fa-solid fa-copy"></i>
+              Copiar
+            </button>
+
+          </div>
+
+          <div
+            id="painelVagas"
+            class="alert-card alert-green"
+            style="display:none;"
+          >
+
+            <div class="alert-header">
+
+              <div class="alert-title">
+                <i class="fa-solid fa-calendar-check"></i>
+                Aulas Vagas
+              </div>
+
+              <button onclick="fecharPainelVagas()">
+                <i class="fa-solid fa-xmark"></i>
+              </button>
+
+            </div>
+
+            <div
+              id="conteudoVagas"
+              class="alert-content"
+            ></div>
+
+            <button
+              class="copy-btn"
+              onclick="copiarVagas()"
+            >
+              <i class="fa-solid fa-copy"></i>
+              Copiar
+            </button>
+
+          </div>
+
+        </div>
+
+        <div class="table-card">
+
+          <div class="table-toolbar">
+
+            <div class="table-title">
+              Grade Semanal
+            </div>
+
+            <div class="table-actions">
+
+              <button class="icon-btn">
+                <i class="fa-solid fa-expand"></i>
+              </button>
+
+            </div>
+
+          </div>
+
+          <div
+            class="table-responsive"
+            id="tabelaHorario"
+          ></div>
+
+        </div>
+
+      </section>
+
+      <section
+        id="aba-sabados"
+        class="tab-content"
+      >
+
+        <div class="controls-grid">
+
+          <div class="control-box">
+
+            <label>
+              Modalidade
+            </label>
+
+            <select
+              id="selectModalidadeSabados"
+              onchange="trocarModalidadeSabados()"
+            >
+
+              <option value="INTEGRADO">
+                INTEGRADO
+              </option>
+
+              <option value="SUPERIOR1">
+                SUPERIOR 1º SEMESTRE
+              </option>
+
+              <option value="SUPERIOR2">
+                SUPERIOR 2º SEMESTRE
+              </option>
+
+            </select>
+
+          </div>
+
+          <div class="control-box control-grow">
+
+            <label>
+              Busca
+            </label>
+
+            <input
+              type="text"
+              id="searchSabados"
+              class="search-input"
+              placeholder="Professor ou disciplina..."
+              onkeyup="renderSabados()"
+            />
+
+          </div>
+
+          <button
+            class="action-btn"
+            onclick="exportarPDFSabados()"
+          >
+
+            <i class="fa-solid fa-file-pdf"></i>
+
+            <span>
+              PDF
+            </span>
+
+          </button>
+
+        </div>
+
+        <div class="table-card">
+
+          <div
+            class="table-responsive"
+            id="containerSabados"
+          ></div>
+
+        </div>
+
+      </section>
+
+      <section
+        id="aba-professor"
+        class="tab-content"
+      >
+
+        <div class="controls-grid">
+
+          <div class="control-box control-grow">
+
+            <label>
+              Professor
+            </label>
+
+            <select
+              id="selectProfessor"
+              onchange="renderProfessor()"
+            >
+              <option value="">
+                Selecione o professor
+              </option>
+            </select>
+
+          </div>
+
+          <div class="control-box">
+
+            <label>
+              Semana
+            </label>
+
+            <select
+              id="selectSemanaProfessor"
+              onchange="renderProfessor()"
+            ></select>
+
+          </div>
+
+          <button
+            class="action-btn"
+            onclick="exportarPDFProfessor()"
+          >
+
+            <i class="fa-solid fa-file-pdf"></i>
+
+            <span>
+              PDF
+            </span>
+
+          </button>
+
+        </div>
+
+        <div class="info-banner">
+
+          <div>
+
+            <small>
+              PROFESSOR
+            </small>
+
+            <h2 id="nomeProfessorFicha">
+              —
+            </h2>
+
+          </div>
+
+          <div class="info-banner-right">
+
+            <small>
+              SEMANA
+            </small>
+
+            <h3 id="semanaProfessorFicha">
+              —
+            </h3>
+
+          </div>
+
+        </div>
+
+        <div class="table-card">
+
+          <div
+            class="table-responsive"
+            id="tabelaProfessor"
+          ></div>
+
+        </div>
+
+      </section>
+
+      <section
+        id="aba-turma"
+        class="tab-content"
+      >
+
+        <div class="controls-grid">
+
+          <div class="control-box">
+
+            <label>
+              Modalidade
+            </label>
+
+            <select
+              id="selectModalidadeTurma"
+              onchange="trocarModalidadeTurma()"
+            >
+
+              <option value="INTEGRADO">
+                INTEGRADO
+              </option>
+
+              <option value="SUPERIOR1">
+                SUPERIOR 1º SEMESTRE
+              </option>
+
+              <option value="SUPERIOR2">
+                SUPERIOR 2º SEMESTRE
+              </option>
+
+            </select>
+
+          </div>
+
+          <div class="control-box control-grow">
+
+            <label>
+              Turma
+            </label>
+
+            <select
+              id="selectTurmaFicha"
+              onchange="renderTurma()"
+            >
+              <option value="">
+                Selecione a turma
+              </option>
+            </select>
+
+          </div>
+
+          <div class="control-box">
+
+            <label>
+              Semana
+            </label>
+
+            <select
+              id="selectSemanaTurma"
+              onchange="renderTurma()"
+            ></select>
+
+          </div>
+
+          <button
+            class="action-btn"
+            onclick="exportarPDFTurma()"
+          >
+
+            <i class="fa-solid fa-file-pdf"></i>
+
+            <span>
+              PDF
+            </span>
+
+          </button>
+
+        </div>
+
+        <div class="info-banner">
+
+          <div>
+
+            <small>
+              TURMA
+            </small>
+
+            <h2 id="nomeTurmaFicha">
+              —
+            </h2>
+
+          </div>
+
+          <div class="info-banner-right">
+
+            <small>
+              SEMANA
+            </small>
+
+            <h3 id="semanaTurmaFicha">
+              —
+            </h3>
+
+          </div>
+
+        </div>
+
+        <div class="table-card">
+
+          <div
+            class="table-responsive"
+            id="tabelaTurma"
+          ></div>
+
+        </div>
+
+      </section>
+
+      <section
+        id="aba-relatorios"
+        class="tab-content"
+      >
+
+        <div class="controls-grid">
+
+          <div class="control-box control-grow">
+
+            <label>
+              Busca
+            </label>
+
+            <input
+              type="text"
+              id="buscaRelatorioDPT"
+              class="search-input"
+              placeholder="Disciplina, professor ou turma..."
+              onkeyup="gerarRelatorioDisciplinaProfessorTurma()"
+            />
+
+          </div>
+
+          <div class="control-box">
+
+            <label>
+              Modalidade
+            </label>
+
+            <select
+              id="selectModalidadeRelatorio"
+              onchange="gerarRelatorioDisciplinaProfessorTurma()"
+            >
+
+              <option value="TODOS">
+                Todas
+              </option>
+
+              <option value="INTEGRADO">
+                Integrado
+              </option>
+
+              <option value="SUPERIOR1">
+                Superior 1º
+              </option>
+
+              <option value="SUPERIOR2">
+                Superior 2º
+              </option>
+
+            </select>
+
+          </div>
+
+          <button
+            class="action-btn"
+            onclick="exportarPDFRelatorioDPT()"
+          >
+
+            <i class="fa-solid fa-file-pdf"></i>
+
+            <span>
+              PDF
+            </span>
+
+          </button>
+
+        </div>
+
+        <div class="table-card">
+
+          <div
+            id="resultadoRelatorioDPT"
+            class="table-responsive"
+          ></div>
+
+        </div>
+
+      </section>
+
+    </div>
+
+  </main>
+
+</div>
+
+<footer class="footer-mobile">
+
+  <div>
+    IFRO Campus Cacoal
+  </div>
+
+  <small>
+    Departamento de Apoio ao Ensino
+  </small>
+
+</footer>
+
+<script src="core.js"></script>
+<script src="utils.js"></script>
+
+<script src="app.js"></script>
+
+<script src="loader.js"></script>
+<script src="parser.js"></script>
+<script src="scheduler.js"></script>
+
+<script src="render.js"></script>
+<script src="renderHorario.js"></script>
+<script src="sabados.js"></script>
+<script src="professores.js"></script>
+<script src="turmas.js"></script>
+<script src="relatorios.js"></script>
+
+<script src="alteracoes.js"></script>
+<script src="comparador.js"></script>
+<script src="eventos.js"></script>
+
+<script src="pdf.js"></script>
+<script src="theme.js"></script>
+<script src="mobile.js"></script>
+
+</body>
+</html>
+
+```
+
+Qual o próximo passo que daremos juntos no sistema? Se quiser trabalhar na lógica de conexão com a planilha de dados ou na renderização das tabelas, estou pronto!
