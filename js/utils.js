@@ -3,6 +3,13 @@
 // Arquivo: js/utils.js
 // ======================================================
 
+window.valormaiusculo = function(valor) {
+  return String(valor || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "") // remove acentos
+    .toUpperCase();
+};
+
 // ======================================================
 // 🔥 NORMALIZAR TEXTO
 // ======================================================
