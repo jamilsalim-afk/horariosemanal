@@ -6,6 +6,19 @@ window.semanasAgrupadas = {};
 window.indicesGlobais = {};
 window.turmasDetectadas = [];
 
+window.scheduler = {
+
+  getTurmasPorModalidade: function(modalidade) {
+
+    return window.dadosGlobais
+      .filter(item => item.modalidade === modalidade)
+      .map(item => item.turma)
+      .filter((v, i, a) => a.indexOf(v) === i);
+
+  }
+
+};
+
 // ======================================================
 // 🔥 IDENTIFICA LINHA DE DATA
 // ======================================================
