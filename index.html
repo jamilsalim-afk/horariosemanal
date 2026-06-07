@@ -16,15 +16,28 @@
 
   --text:#000000;
   --text-soft:#333333;
-
   --border:#bbbbbb;
-
   --time-bg:#f1f3f4;
 
   --footer-bg:#2e7d32;
   --footer-text:#ffffff;
 
   --shadow:0 2px 10px rgba(0,0,0,.12);
+
+  /* Cursos */
+  --agroec:#e8f5e9;
+  --agropec:#e3f2fd;
+  --info:#fff8e1;
+  --geo:#f3e5f5;
+  --mat:#e0f7fa;
+  --agroneg:#efebe9;
+  --zoo:#fce4ec;
+  --agron:#f1f8e9;
+
+  /* Destaques */
+  --highlight:#fbc02d;
+  --intervalo:#e0e0e0;
+  --caed:#fff3cd;
 }
 
 [data-theme="dark"]{
@@ -35,13 +48,27 @@
   --text-soft:#cbd5e1;
 
   --border:#475569;
-
   --time-bg:#334155;
 
   --footer-bg:#14532d;
   --footer-text:#ffffff;
 
   --shadow:0 4px 18px rgba(0,0,0,.35);
+
+  /* Cursos (versões escuras) */
+  --agroec:#1f3b2a;
+  --agropec:#1c3245;
+  --info:#4a3f16;
+  --geo:#3b2942;
+  --mat:#173944;
+  --agroneg:#3a312e;
+  --zoo:#4a2732;
+  --agron:#2e4020;
+
+  /* Destaques */
+  --highlight:#b8860b;
+  --intervalo:#374151;
+  --caed:#665200;
 }
 
 *{
@@ -189,14 +216,14 @@ th{
 
 /* CORES CURSOS */
 
-.c-agroec{background:#e8f5e9 !important;}
-.c-agropec{background:#e3f2fd !important;}
-.c-info{background:#fff8e1 !important;}
-.c-geo{background:#f3e5f5 !important;}
-.c-mat{background:#e0f7fa !important;}
-.c-agroneg{background:#efebe9 !important;}
-.c-zoo{background:#fce4ec !important;}
-.c-agron{background:#f1f8e9 !important;}
+.c-agroec{background:var(--agroec) !important;}
+.c-agropec{background:var(--agropec) !important;}
+.c-info{background:var(--info) !important;}
+.c-geo{background:var(--geo) !important;}
+.c-mat{background:var(--mat) !important;}
+.c-agroneg{background:var(--agroneg) !important;}
+.c-zoo{background:var(--zoo) !important;}
+.c-agron{background:var(--agron) !important;}
 
 /* DIVISOR DIA */
 
@@ -229,7 +256,7 @@ th.time-col{
 /* BUSCA */
 
 .highlight{
-  background:#fbc02d !important;
+  background:var(--highlight) !important;
 }
 
 .opaco{
@@ -240,7 +267,7 @@ th.time-col{
 
 .intervalo,
 .marcacao-extra{
-  background:#e0e0e0 !important;
+  background:var(--intervalo) !important;
   font-weight:bold;
 }
 
@@ -285,7 +312,7 @@ tr.linha-vazia td{
 }
 
 .caed{
-  background-color:#fff3cd;
+  background:var(--caed) !important;
 }
 
 .reposicao{
