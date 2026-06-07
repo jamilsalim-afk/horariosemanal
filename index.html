@@ -1,844 +1,1099 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
-
+<html lang="pt-br">
 <head>
+<meta charset="UTF-8">
+<title>Consulta de Horários Semanais - IFRO</title>
 
-  <meta charset="UTF-8" />
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0, viewport-fit=cover"
-  />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
 
-  <title>IFRO • Horários Acadêmicos 2026</title>
+<style>
+:root { --primary:#2e7d32; --bg:#f4f7f6; }
 
-  <link rel="stylesheet" href="style.css" />
+body {
+  font-family:'Segoe UI',sans-serif;
+  background:var(--bg);
+  margin:0;
+}
 
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+/* CABEÇALHO */
+.ifro-header {
+  position:sticky;
+  top:0;
+  z-index:1100;
+  background:white;
+  border-bottom:4px solid #2e7d32;
+}
+.ifro-header-content { text-align:center; padding:12px; }
+.ifro-linha1 { font-size:20px; font-weight:bold; color:#000; }
+.ifro-linha2 { font-size:18px; font-weight:bold; color:#000; }
+.ifro-linha3 { font-size:16px; color:#000; }
+.ifro-linha4 { font-size:17px; font-weight:bold; color:#000; }
 
-  <link
-    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
-    rel="stylesheet"
-  >
+/* CONTROLES */
+.header-sticky {
+  position:sticky;
+  top:110px;
+  z-index:1000;
+  background:var(--bg);
+  padding:9px;
+}
+.controls-card {
+  background:white;
+  padding:15px;
+  border-radius:12px;
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  justify-content:center;
+}
+select,.search-box,.btn-pdf {
+  padding:12px;
+  font-size:14px;
+  border-radius:6px;
+}
+.search-box {
+  width:260px;
+  border:2px solid var(--primary);
+}
+.btn-pdf {
+  background:#d32f2f;
+  color:white;
+  border:none;
+  cursor:pointer;
+  font-weight:bold;
+}
 
-  <link
-    rel="stylesheet"
-    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
-  />
+/* TABELA */
+.week-container { padding:14px; }
+.table-responsive {
+  width:100%;
+  overflow-x:auto;
+  background:white;
+  border-radius:8px;
+}
+table {
+  min-width:1400px;
+  width:100%;
+  border-collapse:separate; /* 🔥 ESSENCIAL */
+  border-spacing:0;         /* mantém visual igual */
+  font-size:9px;
+  table-layout:fixed;
+}
+th,td {
+  border:1px solid #bbb;
+  padding:6px;
+  text-align:center;
+  vertical-align:middle;
+}
 
-  <meta name="theme-color" content="#0f172a" />
+/* 🔧 CORREÇÃO DE TEXTO */
+td, th { word-break: break-word; }
+.aula-cell { white-space: normal; }
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+/* CORES */
+.c-agroec { background:#e8f5e9 !important; }
+.c-agropec { background:#e3f2fd !important; }
+.c-info { background:#fff8e1 !important; }
+.c-geo { background:#f3e5f5 !important; }
+.c-mat { background:#e0f7fa !important; }
+.c-agroneg { background:#efebe9 !important; }
+.c-zoo { background:#fce4ec !important; }
+.c-agron { background:#f1f8e9 !important; }
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+.day-divider {
+  background:var(--primary);
+  color:white;
+  font-weight:bold;
+  font-size:15px;
+}
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+.time-col {
+  font-weight:bold;
+  width:85px;
+  background:#f1f3f4;
+}
 
-  <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+.highlight { background:#fbc02d !important; }
+.opaco { opacity:0.1; }
 
+.intervalo,.marcacao-extra {
+  background:#e0e0e0 !important;
+  font-weight:bold;
+}
+
+/* 🔥 ALTERAÇÃO: DOBRO DO TAMANHO */
+.feriado {
+  font-size:120px;
+  text-align:center;
+  font-weight:bold;
+  color:rgba(200,0,0,0.4);
+  height:200px;
+}
+
+/* RODAPÉ */
+.ifro-footer {
+  background:#2e7d32;
+  color:white;
+  padding:20px;
+  text-align:center;
+}
+
+  /* 🔥 FIXAR PRIMEIRA COLUNA (HORÁRIOS) */
+.time-col {
+  position: sticky;
+  left: 0;
+  z-index: 2;
+  background: #f1f3f4; /* mantém cor original */
+}
+
+/* garante que o cabeçalho também fique acima */
+th.time-col {
+  z-index: 3;
+}
+
+  /* 🔥 LINHAS VAZIAS MAIS COMPACTAS */
+tr.linha-vazia td {
+  padding: 2px !important;
+  font-size: 8px !important;
+  height: 10px !important;
+}
+
+ .reserva-ensino {
+    color: #fbc02d; /* amarelo forte */
+    font-weight: bold;
+}
+
+.pps {
+    color: #0b3d91; /* azul escuro */
+    font-weight: bold;
+}
+
+.estudos {
+    color: ##1e7e34; /* verde escuro */
+    font-weight: bold;
+}
+
+.reuniao {
+    color: ##fb8c00; /* laranja forte */
+    font-weight: bold;
+}
+
+.caed {
+    background-color: #fff3cd; /* amarelo */
+}
+
+.reposicao {
+    color: #0b3d91; /* azul escuro */
+    font-weight: bold;
+}
+  
+</style>
 </head>
 
-<body class="theme-dark">
-
-<div class="app-shell">
-
-  <aside class="sidebar" id="sidebar">
-
-    <div class="sidebar-top">
-
-      <div class="logo-wrap">
-
-        <div class="logo-icon">
-          <i class="fa-solid fa-graduation-cap"></i>
-        </div>
-
-        <div class="logo-text">
-
-          <div class="logo-title">
-            IFRO
-          </div>
-
-          <div class="logo-subtitle">
-            Horários Acadêmicos
-          </div>
-
-        </div>
-
-      </div>
-
-      <button
-        class="icon-btn mobile-close"
-        onclick="toggleSidebar()"
-      >
-        <i class="fa-solid fa-xmark"></i>
-      </button>
-
-    </div>
-
-    <nav class="sidebar-menu">
-
-      <button
-        class="menu-item active"
-        data-tab="horarios"
-        onclick="abrirAba('horarios')"
-      >
-        <i class="fa-solid fa-table"></i>
-        <span>Horários</span>
-      </button>
-
-      <button
-        class="menu-item"
-        data-tab="sabados"
-        onclick="abrirAba('sabados')"
-      >
-        <i class="fa-solid fa-calendar-days"></i>
-        <span>Sábados Letivos</span>
-      </button>
-
-      <button
-        class="menu-item"
-        data-tab="professor"
-        onclick="abrirAba('professor')"
-      >
-        <i class="fa-solid fa-user-tie"></i>
-        <span>Professor</span>
-      </button>
-
-      <button
-        class="menu-item"
-        data-tab="turma"
-        onclick="abrirAba('turma')"
-      >
-        <i class="fa-solid fa-users"></i>
-        <span>Turma</span>
-      </button>
-
-      <button
-        class="menu-item"
-        data-tab="relatorios"
-        onclick="abrirAba('relatorios')"
-      >
-        <i class="fa-solid fa-chart-column"></i>
-        <span>Relatórios</span>
-      </button>
-
-    </nav>
-
-    <div class="sidebar-footer">
-
-      <button
-        class="theme-toggle"
-        onclick="toggleTheme()"
-      >
-
-        <div class="theme-toggle-icon">
-          <i class="fa-solid fa-moon"></i>
-        </div>
-
-        <div class="theme-toggle-text">
-
-          <strong>Tema</strong>
-
-          <small>
-            Claro / Escuro
-          </small>
-
-        </div>
-
-      </button>
-
-      <div class="sidebar-info">
-
-        <div>
-          IFRO Campus Cacoal
-        </div>
-
-        <small>
-          Departamento de Apoio ao Ensino
-        </small>
-
-      </div>
-
-    </div>
-
-  </aside>
-
-  <div
-    class="sidebar-overlay"
-    id="sidebarOverlay"
-    onclick="toggleSidebar()"
-  ></div>
-
-  <main class="main-content">
-
-    <header class="topbar">
-
-      <button
-        class="icon-btn mobile-menu"
-        onclick="toggleSidebar()"
-      >
-        <i class="fa-solid fa-bars"></i>
-      </button>
-
-      <button
-       id="btnToggleTheme"
-        class="btn-icon"
-        onclick="toggleTheme()"
-      >
-       🌙
-      </button>
-
-      <button
-  id="btnMenuMobile"
-  class="btn-icon mobile-only"
->
-☰
-</button>
-
-      <div class="topbar-title-wrap">
-
-        <h1 id="tituloPagina">
-          Horários Acadêmicos
-        </h1>
-
-        <p>
-          Instituto Federal de Rondônia • Campus Cacoal
-        </p>
-
-      </div>
-
-      <div class="topbar-actions">
-
-        <div class="status-chip">
-
-          <span class="status-dot"></span>
-
-          <span>
-            Sistema Online
-          </span>
-
-        </div>
-
-      </div>
-
-    </header>
-
-    <div class="page-content">
-
-      <section
-        id="aba-horarios"
-        class="tab-content active"
-      >
-
-        <div class="controls-grid">
-
-          <div class="control-box">
-
-            <label>
-              Modalidade
-            </label>
-
-            <select
-              id="selectModalidade"
-              onchange="trocarModalidade()"
-            >
-
-              <option value="INTEGRADO">
-                Cursos Técnicos Integrados
-              </option>
-
-              <option value="SUPERIOR1">
-                Superior 1º Semestre
-              </option>
-
-              <option value="SUPERIOR2">
-                Superior 2º Semestre
-              </option>
-
-            </select>
-
-          </div>
-
-          <div class="control-box">
-
-            <label>
-              Semana
-            </label>
-
-            <select
-              id="selectSemana"
-              onchange="trocarSemana()"
-            ></select>
-
-          </div>
-
-          <div class="control-box control-grow">
-
-            <label>
-              Busca Inteligente
-            </label>
-
-            <input
-              type="text"
-              id="searchProf"
-              class="search-input"
-              placeholder="Professor, disciplina ou turma..."
-              onkeyup="filtrarProfessor()"
-            />
-
-          </div>
-
-          <button
-            class="action-btn"
-            onclick="exportarPDF()"
-          >
-
-            <i class="fa-solid fa-file-pdf"></i>
-
-            <span>
-              PDF
-            </span>
-
-          </button>
-
-        </div>
-
-        <div class="quick-filters">
-
-          <button onclick="buscarAulasVagas('SEGUNDA')">
-            Segunda
-          </button>
-
-          <button onclick="buscarAulasVagas('TERCA')">
-            Terça
-          </button>
-
-          <button onclick="buscarAulasVagas('QUARTA')">
-            Quarta
-          </button>
-
-          <button onclick="buscarAulasVagas('QUINTA')">
-            Quinta
-          </button>
-
-          <button onclick="buscarAulasVagas('SEXTA')">
-            Sexta
-          </button>
-
-          <button
-            class="highlight-green"
-            onclick="buscarAulasVagas('SEMANA')"
-          >
-            Semana Inteira
-          </button>
-
-        </div>
-
-        <div class="alerts-grid">
-
-          <div
-            id="painelAlteracoes"
-            class="alert-card alert-red"
-            style="display:none;"
-          >
-
-            <div class="alert-header">
-
-              <div class="alert-title">
-                <i class="fa-solid fa-triangle-exclamation"></i>
-                Alterações Detectadas
-              </div>
-
-              <button onclick="fecharPainel()">
-                <i class="fa-solid fa-xmark"></i>
-              </button>
-
-            </div>
-
-            <div
-              id="conteudoAlteracoes"
-              class="alert-content"
-            ></div>
-
-            <button
-              class="copy-btn"
-              onclick="copiarAlteracoes()"
-            >
-              <i class="fa-solid fa-copy"></i>
-              Copiar
-            </button>
-
-          </div>
-
-          <div
-            id="painelVagas"
-            class="alert-card alert-green"
-            style="display:none;"
-          >
-
-            <div class="alert-header">
-
-              <div class="alert-title">
-                <i class="fa-solid fa-calendar-check"></i>
-                Aulas Vagas
-              </div>
-
-              <button onclick="fecharPainelVagas()">
-                <i class="fa-solid fa-xmark"></i>
-              </button>
-
-            </div>
-
-            <div
-              id="conteudoVagas"
-              class="alert-content"
-            ></div>
-
-            <button
-              class="copy-btn"
-              onclick="copiarVagas()"
-            >
-              <i class="fa-solid fa-copy"></i>
-              Copiar
-            </button>
-
-          </div>
-
-        </div>
-
-        <div class="table-card">
-
-          <div class="table-toolbar">
-
-            <div class="table-title">
-              Grade Semanal
-            </div>
-
-            <div class="table-actions">
-
-              <button class="icon-btn">
-                <i class="fa-solid fa-expand"></i>
-              </button>
-
-            </div>
-
-          </div>
-
-          <div
-            class="table-responsive"
-            id="tabelaHorario"
-          ></div>
-
-        </div>
-
-      </section>
-
-      <section
-        id="aba-sabados"
-        class="tab-content"
-      >
-
-        <div class="controls-grid">
-
-          <div class="control-box">
-
-            <label>
-              Modalidade
-            </label>
-
-            <select
-              id="selectModalidadeSabados"
-              onchange="trocarModalidadeSabados()"
-            >
-
-              <option value="INTEGRADO">
-                INTEGRADO
-              </option>
-
-              <option value="SUPERIOR1">
-                SUPERIOR 1º SEMESTRE
-              </option>
-
-              <option value="SUPERIOR2">
-                SUPERIOR 2º SEMESTRE
-              </option>
-
-            </select>
-
-          </div>
-
-          <div class="control-box control-grow">
-
-            <label>
-              Busca
-            </label>
-
-            <input
-              type="text"
-              id="searchSabados"
-              class="search-input"
-              placeholder="Professor ou disciplina..."
-              onkeyup="renderSabados()"
-            />
-
-          </div>
-
-          <button
-            class="action-btn"
-            onclick="exportarPDFSabados()"
-          >
-
-            <i class="fa-solid fa-file-pdf"></i>
-
-            <span>
-              PDF
-            </span>
-
-          </button>
-
-        </div>
-
-        <div class="table-card">
-
-          <div
-            class="table-responsive"
-            id="containerSabados"
-          ></div>
-
-        </div>
-
-      </section>
-
-      <section
-        id="aba-professor"
-        class="tab-content"
-      >
-
-        <div class="controls-grid">
-
-          <div class="control-box control-grow">
-
-            <label>
-              Professor
-            </label>
-
-            <select
-              id="selectProfessor"
-              onchange="renderProfessor()"
-            >
-              <option value="">
-                Selecione o professor
-              </option>
-            </select>
-
-          </div>
-
-          <div class="control-box">
-
-            <label>
-              Semana
-            </label>
-
-            <select
-              id="selectSemanaProfessor"
-              onchange="renderProfessor()"
-            ></select>
-
-          </div>
-
-          <button
-            class="action-btn"
-            onclick="exportarPDFProfessor()"
-          >
-
-            <i class="fa-solid fa-file-pdf"></i>
-
-            <span>
-              PDF
-            </span>
-
-          </button>
-
-        </div>
-
-        <div class="info-banner">
-
-          <div>
-
-            <small>
-              PROFESSOR
-            </small>
-
-            <h2 id="nomeProfessorFicha">
-              —
-            </h2>
-
-          </div>
-
-          <div class="info-banner-right">
-
-            <small>
-              SEMANA
-            </small>
-
-            <h3 id="semanaProfessorFicha">
-              —
-            </h3>
-
-          </div>
-
-        </div>
-
-        <div class="table-card">
-
-          <div
-            class="table-responsive"
-            id="tabelaProfessor"
-          ></div>
-
-        </div>
-
-      </section>
-
-      <section
-        id="aba-turma"
-        class="tab-content"
-      >
-
-        <div class="controls-grid">
-
-          <div class="control-box">
-
-            <label>
-              Modalidade
-            </label>
-
-            <select
-              id="selectModalidadeTurma"
-              onchange="trocarModalidadeTurma()"
-            >
-
-              <option value="INTEGRADO">
-                INTEGRADO
-              </option>
-
-              <option value="SUPERIOR1">
-                SUPERIOR 1º SEMESTRE
-              </option>
-
-              <option value="SUPERIOR2">
-                SUPERIOR 2º SEMESTRE
-              </option>
-
-            </select>
-
-          </div>
-
-          <div class="control-box control-grow">
-
-            <label>
-              Turma
-            </label>
-
-            <select
-              id="selectTurmaFicha"
-              onchange="renderTurma()"
-            >
-              <option value="">
-                Selecione a turma
-              </option>
-            </select>
-
-          </div>
-
-          <div class="control-box">
-
-            <label>
-              Semana
-            </label>
-
-            <select
-              id="selectSemanaTurma"
-              onchange="renderTurma()"
-            ></select>
-
-          </div>
-
-          <button
-            class="action-btn"
-            onclick="exportarPDFTurma()"
-          >
-
-            <i class="fa-solid fa-file-pdf"></i>
-
-            <span>
-              PDF
-            </span>
-
-          </button>
-
-        </div>
-
-        <div class="info-banner">
-
-          <div>
-
-            <small>
-              TURMA
-            </small>
-
-            <h2 id="nomeTurmaFicha">
-              —
-            </h2>
-
-          </div>
-
-          <div class="info-banner-right">
-
-            <small>
-              SEMANA
-            </small>
-
-            <h3 id="semanaTurmaFicha">
-              —
-            </h3>
-
-          </div>
-
-        </div>
-
-        <div class="table-card">
-
-          <div
-            class="table-responsive"
-            id="tabelaTurma"
-          ></div>
-
-        </div>
-
-      </section>
-
-      <section
-        id="aba-relatorios"
-        class="tab-content"
-      >
-
-        <div class="controls-grid">
-
-          <div class="control-box control-grow">
-
-            <label>
-              Busca
-            </label>
-
-            <input
-              type="text"
-              id="buscaRelatorioDPT"
-              class="search-input"
-              placeholder="Disciplina, professor ou turma..."
-              onkeyup="gerarRelatorioDisciplinaProfessorTurma()"
-            />
-
-          </div>
-
-          <div class="control-box">
-
-            <label>
-              Modalidade
-            </label>
-
-            <select
-              id="selectModalidadeRelatorio"
-              onchange="gerarRelatorioDisciplinaProfessorTurma()"
-            >
-
-              <option value="TODOS">
-                Todas
-              </option>
-
-              <option value="INTEGRADO">
-                Integrado
-              </option>
-
-              <option value="SUPERIOR1">
-                Superior 1º
-              </option>
-
-              <option value="SUPERIOR2">
-                Superior 2º
-              </option>
-
-            </select>
-
-          </div>
-
-          <button
-            class="action-btn"
-            onclick="exportarPDFRelatorioDPT()"
-          >
-
-            <i class="fa-solid fa-file-pdf"></i>
-
-            <span>
-              PDF
-            </span>
-
-          </button>
-
-        </div>
-
-        <div class="table-card">
-
-          <div
-            id="resultadoRelatorioDPT"
-            class="table-responsive"
-          ></div>
-
-        </div>
-
-      </section>
-
-    </div>
-
-  </main>
-
+<body>
+
+<div class="ifro-header">
+<div class="ifro-header-content">
+<div class="ifro-linha1">INSTITUTO FEDERAL DE EDUCAÇÃO, CIÊNCIA E TECNOLOGIA DE RONDÔNIA - IFRO</div>
+<div class="ifro-linha2">CAMPUS CACOAL</div>
+<div class="ifro-linha3">DEPARTAMENTO DE APOIO AO ENSINO</div>
+<div class="ifro-linha4">HORÁRIOS SEMANAIS - 2026</div>
+</div>
 </div>
 
-<footer class="footer-mobile">
+<div class="header-sticky">
+<div class="controls-card">
+<select id="selectModalidade" onchange="trocarModalidade()">
+<option value="INTEGRADO">CURSOS TÉCNICOS INTEGRADOS</option>
+<option value="SUPERIOR">CURSOS SUPERIORES</option>
+</select>
 
-  <div>
-    IFRO Campus Cacoal
+<select id="selectSemana" onchange="trocarSemana()"></select>
+
+<input type="text" id="searchProf" class="search-box"
+placeholder="🔍 Buscar Professor..." onkeyup="filtrarProfessor()">
+
+<button class="btn-pdf" onclick="exportarPDF()">📄 Baixe o PDF da Semana</button>
+</div>
+</div>
+
+<div class="week-container">
+
+<!-- 🔥 BOTÕES NOVOS -->
+<div id="botoesRelatorio"></div>
+
+<div id="painelAlteracoes" style="
+  display:none;
+  background:white;
+  border-left:6px solid #d32f2f;
+  padding:15px;
+  margin:10px;
+  border-radius:8px;
+  max-height:300px;
+  overflow-y:auto;
+  box-shadow:0 2px 10px rgba(0,0,0,0.2);
+">
+  <div style="display:flex;justify-content:space-between;align-items:center;">
+    <strong>⚠️ Alterações Detectadas</strong>
+    <button onclick="fecharPainel()" style="
+      background:#d32f2f;color:white;border:none;
+      padding:5px 10px;border-radius:5px;cursor:pointer;">
+      ✖
+    </button>
   </div>
 
-  <small>
-    Departamento de Apoio ao Ensino
-  </small>
+  <pre id="conteudoAlteracoes" style="
+    white-space:pre-wrap;
+    font-size:12px;
+    margin-top:10px;
+  "></pre>
 
+  <button onclick="copiarAlteracoes()" style="
+    margin-top:10px;
+    padding:8px;
+    background:#2e7d32;
+    color:white;
+    border:none;
+    border-radius:5px;
+    cursor:pointer;">
+    📋 Copiar
+  </button>
+</div>
+  
+<div class="table-responsive" id="tabelaHorario"></div>
+</div>
+
+<footer class="ifro-footer">
+IFRO - Campus Cacoal<br>
+BR 364, Km 228, Lote 2-A - Zona Rural<br>
+☎ (69) 3443-2445 | ✉ dape.cacoal@ifro.edu.br
 </footer>
 
-<script src="js/core.js"></script>
-<script src="js/utils.js"></script>
+<script>
+const SHEETS={
+INTEGRADO:{id:'1j33kiPqwtzZNuvkBgYDaIiXZvVMY_J0qWAtRfYGdnD8',gid:'1357770092'},
+SUPERIOR:{id:'14ALXZgFIT68ee9ajuIdG63SpGVm0HyTjwp63-J6vRyg',gid:'669887707'}
+};
 
-<script src="js/app.js"></script>
+let dadosGlobais=[],turmasDaPlanilha=[],semanasAgrupadas={};
 
-<script src="js/loader.js"></script>
-<script src="js/parser.js"></script>
-<script src="js/scheduler.js"></script>
+  function isSemanaPassada(dataStr){
+  const [d,m,a] = dataStr.split('/');
+  const data = new Date(a, m-1, d);
 
-<script src="js/render.js"></script>
-<script src="js/renderHorario.js"></script>
-<script src="js/sabados.js"></script>
-<script src="js/professores.js"></script>
-<script src="js/turmas.js"></script>
-<script src="js/relatorios.js"></script>
+  const hoje = new Date();
 
-<script src="js/alteracoes.js"></script>
-<script src="js/comparador.js"></script>
-<script src="js/eventos.js"></script>
+  // pega segunda-feira da semana atual
+  const dia = hoje.getDay();
+  const diff = hoje.getDate() - dia + (dia === 0 ? -6 : 1);
+  const segundaAtual = new Date(hoje.setDate(diff));
 
-<script src="js/pdf.js"></script>
-<script src="js/theme.js"></script>
-<script src="js/mobile.js"></script>
+  return data < segundaAtual;
+}
+
+function limparPainelAlteracoes(){
+  document.getElementById("conteudoAlteracoes").innerText = "";
+  document.getElementById("painelAlteracoes").style.display = "none";
+}
+  
+function trocarModalidade(){
+  window.trocouModalidade = true;
+
+  limparPainelAlteracoes(); // 🔥 ESSENCIAL
+
+  init();
+}
+
+  function trocarSemana(){
+  limparPainelAlteracoes(); // 🔥 ESSENCIAL
+  renderizarTabela();
+}
+
+function salvarSnapshotAtual() {
+  const sem = document.getElementById('selectSemana').value;
+  const mod = document.getElementById('selectModalidade').value;
+
+  const snapshot = {
+    tempo: new Date().toISOString(),
+    dados: dadosGlobais
+  };
+
+  localStorage.setItem(`snapshot_${mod}_${sem}`, JSON.stringify(snapshot));
+}
+
+function obterSnapshotAntigo() {
+  const sem = document.getElementById('selectSemana').value;
+  const mod = document.getElementById('selectModalidade').value;
+
+  const data = localStorage.getItem(`snapshot_${mod}_${sem}`);
+  return data ? JSON.parse(data) : null;
+}
+
+function valorMudou(v1, v2){
+  const t1 = (v1 || "").trim();
+  const t2 = (v2 || "").trim();
+
+  if (t1 !== t2) return true;
+
+  const n1 = normalizarTexto(t1);
+  const n2 = normalizarTexto(t2);
+
+  return n1 !== n2;
+}
+  
+function verificarMudancaAoAbrir() {
+
+  const sem = document.getElementById('selectSemana').value;
+  const mod = document.getElementById('selectModalidade').value;
+
+  const chave = `snapshot_${mod}_${sem}`;
+
+  const antigoRaw = localStorage.getItem(chave);
+
+  // 🔥 Se não existe snapshot → salva e sai
+  if (!antigoRaw) {
+    salvarSnapshotAtual();
+    return;
+  }
+
+  const antigo = JSON.parse(antigoRaw);
+  const novo = dadosGlobais;
+
+  const agrupado = {};
+  let ultimoDia = "";
+
+  for (let i = 1; i < novo.length; i++) {
+
+    if (novo[i][0]) ultimoDia = novo[i][0];
+    const diaAtual = ultimoDia;
+
+    if (!diaAtual) continue;
+    if (isSemanaPassada(diaAtual)) continue;
+
+    const horario = (novo[i][1] || "").trim();
+    const horarioNorm = normalizarTexto(horario);
+
+    // 🔥 IGNORA INTERVALO
+    if (
+      !horario ||
+      horarioNorm.includes("INTERVALO") ||
+      horarioNorm.includes("[+]") ||
+      horarioNorm.includes("*") ||
+      horarioNorm.includes("[R]")
+    ) continue;
+
+    for (let j = 2; j < novo[i].length; j++) {
+
+      const vNovo = (novo[i][j] || "").trim();
+      const vAntigo = (antigo.dados?.[i]?.[j] || "").trim();
+
+      if (!valorMudou(vNovo, vAntigo)) continue;
+
+      const turma = (dadosGlobais[0][j] || "").trim();
+      if (!turma) continue;
+
+      const chaveItem = `${diaAtual}__${turma}__${horario}`;
+
+      if (!agrupado[chaveItem]) {
+        agrupado[chaveItem] = {
+          dia: diaAtual,
+          turma,
+          horario,
+          alteracoes: []
+        };
+      }
+
+      agrupado[chaveItem].alteracoes.push({
+        antes: vAntigo || "(vazio)",
+        depois: vNovo || "(vazio)"
+      });
+    }
+  }
+
+  const listaFinal = Object.values(agrupado);
+
+  if (listaFinal.length > 0) {
+    mostrarAvisoAlteracoes(listaFinal);
+  } else {
+    document.getElementById("painelAlteracoes").style.display = "none";
+  }
+
+  salvarSnapshotAtual();
+}
+
+function mostrarAvisoAlteracoes(lista) {
+
+  let texto = "⚠️ ALTERAÇÕES DE AULAS DETECTADAS:\n\n";
+
+  lista.forEach(item => {
+
+    texto += `📅 Dia: ${item.dia}\n`;
+    texto += `🏫 Turma: ${item.turma}\n`;
+    texto += `⏰ Horário: ${item.horario}\n`;
+
+    item.alteracoes.forEach(a => {
+      texto += `➡️ ${a.antes} → ${a.depois}\n`;
+    });
+
+    texto += "\n";
+  });
+
+  document.getElementById("conteudoAlteracoes").innerText = texto;
+  document.getElementById("painelAlteracoes").style.display = "block";
+}
+
+  function fecharPainel(){
+  document.getElementById("painelAlteracoes").style.display = "none";
+}
+
+function copiarAlteracoes(){
+  const texto = document.getElementById("conteudoAlteracoes").innerText;
+
+  navigator.clipboard.writeText(texto).then(()=>{
+    alert("Copiado!");
+  });
+}
+  
+const FERIADOS=[
+"01/01/2026","16/02/2026","17/02/2026","18/02/2026","03/04/2026","20/04/2026","21/04/2026","01/05/2026",
+"04/06/2026","05/06/2026","07/09/2026","12/10/2026","02/11/2026",
+"15/11/2026","25/12/2026"
+];
+
+function normalizarTexto(txt){
+    return (txt || "")
+        .toString()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "") // remove acentos
+        .replace(/\s+/g, " ") // espaços duplos
+        .trim()
+        .toUpperCase();
+}
+  
+function isFeriado(d){return FERIADOS.includes(d);}
+
+/* 🔥 NOVA FUNÇÃO (BUSCA COM HIGHLIGHT) */
+function filtrarProfessor(){
+  const termo = document.getElementById('searchProf').value.toUpperCase();
+  const tabela = document.getElementById('tabelaHorario');
+  const celulas = tabela.getElementsByTagName('td');
+
+  for(let i=0;i<celulas.length;i++){
+    const td = celulas[i];
+    const txt = td.innerText.toUpperCase();
+
+    /* 🔥 IGNORA COLUNA DE HORÁRIO E CABEÇALHO DO DIA */
+    if(
+      td.classList.contains('time-col') ||
+      td.parentElement.classList.contains('day-divider')
+    ){
+      td.classList.remove('opaco');
+      td.classList.remove('highlight');
+      continue;
+    }
+
+    if(termo && txt.includes(termo)){
+      td.classList.add('highlight');
+      td.classList.remove('opaco');
+    } else if(termo){
+      td.classList.remove('highlight');
+      td.classList.add('opaco');
+    } else {
+      td.classList.remove('highlight');
+      td.classList.remove('opaco');
+    }
+  }
+}
+
+function parseCSV(text){
+return text.split(/\r?\n/).map(l=>{
+let r=[],c='',q=false;
+for(let i=0;i<l.length;i++){
+let ch=l[i];
+if(ch=='"') q=!q;
+else if(ch==','&&!q){r.push(c.trim());c='';}
+else c+=ch;
+}
+r.push(c.trim());
+return r;
+});
+}
+
+async function init(){
+
+  document.getElementById('searchProf').value = "";
+
+  const mod = document.getElementById('selectModalidade').value;
+
+  // 🔥 LIMPA PAINEL ao trocar
+  document.getElementById("painelAlteracoes").style.display = "none";
+
+  // 🔥 FLAG DE TROCA
+  window.trocouModalidade = true;
+
+  const url = `https://docs.google.com/spreadsheets/d/${SHEETS[mod].id}/export?format=csv&gid=${SHEETS[mod].gid}`;
+  const res = await fetch(url);
+
+  dadosGlobais = parseCSV(await res.text());
+
+  processarDados();
+
+  // 🔥 GARANTE verificação após tudo carregado
+  setTimeout(() => {
+    verificarMudancaAoAbrir();
+  }, 200);
+}
+function getCursoInfo(t){
+t=t.toUpperCase();
+if(t.includes("AGROEC")) return {cl:"c-agroec",rgb:[232,245,233]};
+if(t.includes("AGROPEC")) return {cl:"c-agropec",rgb:[227,242,253]};
+if(t.includes("INFO")) return {cl:"c-info",rgb:[255,248,225]};
+if(t.includes("GEO")) return {cl:"c-geo",rgb:[243,229,245]};
+if(t.includes("MAT")) return {cl:"c-mat",rgb:[224,247,250]};
+if(t.includes("AGRONEG")) return {cl:"c-agroneg",rgb:[239,235,233]};
+if(t.includes("ZOO")) return {cl:"c-zoo",rgb:[252,228,236]};
+if(t.includes("AGRON")) return {cl:"c-agron",rgb:[241,248,233]};
+return {cl:"",rgb:[255,255,255]};
+}
+
+function ordenarDatasBR(arr){
+return arr.sort((a,b)=>{
+const pa=a.split('/'),pb=b.split('/');
+return new Date(pa[2],pa[1]-1,pa[0]) - new Date(pb[2],pb[1]-1,pb[0]);
+});
+}
+
+function getSemanaAtual(){
+  const hoje = new Date();
+
+  // calcula segunda-feira da semana atual
+  const dia = hoje.getDay(); // 0 = domingo
+  const diff = hoje.getDate() - dia + (dia === 0 ? -6 : 1);
+
+  const segunda = new Date(hoje.setDate(diff));
+
+  const d = String(segunda.getDate()).padStart(2,'0');
+  const m = String(segunda.getMonth()+1).padStart(2,'0');
+  const a = segunda.getFullYear();
+
+  return `${d}/${m}/${a}`;
+}
+  
+function processarDados(){
+semanasAgrupadas={};
+turmasDaPlanilha=dadosGlobais[0].slice(2).filter(t=>t);
+let ultima="";
+for(let i=1;i<dadosGlobais.length;i++){
+let r=[...dadosGlobais[i]];
+if(r[0]) ultima=r[0];
+r[0]=ultima;
+if(!r[0]) continue;
+
+const [d,m,a]=r[0].split('/');
+const dt=new Date(a,m-1,d);
+const seg=new Date(dt.setDate(dt.getDate()-dt.getDay()+1)).toLocaleDateString('pt-BR');
+
+if(!semanasAgrupadas[seg]) semanasAgrupadas[seg]={dias:{}};
+if(!semanasAgrupadas[seg].dias[r[0]]) semanasAgrupadas[seg].dias[r[0]]=[];
+semanasAgrupadas[seg].dias[r[0]].push(r);
+}
+
+const sel=document.getElementById('selectSemana');
+sel.innerHTML="";
+const semanaAtual = getSemanaAtual();
+
+ordenarDatasBR(Object.keys(semanasAgrupadas)).forEach(s=>{
+  sel.innerHTML+=`<option value="${s}">Semana de ${s}</option>`;
+});
+
+/* 🔥 SELECIONA SEMANA ATUAL SE EXISTIR */
+if(semanasAgrupadas[semanaAtual]){
+  sel.value = semanaAtual;
+}
+
+renderizarTabela();
+}
+
+function getTurmasAtivasNaSemana(dias){
+return turmasDaPlanilha.filter(t=>{
+const idx=dadosGlobais[0].indexOf(t);
+return Object.values(dias).some(d=>d.some(r=>{
+const v=(r[idx]||"").trim();
+return v && v!=="-" && !r[1].toUpperCase().includes("INTERVALO");
+}));
+});
+}
+
+function renderizarTabela(){
+    const sem = document.getElementById('selectSemana').value;
+    const dias = semanasAgrupadas[sem].dias;
+    const container = document.getElementById('tabelaHorario');
+
+    const turmasAtivas = document.getElementById('selectModalidade').value === "SUPERIOR"
+        ? getTurmasAtivasNaSemana(dias)
+        : turmasDaPlanilha;
+
+    const nomes = ["DOMINGO","SEGUNDA-FEIRA","TERÇA-FEIRA","QUARTA-FEIRA","QUINTA-FEIRA","SEXTA-FEIRA","SÁBADO"];
+
+    let html = "";
+
+    // 🔥 Regras de destaque
+    const regrasDestaque = [
+    { match: v => v.includes("RESERVA ENSINO"), classe: "reserva-ensino" },
+    { match: v => v.includes("PPS/ATENDIMENTO"), classe: "pps" },
+    { match: v => v.includes("ESTUDOS INDIVIDUAIS"), classe: "estudos" },
+    { match: v => v.includes("REUNIAO DE SERVIDORES"), classe: "reuniao" },
+    { match: v => v.includes("CAED") || v.includes("PRE-CONSELHO"), classe: "caed" },
+    { match: v => v.includes("_REP -"), classe: "reposicao" }
+];
+
+    Object.keys(dias).forEach(dia => {
+        const p = dia.split('/');
+        const dObj = new Date(p[2], p[1]-1, p[0]);
+
+        if (isFeriado(dia)){
+            html += `<table>
+                <tr class="day-divider">
+                    <td colspan="${turmasAtivas.length+1}">
+                        ${nomes[dObj.getDay()]} - ${dia}
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="${turmasAtivas.length+1}" class="feriado">
+                        FERIADO
+                    </td>
+                </tr>
+            </table><br>`;
+            return;
+        }
+
+        html += `<table>`;
+        html += `<tr class="day-divider">
+                    <td colspan="${turmasAtivas.length+1}">
+                        ${nomes[dObj.getDay()]} - ${dia}
+                    </td>
+                 </tr>`;
+
+        html += `<tr>
+                    <th class="time-col">Horário</th>`;
+
+        turmasAtivas.forEach(t => {
+            html += `<th class="${getCursoInfo(t).cl}">${t}</th>`;
+        });
+
+        html += `</tr>`;
+
+        dias[dia].forEach(r => {
+            const isInt = r[1].toUpperCase().includes("INTERVALO");
+            const linhaVazia = r.slice(2).every(v => !v || v.trim() === "");
+
+            html += `<tr class="${isInt ? 'intervalo' : ''} ${linhaVazia ? 'linha-vazia' : ''}">
+                        <td class="time-col">${r[1]}</td>`;
+
+            turmasAtivas.forEach(t => {
+                const idx = dadosGlobais[0].indexOf(t);
+                let val = (r[idx] || "").trim();
+
+                let classesExtras = [];
+
+const valNorm = normalizarTexto(val);
+
+regrasDestaque.forEach(regra => {
+    if (regra.match(valNorm)) {
+        classesExtras.push(regra.classe);
+    }
+});
+              
+                // 🔥 manter regras antigas
+               if (
+    val.includes("[+]") ||
+    val.includes("*") ||
+    val.includes("[R]") ||
+    valNorm.includes("INTERVALO")
+) {
+    classesExtras.push("marcacao-extra");
+}
+
+                html += `<td class="aula-cell ${getCursoInfo(t).cl} ${classesExtras.join(" ")}">
+                            ${val}
+                         </td>`;
+            });
+
+            html += `</tr>`;
+        });
+
+        html += `</table><br>`;
+    });
+
+    container.innerHTML = html;
+  criarBotoesDias();
+}
+
+  const coresPDF = {
+    "reserva-ensino": [212, 237, 218], // verde claro
+    "pps": [11, 61, 145], // azul escuro (texto)
+    "estudos": [255, 229, 180], // laranja claro
+    "reuniao": [208, 235, 255], // azul claro
+    "caed": [255, 243, 205], // amarelo
+    "reposicao": [30, 126, 52], // verde escuro
+    "marcacao-extra": [224, 224, 224]
+};
+
+function coletarVagasDoDia(dia) {
+  const sem = document.getElementById('selectSemana').value;
+  const dias = semanasAgrupadas[sem].dias;
+
+  const vagas = [];
+
+  if (!dias[dia]) return vagas;
+
+  dias[dia].forEach(r => {
+    const horario = r[1];
+
+    turmasDaPlanilha.forEach(turma => {
+      const idx = dadosGlobais[0].indexOf(turma);
+      const val = (r[idx] || "").toUpperCase();
+
+      if (
+        val.includes("RESERVA ENSINO") ||
+        val.includes("ESTUDOS INDIVIDUAIS")
+      ) {
+        vagas.push({
+          turma,
+          horario
+        });
+      }
+    });
+  });
+
+  return vagas;
+}
+
+function gerarRelatorioDia(dia) {
+  const vagas = coletarVagasDoDia(dia);
+
+  let texto = `Olá Professores, na data de hoje (${dia}), identificamos várias turmas com aulas vagas. Segue a lista das turmas e horários.\n\n`;
+
+  if (vagas.length === 0) {
+    texto += "Não há aulas vagas no dia informado.";
+    return texto;
+  }
+
+  // 🔥 AGRUPAMENTO
+  const agrupado = {};
+
+  vagas.forEach(v => {
+    if (!agrupado[v.turma]) {
+      agrupado[v.turma] = [];
+    }
+
+    agrupado[v.turma].push(v.horario);
+  });
+
+  // 🔥 MONTAGEM FINAL
+  Object.keys(agrupado).forEach(turma => {
+
+    const horariosUnicos = [...new Set(agrupado[turma])];
+
+    texto += `📅 DATA: ${dia}\n`;
+    texto += `🏫 TURMA: ${turma}\n`;
+    texto += `⏰ AULAS VAGAS: ${horariosUnicos.join(", ")}\n\n`;
+  });
+
+  return texto;
+}
+
+function copiarRelatorioDia(dia) {
+  const texto = gerarRelatorioDia(dia);
+
+  navigator.clipboard.writeText(texto).then(() => {
+    alert("Relatório copiado para área de transferência!");
+  });
+}
+
+function gerarRelatorioSemana() {
+  const sem = document.getElementById('selectSemana').value;
+  const dias = semanasAgrupadas[sem].dias;
+
+  let texto = `Olá Professores, identificamos várias turmas com aula vaga esta semana. Segue a lista dos dias, turmas e horários.\n\n`;
+
+  const agrupado = {};
+
+  // 🔥 AGRUPA DIA + TURMA
+  Object.keys(dias).forEach(dia => {
+    const vagas = coletarVagasDoDia(dia);
+
+    vagas.forEach(v => {
+      const chave = `${dia}__${v.turma}`;
+
+      if (!agrupado[chave]) {
+        agrupado[chave] = {
+          dia,
+          turma: v.turma,
+          horarios: []
+        };
+      }
+
+      agrupado[chave].horarios.push(v.horario);
+    });
+  });
+
+  const listaFinal = Object.values(agrupado);
+
+  if (listaFinal.length === 0) {
+    texto += "Não há aulas vagas na semana.";
+    navigator.clipboard.writeText(texto);
+    alert("Relatório semanal copiado!");
+    return;
+  }
+
+  // 🔥 ORGANIZA POR DIA
+  listaFinal.sort((a, b) => {
+    const [da, ma, aa] = a.dia.split('/');
+    const [db, mb, ab] = b.dia.split('/');
+    return new Date(aa, ma-1, da) - new Date(ab, mb-1, db);
+  });
+
+  let diaAtual = "";
+
+  listaFinal.forEach(item => {
+
+    // 🔥 quebra por dia
+    if (item.dia !== diaAtual) {
+      texto += `📅 DATA: ${item.dia}\n\n`;
+      diaAtual = item.dia;
+    }
+
+    const horariosUnicos = [...new Set(item.horarios)];
+
+    texto += `🏫 TURMA: ${item.turma}\n`;
+    texto += `⏰ AULAS VAGAS: ${horariosUnicos.join(", ")}\n\n`;
+  });
+
+  navigator.clipboard.writeText(texto).then(() => {
+    alert("Relatório semanal copiado!");
+  });
+}
+  
+function exportarPDF(){
+const { jsPDF } = window.jspdf;
+const pdf = new jsPDF('l','mm','a4');
+
+const sem = document.getElementById('selectSemana').value;
+const diasObj = semanasAgrupadas[sem].dias;
+
+const turmasAtivas = document.getElementById('selectModalidade').value === "SUPERIOR"
+? getTurmasAtivasNaSemana(diasObj)
+: turmasDaPlanilha;
+
+const nomes = ["DOMINGO","SEGUNDA-FEIRA","TERÇA-FEIRA","QUARTA-FEIRA","QUINTA-FEIRA","SEXTA-FEIRA","SÁBADO"];
+
+/* 🔥 CORES PDF */
+const coresPDF = {
+    "reserva-ensino": [212,237,218],
+    "pps": [11,61,145],
+    "estudos": [255,229,180],
+    "reuniao": [208,235,255],
+    "caed": [255,243,205],
+    "reposicao": [30,126,52],
+    "marcacao-extra": [224,224,224]
+};
+
+/* 🔥 DETECÇÃO DE CLASSE */
+function detectarClasse(valor){
+    let valNorm = normalizarTexto(valor);
+
+    if(valNorm.includes("RESERVA ENSINO")) return "reserva-ensino";
+    if(valNorm.includes("PPS/ATENDIMENTO")) return "pps";
+    if(valNorm.includes("ESTUDOS INDIVIDUAIS")) return "estudos";
+    if(valNorm.includes("REUNIAO DE SERVIDORES")) return "reuniao";
+    if(valNorm.includes("CAED") || valNorm.includes("PRE-CONSELHO")) return "caed";
+    if(valNorm.includes("_REP -")) return "reposicao";
+
+    if(
+        valNorm.includes("[+]") ||
+        valNorm.includes("*") ||
+        valNorm.includes("[R]") ||
+        valNorm.includes("INTERVALO")
+    ){
+        return "marcacao-extra";
+    }
+
+    return null;
+}
+
+Object.keys(diasObj).forEach((dia,i)=>{
+
+if(i>0) pdf.addPage();
+
+const pageWidth = pdf.internal.pageSize.getWidth();
+
+/* =========================
+   🔥 SEU CABEÇALHO ORIGINAL
+========================= */
+pdf.setFontSize(9);
+pdf.text("INSTITUTO FEDERAL DE EDUCAÇÃO, CIÊNCIA E TECNOLOGIA DE RONDÔNIA - IFRO",pageWidth/2,8,{align:'center'});
+pdf.text("CAMPUS CACOAL - Departamento de Apoio ao Ensino - DAPE",pageWidth/2,12,{align:'center'});
+pdf.text(`SEMANA: ${sem}`,pageWidth/2,16,{align:'center'});
+
+/* DIA */
+const p = dia.split('/');
+const dObj = new Date(p[2],p[1]-1,p[0]);
+
+pdf.setFontSize(14);
+pdf.setTextColor(46,125,50);
+pdf.setFont(undefined,'bold');
+pdf.text(`${nomes[dObj.getDay()]} - ${dia}`, pageWidth/2, 24, {align:'center'});
+pdf.setTextColor(0,0,0);
+pdf.setFont(undefined,'normal');
+
+/* FERIADO */
+if(isFeriado(dia)){
+pdf.setFontSize(60);
+pdf.text("FERIADO", pageWidth/2, 100, {align:'center'});
+return;
+}
+
+/* DADOS */
+const body = diasObj[dia].map(r=>{
+let line=[r[1]];
+turmasAtivas.forEach(t=>{
+const idx = dadosGlobais[0].indexOf(t);
+line.push((r[idx]||"").trim());
+});
+return line;
+});
+
+/* =========================
+   🔥 TABELA OTIMIZADA
+========================= */
+pdf.autoTable({
+head:[['Horário',...turmasAtivas]],
+body:body,
+startY:28,
+
+theme:'grid',
+
+/* 🔥 MARGENS 0,2cm (2mm) */
+margin:{ top: 28, left: 2, right: 2, bottom: 2 },
+
+/* 🔥 GRADE MAIS LEVE */
+tableLineColor:[200,200,200],
+tableLineWidth:0.1,
+
+styles:{
+fontSize:4.5,
+halign:'center',
+valign:'middle',
+cellPadding:1
+},
+
+/* 🔥 CABEÇALHO LIMPO */
+headStyles:{
+fillColor:[46,125,50],
+textColor:[0,0,0],
+fontStyle:'bold',
+lineColor:[200,200,200],
+lineWidth:0.1
+},
+
+/* 🔥 COLUNA HORÁRIO MENOR */
+columnStyles:{
+0:{ cellWidth:16 }
+},
+
+didParseCell:(data)=>{
+
+const col = data.column.index;
+
+/* cores por curso */
+if(col>0){
+const curso = getCursoInfo(turmasAtivas[col-1]);
+data.cell.styles.fillColor = curso.rgb;
+}
+
+/* regras de destaque */
+const txt = (data.cell.raw||"").toString();
+const classe = detectarClasse(txt);
+
+if(classe && coresPDF[classe]){
+data.cell.styles.fillColor = coresPDF[classe];
+
+if(classe==="pps" || classe==="reposicao"){
+data.cell.styles.textColor=[255,255,255];
+data.cell.styles.fontStyle="bold";
+}
+}
+
+/* 🔥 LINHAS VAZIAS MENOR POSSÍVEL */
+const vazio = data.row.raw.slice(1).every(v=>!v||v.trim()==="");
+
+if(vazio){
+data.cell.styles.minCellHeight = 1.5;
+data.cell.styles.fontSize = 3.5;
+}
+
+/* intervalo leve */
+const t = txt.toUpperCase();
+if(t.includes("INTERVALO")||t.includes("[+]")||t.includes("*")||t.includes("[R]")){
+data.cell.styles.fillColor=[235,235,235];
+}
+}
+});
+
+/* =========================
+   🔥 SEU RODAPÉ ORIGINAL
+========================= */
+pdf.setFontSize(8);
+pdf.text(
+"IFRO - Campus Cacoal | BR 364, Km 228, Lote 2-A | (69) 3443-2445 | dape.cacoal@ifro.edu.br",
+pageWidth/2,
+205,
+{align:'center'}
+);
+
+});
+
+const mod = document.getElementById('selectModalidade').value;
+const nomeArquivo = `HORÁRIO ${mod} - SEMANA DE ${sem}`;
+pdf.save(nomeArquivo);
+}
+
+function criarBotoesDias() {
+  const sem = document.getElementById('selectSemana').value;
+  const dias = semanasAgrupadas[sem].dias;
+
+  let html = `
+    <div style="padding:10px;display:flex;gap:10px;flex-wrap:wrap;">
+  `;
+
+  Object.keys(dias).forEach(dia => {
+    html += `
+      <button onclick="copiarRelatorioDia('${dia}')"
+        style="padding:10px;background:#2e7d32;color:white;border:none;border-radius:6px;cursor:pointer;">
+        📅 ${dia}
+      </button>
+    `;
+  });
+
+  html += `
+      <button onclick="gerarRelatorioSemana()"
+        style="padding:10px;background:#d32f2f;color:white;border:none;border-radius:6px;cursor:pointer;">
+        📊 Semana inteira
+      </button>
+    </div>
+  `;
+
+  document.getElementById("botoesRelatorio").innerHTML = html;
+}
+
+window.addEventListener("beforeunload", () => {
+  salvarSnapshotAtual();
+});
+  
+window.onload=init;
+</script>
 
 </body>
 </html>
