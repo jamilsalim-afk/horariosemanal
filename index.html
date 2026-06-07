@@ -1242,6 +1242,20 @@ function criarBotoesDias() {
 window.addEventListener("beforeunload", () => {
   salvarSnapshotAtual();
 });
+
+  document.getElementById("btnTema").addEventListener("click", () => {
+
+  const html = document.documentElement;
+
+  if (html.getAttribute("data-theme") === "dark") {
+    html.removeAttribute("data-theme");
+    document.getElementById("btnTema").innerHTML = "🌙 Tema";
+  } else {
+    html.setAttribute("data-theme", "dark");
+    document.getElementById("btnTema").innerHTML = "☀️ Tema";
+  }
+
+});
   
 window.onload=init;
 </script>
