@@ -678,6 +678,18 @@ function verificarMudancaAoAbrir() {
   salvarSnapshotAtual();
 }
 
+function mostrarMensagemPainel(titulo, texto){
+
+  const tituloPainel =
+    document.querySelector("#painelAlteracoes strong");
+
+  tituloPainel.innerText = titulo;
+
+  document.getElementById("conteudoAlteracoes").innerText = texto;
+
+  document.getElementById("painelAlteracoes").style.display = "block";
+}
+  
 function mostrarAvisoAlteracoes(lista) {
 
   let texto = "⚠️ ALTERAÇÕES DE AULAS DETECTADAS:\n\n";
@@ -1060,12 +1072,14 @@ function gerarRelatorioDia(dia) {
   return texto;
 }
 
-function copiarRelatorioDia(dia) {
+function mostrarRelatorioDia(dia){
+
   const texto = gerarRelatorioDia(dia);
 
-  navigator.clipboard.writeText(texto).then(() => {
-    alert("Relatório copiado para área de transferência!");
-  });
+  mostrarMensagemPainel(
+    `📅 Relatório de aulas vagas - ${dia}`,
+    texto
+  );
 }
 
 function gerarRelatorioSemana() {
@@ -1098,11 +1112,16 @@ function gerarRelatorioSemana() {
   const listaFinal = Object.values(agrupado);
 
   if (listaFinal.length === 0) {
-    texto += "Não há aulas vagas na semana.";
-    navigator.clipboard.writeText(texto);
-    alert("Relatório semanal copiado!");
-    return;
-  }
+
+  texto += "Não há aulas vagas na semana.";
+
+  mostrarMensagemPainel(
+    "📊 Relatório semanal de aulas vagas",
+    texto
+  );
+
+  return;
+}
 
   // 🔥 ORGANIZA POR DIA
   listaFinal.sort((a, b) => {
@@ -1127,9 +1146,10 @@ function gerarRelatorioSemana() {
     texto += `⏰ AULAS VAGAS: ${horariosUnicos.join(", ")}\n\n`;
   });
 
-  navigator.clipboard.writeText(texto).then(() => {
-    alert("Relatório semanal copiado!");
-  });
+  mostrarMensagemPainel(
+  "📊 Relatório semanal de aulas vagas",
+  texto
+);
 }
   
 function exportarPDF(){
@@ -1317,25 +1337,58 @@ pdf.save(nomeArquivo);
 }
 
 function criarBotoesDias() {
+
   const sem = document.getElementById('selectSemana').value;
+
   const dias = semanasAgrupadas[sem].dias;
 
   let html = `
-    <div style="padding:10px;display:flex;gap:10px;flex-wrap:wrap;">
+    <div style="
+      padding:10px;
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+    ">
   `;
 
   Object.keys(dias).forEach(dia => {
+
+    const [d,m,a] = dia.split('/');
+
+    const data = new Date(a,m-1,d);
+
+    const diaSemana = data.getDay();
+
+    // ignora sábado e domingo
+    if (diaSemana === 6 || diaSemana === 0) return;
+
     html += `
-      <button onclick="copiarRelatorioDia('${dia}')"
-        style="padding:10px;background:#2e7d32;color:white;border:none;border-radius:6px;cursor:pointer;">
+      <button
+        onclick="mostrarRelatorioDia('${dia}')"
+        style="
+          padding:10px;
+          background:#2e7d32;
+          color:white;
+          border:none;
+          border-radius:6px;
+          cursor:pointer;
+        ">
         📅 ${dia}
       </button>
     `;
   });
 
   html += `
-      <button onclick="gerarRelatorioSemana()"
-        style="padding:10px;background:#d32f2f;color:white;border:none;border-radius:6px;cursor:pointer;">
+      <button
+        onclick="gerarRelatorioSemana()"
+        style="
+          padding:10px;
+          background:#d32f2f;
+          color:white;
+          border:none;
+          border-radius:6px;
+          cursor:pointer;
+        ">
         📊 Semana inteira
       </button>
     </div>
