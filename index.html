@@ -1302,10 +1302,10 @@ window.addEventListener("beforeunload", () => {
 
   if (html.getAttribute("data-theme") === "dark") {
     html.removeAttribute("data-theme");
-    document.getElementById("btnTema").innerHTML = "🌙 Tema";
+    document.getElementById("btnTema").innerHTML = "🌙";
   } else {
     html.setAttribute("data-theme", "dark");
-    document.getElementById("btnTema").innerHTML = "☀️ Tema";
+    document.getElementById("btnTema").innerHTML = "☀️";
   }
 
 });
