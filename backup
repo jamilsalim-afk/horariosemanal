@@ -11,391 +11,7 @@ if(localStorage.getItem("tema")==="dark"){
    document.documentElement.setAttribute("data-theme","dark");
 }
 </script>
-  
-<style>
-:root{
-  --primary:#2e7d32;
-
-  --bg:#f4f7f6;
-  --surface:#ffffff;
-
-  --text:#000000;
-  --text-soft:#333333;
-  --border:#bbbbbb;
-  --time-bg:#f1f3f4;
-
-  --footer-bg:#2e7d32;
-  --footer-text:#ffffff;
-
-  --shadow:0 2px 10px rgba(0,0,0,.12);
-
-  /* Cursos */
-  --agroec:#e8f5e9;
-  --agropec:#e3f2fd;
-  --info:#fff8e1;
-  --geo:#f3e5f5;
-  --mat:#e0f7fa;
-  --agroneg:#efebe9;
-  --zoo:#fce4ec;
-  --agron:#f1f8e9;
-
-  /* Destaques */
-  --highlight:#fbc02d;
-  --intervalo:#e0e0e0;
-  --caed:#fff3cd;
-}
-
-[data-theme="dark"]{
-  --bg:#0f172a;
-  --surface:#1e293b;
-
-  --text:#f8fafc;
-  --text-soft:#cbd5e1;
-
-  --border:#475569;
-  --time-bg:#334155;
-
-  --footer-bg:#14532d;
-  --footer-text:#ffffff;
-
-  --shadow:0 4px 18px rgba(0,0,0,.35);
-
-  /* Cursos (versões escuras) */
-  --agroec:#1f3b2a;
-  --agropec:#1c3245;
-  --info:#4a3f16;
-  --geo:#3b2942;
-  --mat:#173944;
-  --agroneg:#3a312e;
-  --zoo:#4a2732;
-  --agron:#2e4020;
-
-  /* Destaques */
-  --highlight:#b8860b;
-  --intervalo:#374151;
-  --caed:#665200;
-}
-
-*{
-  box-sizing:border-box;
-}
-
-body{
-  font-family:'Segoe UI',sans-serif;
-  background:var(--bg);
-  color:var(--text);
-  margin:0;
-  transition:.3s;
-}
-
-/* CABEÇALHO */
-
-.ifro-header{
-  position:sticky;
-  top:0;
-  z-index:1100;
-  background:var(--surface);
-  border-bottom:4px solid var(--primary);
-}
-
-.ifro-header-content{
-  text-align:center;
-  padding:12px;
-}
-
-.ifro-linha1{
-  font-size:20px;
-  font-weight:bold;
-  color:var(--text);
-}
-
-.ifro-linha2{
-  font-size:18px;
-  font-weight:bold;
-  color:var(--text);
-}
-
-.ifro-linha3{
-  font-size:16px;
-  color:var(--text);
-}
-
-.ifro-linha4{
-  font-size:17px;
-  font-weight:bold;
-  color:var(--text);
-}
-
-/* CONTROLES */
-
-.header-sticky{
-  position:sticky;
-  top:110px;
-  z-index:1000;
-  background:var(--bg);
-  padding:9px;
-}
-
-.controls-card{
-  background:var(--surface);
-  padding:15px;
-  border-radius:12px;
-  display:flex;
-  flex-wrap:wrap;
-  gap:10px;
-  justify-content:center;
-  box-shadow:var(--shadow);
-}
-
-select,
-.search-box,
-.btn-pdf{
-  padding:12px;
-  font-size:14px;
-  border-radius:6px;
-}
-
-select,
-.search-box{
-  background:var(--surface);
-  color:var(--text);
-  border:2px solid var(--primary);
-}
-
-.search-box{
-  width:260px;
-}
-
-.btn-pdf{
-  background:#d32f2f;
-  color:#fff;
-  border:none;
-  cursor:pointer;
-  font-weight:bold;
-}
-
-.btn-pdf:hover{
-  opacity:.92;
-}
-
-/* CONTEÚDO */
-
-.week-container{
-  padding:14px;
-}
-
-.table-responsive{
-  width:100%;
-  overflow-x:auto;
-  background:var(--surface);
-  border-radius:8px;
-  box-shadow:var(--shadow);
-}
-
-table{
-  min-width:1400px;
-  width:100%;
-  border-collapse:separate;
-  border-spacing:0;
-  font-size:9px;
-  table-layout:fixed;
-}
-
-th,
-td{
-  border:1px solid var(--border);
-  padding:6px;
-  text-align:center;
-  vertical-align:middle;
-  color:var(--text);
-}
-
-td,
-th{
-  word-break:break-word;
-}
-
-.aula-cell{
-  white-space:normal;
-}
-
-/* CORES CURSOS */
-
-.c-agroec{background:var(--agroec) !important;}
-.c-agropec{background:var(--agropec) !important;}
-.c-info{background:var(--info) !important;}
-.c-geo{background:var(--geo) !important;}
-.c-mat{background:var(--mat) !important;}
-.c-agroneg{background:var(--agroneg) !important;}
-.c-zoo{background:var(--zoo) !important;}
-.c-agron{background:var(--agron) !important;}
-
-/* DIVISOR DIA */
-
-.day-divider{
-  background:var(--primary);
-  color:#fff;
-  font-weight:bold;
-  font-size:15px;
-}
-
-.day-divider td{
-  color:#fff;
-}
-
-/* HORÁRIO */
-
-.time-col{
-  font-weight:bold;
-  width:85px;
-  background:var(--time-bg);
-  position:sticky;
-  left:0;
-  z-index:2;
-}
-
-th.time-col{
-  z-index:3;
-}
-
-/* BUSCA */
-
-.highlight{
-  background:var(--highlight) !important;
-}
-
-.opaco{
-  opacity:.1;
-}
-
-/* INTERVALOS */
-
-.intervalo,
-.marcacao-extra{
-  background:var(--intervalo) !important;
-  font-weight:bold;
-}
-
-/* FERIADO */
-
-.feriado{
-  font-size:120px;
-  text-align:center;
-  font-weight:bold;
-  color:rgba(200,0,0,.4);
-  height:200px;
-}
-
-/* LINHAS VAZIAS */
-
-tr.linha-vazia td{
-  padding:2px !important;
-  font-size:8px !important;
-  height:10px !important;
-}
-
-/* DESTAQUES */
-
-.reserva-ensino{
-  color:#fbc02d;
-  font-weight:bold;
-}
-
-.pps{
-  color:#0b3d91;
-  font-weight:bold;
-}
-
-.estudos{
-  color:#1e7e34;
-  font-weight:bold;
-}
-
-.reuniao{
-  color:#fb8c00;
-  font-weight:bold;
-}
-
-.caed{
-  background:var(--caed) !important;
-}
-
-.reposicao{
-  color:#0b3d91;
-  font-weight:bold;
-}
-
-/* PAINEL ALTERAÇÕES */
-
-#painelAlteracoes{
-  background:var(--surface) !important;
-  color:var(--text);
-  box-shadow:var(--shadow);
-}
-
-#conteudoAlteracoes{
-  color:var(--text);
-}
-
-/* BOTÕES RELATÓRIO */
-
-#botoesRelatorio button{
-  transition:.2s;
-}
-
-#botoesRelatorio button:hover{
-  transform:translateY(-1px);
-}
-
-/* RODAPÉ */
-
-.ifro-footer{
-  background:var(--footer-bg);
-  color:var(--footer-text);
-  padding:20px;
-  text-align:center;
-  margin-top:15px;
-}
-
-/* SCROLL */
-
-::-webkit-scrollbar{
-  height:10px;
-  width:10px;
-}
-
-::-webkit-scrollbar-thumb{
-  background:#999;
-  border-radius:8px;
-}
-
-#btnTema{
-  width:48px;
-  height:48px;
-
-  border:none;
-  border-radius:50%;
-
-  background:var(--surface);
-  color:var(--text);
-
-  cursor:pointer;
-
-  font-size:22px;
-
-  display:flex;
-  justify-content:center;
-  align-items:center;
-
-  box-shadow:var(--shadow);
-
-  transition:.3s;
-}
-
-#btnTema:hover{
-  transform:rotate(15deg) scale(1.08);
-}
-</style>
+<link rel="stylesheet" href="style.css">
 </head>
 
 <body>
@@ -408,6 +24,52 @@ tr.linha-vazia td{
 <div class="ifro-linha4">HORÁRIOS SEMANAIS - 2026</div>
 </div>
 </div>
+
+<div class="tabs-container">
+
+  <button class="tab-btn active"
+          onclick="abrirAba('dashboard',this)">
+          📊 Dashboard
+  </button>
+
+  <button class="tab-btn"
+          onclick="abrirAba('horarios',this)">
+          📅 Horários
+  </button>
+
+<button class="tab-btn"
+          onclick="abrirAba('sabados',this)">
+          📚 Sábados Letivos
+  </button>
+   
+<button class="tab-btn"
+          onclick="abrirAba('professores',this)">
+          👨‍🏫 Professores
+  </button>
+
+  <button class="tab-btn"
+          onclick="abrirAba('turmas',this)">
+          🏫 Turmas
+  </button>
+
+  <button class="tab-btn"
+          onclick="abrirAba('estatisticas',this)">
+          📈 Estatísticas
+  </button>
+
+<button id="btnTema">🌙</button>
+   
+</div>
+
+<div id="dashboard"
+     class="tab-content active">
+
+  <div id="dashboardContent"></div>
+
+</div>
+
+<div id="horarios"
+     class="tab-content">
 
 <div class="header-sticky">
 <div class="controls-card">
@@ -423,11 +85,10 @@ placeholder="🔍 Buscar Professor..." onkeyup="filtrarProfessor()">
 
 <button class="btn-pdf" onclick="exportarPDF()">📄 Baixe o PDF da Semana</button>
 
-<button id="btnTema">🌙</button>
 </div>
 </div>
 
-<div class="week-container">
+  <div class="week-container">
 
 <!-- 🔥 BOTÕES NOVOS -->
 <div id="botoesRelatorio"></div>
@@ -473,6 +134,52 @@ placeholder="🔍 Buscar Professor..." onkeyup="filtrarProfessor()">
 <div class="table-responsive" id="tabelaHorario"></div>
 </div>
 
+<div id="sabados" class="tab-content">
+
+  <div class="header-sticky">
+    <div class="controls-card">
+
+    <label>Modalidade</label>
+    <select id="selectModalidadeSabado"
+            onchange="carregarSabados()">
+        <option value="INTEGRADO">
+            CURSOS TÉCNICOS INTEGRADOS
+        </option>
+        <option value="SUPERIOR">
+            CURSOS SUPERIORES
+        </option>
+    </select>
+
+    <label>Sábado Letivo</label>
+    <select id="selectSabado"
+            onchange="renderizarSabadoSelecionado()">
+    </select>
+
+</div>
+  </div>
+
+  <div class="week-container">
+
+      <div class="table-responsive">
+          <div id="tabelaSabados"></div>
+      </div>
+
+  </div>
+
+</div>
+   
+<div id="professores" class="tab-content">
+    Em construção...
+</div>
+
+<div id="turmas" class="tab-content">
+    Em construção...
+</div>
+
+<div id="estatisticas" class="tab-content">
+    Em construção...
+</div>
+
 <footer class="ifro-footer">
 IFRO - Campus Cacoal<br>
 BR 364, Km 228, Lote 2-A - Zona Rural<br>
@@ -485,7 +192,13 @@ INTEGRADO:{id:'1j33kiPqwtzZNuvkBgYDaIiXZvVMY_J0qWAtRfYGdnD8',gid:'1357770092'},
 SUPERIOR:{id:'14ALXZgFIT68ee9ajuIdG63SpGVm0HyTjwp63-J6vRyg',gid:'669887707'}
 };
 
-let dadosGlobais=[],turmasDaPlanilha=[],semanasAgrupadas={};
+let dadosGlobais = [];
+
+let dadosIntegrado = [];
+let dadosSuperior = [];
+
+let turmasDaPlanilha = [];
+let semanasAgrupadas = {};
 
   function deveCompararDia(dataStr){
 
@@ -548,11 +261,25 @@ function limparPainelAlteracoes(){
 }
   
 function trocarModalidade(){
-  window.trocouModalidade = true;
 
-  limparPainelAlteracoes(); // 🔥 ESSENCIAL
+  limparPainelAlteracoes();
 
-  init();
+  const mod =
+    document.getElementById(
+      "selectModalidade"
+    ).value;
+
+  if(mod==="INTEGRADO"){
+    dadosGlobais = dadosIntegrado;
+  }else{
+    dadosGlobais = dadosSuperior;
+  }
+
+  processarDados();
+
+  setTimeout(()=>{
+    verificarMudancaAoAbrir();
+  },200);
 }
 
   function trocarSemana(){
@@ -797,26 +524,97 @@ async function init(){
 
   document.getElementById('searchProf').value = "";
 
-  const mod = document.getElementById('selectModalidade').value;
-
-  // 🔥 LIMPA PAINEL ao trocar
   document.getElementById("painelAlteracoes").style.display = "none";
 
-  // 🔥 FLAG DE TROCA
-  window.trocouModalidade = true;
+  try{
 
-  const url = `https://docs.google.com/spreadsheets/d/${SHEETS[mod].id}/export?format=csv&gid=${SHEETS[mod].gid}`;
-  const res = await fetch(url);
+    // ==========================
+    // CARREGA INTEGRADO
+    // ==========================
 
-  dadosGlobais = parseCSV(await res.text());
+    const urlIntegrado =
+      `https://docs.google.com/spreadsheets/d/${SHEETS.INTEGRADO.id}/export?format=csv&gid=${SHEETS.INTEGRADO.gid}`;
 
-  processarDados();
+    // ==========================
+    // CARREGA SUPERIOR
+    // ==========================
 
-  // 🔥 GARANTE verificação após tudo carregado
-  setTimeout(() => {
-    verificarMudancaAoAbrir();
-  }, 200);
+    const urlSuperior =
+      `https://docs.google.com/spreadsheets/d/${SHEETS.SUPERIOR.id}/export?format=csv&gid=${SHEETS.SUPERIOR.gid}`;
+
+    // ==========================
+    // DOWNLOAD EM PARALELO
+    // ==========================
+
+    const [resIntegrado,resSuperior] =
+      await Promise.all([
+        fetch(urlIntegrado),
+        fetch(urlSuperior)
+      ]);
+
+    // ==========================
+    // CONVERTE CSV
+    // ==========================
+
+    dadosIntegrado =
+      parseCSV(await resIntegrado.text());
+
+    dadosSuperior =
+      parseCSV(await resSuperior.text());
+
+    // ==========================
+    // DEFINE MODALIDADE ATIVA
+    // ==========================
+
+    const modalidadeAtual =
+      document.getElementById(
+        'selectModalidade'
+      ).value;
+
+    if(modalidadeAtual === "INTEGRADO"){
+      dadosGlobais = dadosIntegrado;
+    }else{
+      dadosGlobais = dadosSuperior;
+    }
+
+    // ==========================
+    // PROCESSA HORÁRIOS
+    // ==========================
+
+    processarDados();
+
+    // ==========================
+    // GERA DASHBOARD
+    // ==========================
+
+    gerarDashboard();
+
+    // ==========================
+    // VERIFICA ALTERAÇÕES
+    // ==========================
+
+    setTimeout(() => {
+
+      if(
+        document.getElementById(
+          'selectModalidade'
+        ).value
+      ){
+        verificarMudancaAoAbrir();
+      }
+
+    },200);
+
+  }catch(erro){
+
+    console.error(erro);
+
+    alert(
+      "Erro ao carregar planilhas."
+    );
+  }
 }
+
 function getCursoInfo(t){
 t=t.toUpperCase();
 if(t.includes("AGROEC")) return {cl:"c-agroec",rgb:[232,245,233]};
@@ -1012,6 +810,283 @@ regrasDestaque.forEach(regra => {
     "reposicao": [30, 126, 52], // verde escuro
     "marcacao-extra": [224, 224, 224]
 };
+   
+function carregarSabados(){
+
+  const modalidade =
+    document.getElementById(
+      "selectModalidadeSabado"
+    ).value;
+
+  const dados =
+    modalidade === "INTEGRADO"
+      ? dadosIntegrado
+      : dadosSuperior;
+
+  const sabados = [];
+
+  let ultimaData = "";
+
+  for(let i=1;i<dados.length;i++){
+
+      if(dados[i][0])
+         ultimaData = dados[i][0];
+
+      if(!ultimaData)
+         continue;
+
+      const [d,m,a] =
+        ultimaData.split('/');
+
+      const data =
+        new Date(a,m-1,d);
+
+      if(data.getDay() !== 6)
+         continue;
+
+      if(!sabados.includes(ultimaData))
+         sabados.push(ultimaData);
+  }
+
+  sabados.sort((a,b)=>{
+
+      const pa = a.split('/');
+      const pb = b.split('/');
+
+      return new Date(
+          pa[2],
+          pa[1]-1,
+          pa[0]
+      ) - new Date(
+          pb[2],
+          pb[1]-1,
+          pb[0]
+      );
+
+  });
+
+  const select =
+    document.getElementById(
+      "selectSabado"
+    );
+
+  select.innerHTML = "";
+
+  sabados.forEach(data=>{
+
+      select.innerHTML += `
+      <option value="${data}">
+        ${data}
+      </option>
+      `;
+  });
+
+  renderizarSabadoSelecionado();
+}
+   
+   function renderizarSabados(){
+
+  const modalidade =
+    document.getElementById(
+      "selectModalidadeSabado"
+    ).value;
+
+  const dados =
+    modalidade === "INTEGRADO"
+      ? dadosIntegrado
+      : dadosSuperior;
+
+  let html = "";
+
+  let ultimaData = "";
+
+  let diasSabado = {};
+
+  for(let i=1;i<dados.length;i++){
+
+      const row = dados[i];
+
+      if(row[0])
+         ultimaData = row[0];
+
+      const dataStr = ultimaData;
+
+      if(!dataStr) continue;
+
+      const [d,m,a] =
+        dataStr.split('/');
+
+      const data =
+        new Date(a,m-1,d);
+
+      if(data.getDay() !== 6)
+         continue;
+
+      if(!diasSabado[dataStr])
+         diasSabado[dataStr] = [];
+
+      diasSabado[dataStr].push(row);
+  }
+
+  const turmas =
+    dados[0].slice(2).filter(Boolean);
+
+  Object.keys(diasSabado).forEach(dia=>{
+
+      html += `
+      <table>
+
+      <tr class="day-divider">
+        <td colspan="${turmas.length+1}">
+          SÁBADO LETIVO - ${dia}
+        </td>
+      </tr>
+
+      <tr>
+        <th class="time-col">Horário</th>
+      `;
+
+      turmas.forEach(t=>{
+
+          html += `
+          <th class="${getCursoInfo(t).cl}">
+            ${t}
+          </th>`;
+      });
+
+      html += "</tr>";
+
+      diasSabado[dia].forEach(r=>{
+
+          html += `
+          <tr>
+
+            <td class="time-col">
+              ${r[1]}
+            </td>
+          `;
+
+          turmas.forEach(t=>{
+
+              const idx =
+                dados[0].indexOf(t);
+
+              const val =
+                (r[idx] || "").trim();
+
+              html += `
+              <td class="aula-cell ${getCursoInfo(t).cl}">
+                ${val}
+              </td>`;
+          });
+
+          html += "</tr>";
+      });
+
+      html += "</table><br>";
+  });
+
+  document.getElementById(
+    "tabelaSabados"
+  ).innerHTML = html;
+}
+
+   function renderizarSabadoSelecionado(){
+
+  const modalidade =
+    document.getElementById(
+      "selectModalidadeSabado"
+    ).value;
+
+  const sabado =
+    document.getElementById(
+      "selectSabado"
+    ).value;
+
+  const dados =
+    modalidade === "INTEGRADO"
+      ? dadosIntegrado
+      : dadosSuperior;
+
+  let ultimaData = "";
+
+  const linhas = [];
+
+  for(let i=1;i<dados.length;i++){
+
+      if(dados[i][0])
+         ultimaData = dados[i][0];
+
+      if(ultimaData === sabado){
+         linhas.push(dados[i]);
+      }
+  }
+
+  const turmas =
+    dados[0]
+      .slice(2)
+      .filter(Boolean);
+
+  let html = `
+  <table>
+
+    <tr class="day-divider">
+      <td colspan="${turmas.length+1}">
+        SÁBADO LETIVO - ${sabado}
+      </td>
+    </tr>
+
+    <tr>
+      <th class="time-col">
+        Horário
+      </th>
+  `;
+
+  turmas.forEach(t=>{
+
+      html += `
+      <th class="${getCursoInfo(t).cl}">
+        ${t}
+      </th>
+      `;
+  });
+
+  html += "</tr>";
+
+  linhas.forEach(r=>{
+
+      html += `
+      <tr>
+
+        <td class="time-col">
+          ${r[1]}
+        </td>
+      `;
+
+      turmas.forEach(t=>{
+
+          const idx =
+            dados[0].indexOf(t);
+
+          const valor =
+            (r[idx] || "").trim();
+
+          html += `
+          <td class="aula-cell ${getCursoInfo(t).cl}">
+            ${valor}
+          </td>
+          `;
+      });
+
+      html += "</tr>";
+  });
+
+  html += "</table>";
+
+  document.getElementById(
+    "tabelaSabados"
+  ).innerHTML = html;
+}
 
 function coletarVagasDoDia(dia) {
   const sem = document.getElementById('selectSemana').value;
@@ -1339,6 +1414,168 @@ pageWidth/2,
 const mod = document.getElementById('selectModalidade').value;
 const nomeArquivo = `HORÁRIO ${mod} - SEMANA DE ${sem}`;
 pdf.save(nomeArquivo);
+}
+
+function abrirAba(nome,botao){
+
+  document
+    .querySelectorAll(".tab-content")
+    .forEach(el =>
+      el.classList.remove("active")
+    );
+
+  document
+    .querySelectorAll(".tab-btn")
+    .forEach(el =>
+      el.classList.remove("active")
+    );
+
+  document
+    .getElementById(nome)
+    .classList.add("active");
+
+  if(botao)
+     botao.classList.add("active");
+
+  if(nome==="sabados"){
+      carregarSabados();
+  }
+}
+
+function gerarDashboard(){
+
+  const statsIntegrado =
+    calcularIndicadores(dadosIntegrado);
+
+  const statsSuperior =
+    calcularIndicadores(dadosSuperior);
+
+  document.getElementById("dashboardContent").innerHTML = `
+      <div class="dashboard-grid">
+
+          ${cardDashboard(
+            "🎓 Integrado",
+            statsIntegrado
+          )}
+
+          ${cardDashboard(
+            "🎓 Superior",
+            statsSuperior
+          )}
+
+      </div>
+  `;
+}
+
+function cardDashboard(titulo,d){
+
+return `
+<div class="dash-card">
+
+<h2>${titulo}</h2>
+
+<div class="dash-item">
+  <span>Dias Letivos</span>
+  <strong>${d.diasLetivos}</strong>
+</div>
+
+<div class="dash-item">
+  <span>Quantidade de Aulas</span>
+  <strong>${d.aulas}</strong>
+</div>
+
+<div class="dash-item">
+  <span>Aulas Vagas</span>
+  <strong>${d.vagas}</strong>
+</div>
+
+<div class="dash-item">
+  <span>Sábados Letivos</span>
+  <strong>${d.sabados}</strong>
+</div>
+
+</div>
+`;
+}
+
+function calcularIndicadores(dados){
+
+  let dias = new Set();
+
+  let aulas = 0;
+  let vagas = 0;
+  let sabados = 0;
+
+  const hoje = new Date();
+
+  hoje.setHours(23,59,59,999);
+
+  let ultimaData = "";
+
+  for(let i=1;i<dados.length;i++){
+
+      const row = dados[i];
+
+      if(row[0]) ultimaData = row[0];
+
+      const dataStr = ultimaData;
+
+      if(!dataStr) continue;
+
+      const [d,m,a] = dataStr.split('/');
+
+      const data = new Date(a,m-1,d);
+
+      // ignora datas futuras
+      if(data > hoje) continue;
+
+      // ignora feriados
+      if(isFeriado(dataStr)) continue;
+
+      dias.add(dataStr);
+
+      // sábado letivo
+      if(data.getDay() === 6){
+         sabados++;
+      }
+
+      const horario = normalizarTexto(row[1] || "");
+
+      // ignora linhas de intervalo
+      if(
+        horario.includes("INTERVALO") ||
+        horario.includes("[+]") ||
+        horario.includes("[R]") ||
+        horario.includes("*")
+      ){
+        continue;
+      }
+
+      for(let j=2;j<row.length;j++){
+
+         const val = (row[j] || "").trim();
+
+         if(!val) continue;
+
+         const norm = normalizarTexto(val);
+
+         aulas++;
+
+         if(
+            norm.includes("RESERVA ENSINO") ||
+            norm.includes("ESTUDOS INDIVIDUAIS")
+         ){
+            vagas++;
+         }
+      }
+  }
+
+  return {
+      diasLetivos: dias.size,
+      aulas,
+      vagas,
+      sabados
+  };
 }
 
 function criarBotoesDias() {
