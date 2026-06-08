@@ -153,39 +153,24 @@ placeholder="🔍 Buscar Professor..." onkeyup="filtrarProfessor()">
 
 </div>
   </div>
-
   <div class="week-container">
-
       <div class="table-responsive">
           <div id="tabelaSabados"></div>
       </div>
-
   </div>
-
 </div>
    
 <div id="professores" class="tab-content">
-
   <div class="header-sticky">
     <div class="controls-card">
-
-      <select id="selectProfessor"
-              onchange="gerarRelatorioProfessor()">
-      </select>
-
-      <select id="selectSemanaProfessor"
-              onchange="gerarRelatorioProfessor()">
-      </select>
-
+      <select id="selectProfessor"></select>
+      <select id="selectSemanaProfessor"></select>
     </div>
   </div>
 
   <div id="cardsProfessor"></div>
-
   <div id="tabelaProfessor"></div>
-
   <div id="historicoProfessor"></div>
-
 </div>
 
 <div id="turmas" class="tab-content">
@@ -205,7 +190,8 @@ BR 364, Km 228, Lote 2-A - Zona Rural<br>
 <script>
 const SHEETS={
 INTEGRADO:{id:'1j33kiPqwtzZNuvkBgYDaIiXZvVMY_J0qWAtRfYGdnD8',gid:'1357770092'},
-SUPERIOR:{id:'14ALXZgFIT68ee9ajuIdG63SpGVm0HyTjwp63-J6vRyg',gid:'669887707'}
+SUPERIOR:{id:'14ALXZgFIT68ee9ajuIdG63SpGVm0HyTjwp63-J6vRyg',gid:'669887707'},
+PROFESSORES:{id:'1IDjs0oS6lQBGDrL7ja1Ge0vaBdNCNIULDH7J5p89c5s',gid:'1694280391'}
 };
 
 let dadosGlobais = [];
