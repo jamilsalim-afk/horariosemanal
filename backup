@@ -6,188 +6,395 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
-
+<script>
+if(localStorage.getItem("tema")==="dark"){
+   document.documentElement.setAttribute("data-theme","dark");
+}
+</script>
+  
 <style>
-:root { --primary:#2e7d32; --bg:#f4f7f6; }
+:root{
+  --primary:#2e7d32;
 
-body {
+  --bg:#f4f7f6;
+  --surface:#ffffff;
+
+  --text:#000000;
+  --text-soft:#333333;
+  --border:#bbbbbb;
+  --time-bg:#f1f3f4;
+
+  --footer-bg:#2e7d32;
+  --footer-text:#ffffff;
+
+  --shadow:0 2px 10px rgba(0,0,0,.12);
+
+  /* Cursos */
+  --agroec:#e8f5e9;
+  --agropec:#e3f2fd;
+  --info:#fff8e1;
+  --geo:#f3e5f5;
+  --mat:#e0f7fa;
+  --agroneg:#efebe9;
+  --zoo:#fce4ec;
+  --agron:#f1f8e9;
+
+  /* Destaques */
+  --highlight:#fbc02d;
+  --intervalo:#e0e0e0;
+  --caed:#fff3cd;
+}
+
+[data-theme="dark"]{
+  --bg:#0f172a;
+  --surface:#1e293b;
+
+  --text:#f8fafc;
+  --text-soft:#cbd5e1;
+
+  --border:#475569;
+  --time-bg:#334155;
+
+  --footer-bg:#14532d;
+  --footer-text:#ffffff;
+
+  --shadow:0 4px 18px rgba(0,0,0,.35);
+
+  /* Cursos (versões escuras) */
+  --agroec:#1f3b2a;
+  --agropec:#1c3245;
+  --info:#4a3f16;
+  --geo:#3b2942;
+  --mat:#173944;
+  --agroneg:#3a312e;
+  --zoo:#4a2732;
+  --agron:#2e4020;
+
+  /* Destaques */
+  --highlight:#b8860b;
+  --intervalo:#374151;
+  --caed:#665200;
+}
+
+*{
+  box-sizing:border-box;
+}
+
+body{
   font-family:'Segoe UI',sans-serif;
   background:var(--bg);
+  color:var(--text);
   margin:0;
+  transition:.3s;
 }
 
 /* CABEÇALHO */
-.ifro-header {
+
+.ifro-header{
   position:sticky;
   top:0;
   z-index:1100;
-  background:white;
-  border-bottom:4px solid #2e7d32;
+  background:var(--surface);
+  border-bottom:4px solid var(--primary);
 }
-.ifro-header-content { text-align:center; padding:12px; }
-.ifro-linha1 { font-size:20px; font-weight:bold; color:#000; }
-.ifro-linha2 { font-size:18px; font-weight:bold; color:#000; }
-.ifro-linha3 { font-size:16px; color:#000; }
-.ifro-linha4 { font-size:17px; font-weight:bold; color:#000; }
+
+.ifro-header-content{
+  text-align:center;
+  padding:12px;
+}
+
+.ifro-linha1{
+  font-size:20px;
+  font-weight:bold;
+  color:var(--text);
+}
+
+.ifro-linha2{
+  font-size:18px;
+  font-weight:bold;
+  color:var(--text);
+}
+
+.ifro-linha3{
+  font-size:16px;
+  color:var(--text);
+}
+
+.ifro-linha4{
+  font-size:17px;
+  font-weight:bold;
+  color:var(--text);
+}
 
 /* CONTROLES */
-.header-sticky {
+
+.header-sticky{
   position:sticky;
   top:110px;
   z-index:1000;
   background:var(--bg);
   padding:9px;
 }
-.controls-card {
-  background:white;
+
+.controls-card{
+  background:var(--surface);
   padding:15px;
   border-radius:12px;
   display:flex;
   flex-wrap:wrap;
   gap:10px;
   justify-content:center;
+  box-shadow:var(--shadow);
 }
-select,.search-box,.btn-pdf {
+
+select,
+.search-box,
+.btn-pdf{
   padding:12px;
   font-size:14px;
   border-radius:6px;
 }
-.search-box {
-  width:260px;
+
+select,
+.search-box{
+  background:var(--surface);
+  color:var(--text);
   border:2px solid var(--primary);
 }
-.btn-pdf {
+
+.search-box{
+  width:260px;
+}
+
+.btn-pdf{
   background:#d32f2f;
-  color:white;
+  color:#fff;
   border:none;
   cursor:pointer;
   font-weight:bold;
 }
 
-/* TABELA */
-.week-container { padding:14px; }
-.table-responsive {
+.btn-pdf:hover{
+  opacity:.92;
+}
+
+/* CONTEÚDO */
+
+.week-container{
+  padding:14px;
+}
+
+.table-responsive{
   width:100%;
   overflow-x:auto;
-  background:white;
+  background:var(--surface);
   border-radius:8px;
+  box-shadow:var(--shadow);
 }
-table {
+
+table{
   min-width:1400px;
   width:100%;
-  border-collapse:separate; /* 🔥 ESSENCIAL */
-  border-spacing:0;         /* mantém visual igual */
+  border-collapse:separate;
+  border-spacing:0;
   font-size:9px;
   table-layout:fixed;
 }
-th,td {
-  border:1px solid #bbb;
+
+th,
+td{
+  border:1px solid var(--border);
   padding:6px;
   text-align:center;
   vertical-align:middle;
+  color:var(--text);
 }
 
-/* 🔧 CORREÇÃO DE TEXTO */
-td, th { word-break: break-word; }
-.aula-cell { white-space: normal; }
+td,
+th{
+  word-break:break-word;
+}
 
-/* CORES */
-.c-agroec { background:#e8f5e9 !important; }
-.c-agropec { background:#e3f2fd !important; }
-.c-info { background:#fff8e1 !important; }
-.c-geo { background:#f3e5f5 !important; }
-.c-mat { background:#e0f7fa !important; }
-.c-agroneg { background:#efebe9 !important; }
-.c-zoo { background:#fce4ec !important; }
-.c-agron { background:#f1f8e9 !important; }
+.aula-cell{
+  white-space:normal;
+}
 
-.day-divider {
+/* CORES CURSOS */
+
+.c-agroec{background:var(--agroec) !important;}
+.c-agropec{background:var(--agropec) !important;}
+.c-info{background:var(--info) !important;}
+.c-geo{background:var(--geo) !important;}
+.c-mat{background:var(--mat) !important;}
+.c-agroneg{background:var(--agroneg) !important;}
+.c-zoo{background:var(--zoo) !important;}
+.c-agron{background:var(--agron) !important;}
+
+/* DIVISOR DIA */
+
+.day-divider{
   background:var(--primary);
-  color:white;
+  color:#fff;
   font-weight:bold;
   font-size:15px;
 }
 
-.time-col {
+.day-divider td{
+  color:#fff;
+}
+
+/* HORÁRIO */
+
+.time-col{
   font-weight:bold;
   width:85px;
-  background:#f1f3f4;
+  background:var(--time-bg);
+  position:sticky;
+  left:0;
+  z-index:2;
 }
 
-.highlight { background:#fbc02d !important; }
-.opaco { opacity:0.1; }
+th.time-col{
+  z-index:3;
+}
 
-.intervalo,.marcacao-extra {
-  background:#e0e0e0 !important;
+/* BUSCA */
+
+.highlight{
+  background:var(--highlight) !important;
+}
+
+.opaco{
+  opacity:.1;
+}
+
+/* INTERVALOS */
+
+.intervalo,
+.marcacao-extra{
+  background:var(--intervalo) !important;
   font-weight:bold;
 }
 
-/* 🔥 ALTERAÇÃO: DOBRO DO TAMANHO */
-.feriado {
+/* FERIADO */
+
+.feriado{
   font-size:120px;
   text-align:center;
   font-weight:bold;
-  color:rgba(200,0,0,0.4);
+  color:rgba(200,0,0,.4);
   height:200px;
 }
 
+/* LINHAS VAZIAS */
+
+tr.linha-vazia td{
+  padding:2px !important;
+  font-size:8px !important;
+  height:10px !important;
+}
+
+/* DESTAQUES */
+
+.reserva-ensino{
+  color:#fbc02d;
+  font-weight:bold;
+}
+
+.pps{
+  color:#0b3d91;
+  font-weight:bold;
+}
+
+.estudos{
+  color:#1e7e34;
+  font-weight:bold;
+}
+
+.reuniao{
+  color:#fb8c00;
+  font-weight:bold;
+}
+
+.caed{
+  background:var(--caed) !important;
+}
+
+.reposicao{
+  color:#0b3d91;
+  font-weight:bold;
+}
+
+/* PAINEL ALTERAÇÕES */
+
+#painelAlteracoes{
+  background:var(--surface) !important;
+  color:var(--text);
+  box-shadow:var(--shadow);
+}
+
+#conteudoAlteracoes{
+  color:var(--text);
+}
+
+/* BOTÕES RELATÓRIO */
+
+#botoesRelatorio button{
+  transition:.2s;
+}
+
+#botoesRelatorio button:hover{
+  transform:translateY(-1px);
+}
+
 /* RODAPÉ */
-.ifro-footer {
-  background:#2e7d32;
-  color:white;
+
+.ifro-footer{
+  background:var(--footer-bg);
+  color:var(--footer-text);
   padding:20px;
   text-align:center;
+  margin-top:15px;
 }
 
-  /* 🔥 FIXAR PRIMEIRA COLUNA (HORÁRIOS) */
-.time-col {
-  position: sticky;
-  left: 0;
-  z-index: 2;
-  background: #f1f3f4; /* mantém cor original */
+/* SCROLL */
+
+::-webkit-scrollbar{
+  height:10px;
+  width:10px;
 }
 
-/* garante que o cabeçalho também fique acima */
-th.time-col {
-  z-index: 3;
+::-webkit-scrollbar-thumb{
+  background:#999;
+  border-radius:8px;
 }
 
-  /* 🔥 LINHAS VAZIAS MAIS COMPACTAS */
-tr.linha-vazia td {
-  padding: 2px !important;
-  font-size: 8px !important;
-  height: 10px !important;
+#btnTema{
+  width:48px;
+  height:48px;
+
+  border:none;
+  border-radius:50%;
+
+  background:var(--surface);
+  color:var(--text);
+
+  cursor:pointer;
+
+  font-size:22px;
+
+  display:flex;
+  justify-content:center;
+  align-items:center;
+
+  box-shadow:var(--shadow);
+
+  transition:.3s;
 }
 
- .reserva-ensino {
-    color: #fbc02d; /* amarelo forte */
-    font-weight: bold;
+#btnTema:hover{
+  transform:rotate(15deg) scale(1.08);
 }
-
-.pps {
-    color: #0b3d91; /* azul escuro */
-    font-weight: bold;
-}
-
-.estudos {
-    color: ##1e7e34; /* verde escuro */
-    font-weight: bold;
-}
-
-.reuniao {
-    color: ##fb8c00; /* laranja forte */
-    font-weight: bold;
-}
-
-.caed {
-    background-color: #fff3cd; /* amarelo */
-}
-
-.reposicao {
-    color: #0b3d91; /* azul escuro */
-    font-weight: bold;
-}
-  
 </style>
 </head>
 
@@ -215,6 +422,8 @@ tr.linha-vazia td {
 placeholder="🔍 Buscar Professor..." onkeyup="filtrarProfessor()">
 
 <button class="btn-pdf" onclick="exportarPDF()">📄 Baixe o PDF da Semana</button>
+
+<button id="btnTema">🌙</button>
 </div>
 </div>
 
@@ -278,6 +487,47 @@ SUPERIOR:{id:'14ALXZgFIT68ee9ajuIdG63SpGVm0HyTjwp63-J6vRyg',gid:'669887707'}
 
 let dadosGlobais=[],turmasDaPlanilha=[],semanasAgrupadas={};
 
+  function deveCompararDia(dataStr){
+
+  const [d,m,a] = dataStr.split('/');
+  const data = new Date(a, m-1, d);
+
+  const hoje = new Date();
+
+  // remove hora
+  hoje.setHours(0,0,0,0);
+  data.setHours(0,0,0,0);
+
+  // segunda-feira da semana atual
+  const segunda = new Date(hoje);
+  const diaSemana = segunda.getDay();
+  const ajuste = diaSemana === 0 ? -6 : 1 - diaSemana;
+  segunda.setDate(segunda.getDate() + ajuste);
+  segunda.setHours(0,0,0,0);
+
+  // sábado da semana atual
+  const sabado = new Date(segunda);
+  sabado.setDate(sabado.getDate() + 5);
+  sabado.setHours(23,59,59,999);
+
+  // só compara dias da semana atual
+  if(data < segunda) return false;
+  if(data > sabado) return false;
+
+  // só compara de hoje para frente
+  if(data < hoje) return false;
+
+  return true;
+}
+
+  function semanaSelecionadaEhAtual(){
+
+  const semanaSelecionada =
+    document.getElementById('selectSemana').value;
+
+  return semanaSelecionada === getSemanaAtual();
+}
+
   function isSemanaPassada(dataStr){
   const [d,m,a] = dataStr.split('/');
   const data = new Date(a, m-1, d);
@@ -311,15 +561,23 @@ function trocarModalidade(){
 }
 
 function salvarSnapshotAtual() {
+
+  if(!semanaSelecionadaEhAtual()){
+    return;
+  }
+
   const sem = document.getElementById('selectSemana').value;
   const mod = document.getElementById('selectModalidade').value;
 
   const snapshot = {
-    tempo: new Date().toISOString(),
-    dados: dadosGlobais
+    tempo:new Date().toISOString(),
+    dados:dadosGlobais
   };
 
-  localStorage.setItem(`snapshot_${mod}_${sem}`, JSON.stringify(snapshot));
+  localStorage.setItem(
+    `snapshot_${mod}_${sem}`,
+    JSON.stringify(snapshot)
+  );
 }
 
 function obterSnapshotAntigo() {
@@ -344,6 +602,9 @@ function valorMudou(v1, v2){
   
 function verificarMudancaAoAbrir() {
 
+  if(!semanaSelecionadaEhAtual()){
+    return;
+  }
   const sem = document.getElementById('selectSemana').value;
   const mod = document.getElementById('selectModalidade').value;
 
@@ -369,7 +630,7 @@ function verificarMudancaAoAbrir() {
     const diaAtual = ultimoDia;
 
     if (!diaAtual) continue;
-    if (isSemanaPassada(diaAtual)) continue;
+    if (!deveCompararDia(diaAtual)) continue;
 
     const horario = (novo[i][1] || "").trim();
     const horarioNorm = normalizarTexto(horario);
@@ -422,6 +683,18 @@ function verificarMudancaAoAbrir() {
   salvarSnapshotAtual();
 }
 
+function mostrarMensagemPainel(titulo, texto){
+
+  const tituloPainel =
+    document.querySelector("#painelAlteracoes strong");
+
+  tituloPainel.innerText = titulo;
+
+  document.getElementById("conteudoAlteracoes").innerText = texto;
+
+  document.getElementById("painelAlteracoes").style.display = "block";
+}
+  
 function mostrarAvisoAlteracoes(lista) {
 
   let texto = "⚠️ ALTERAÇÕES DE AULAS DETECTADAS:\n\n";
@@ -804,12 +1077,14 @@ function gerarRelatorioDia(dia) {
   return texto;
 }
 
-function copiarRelatorioDia(dia) {
+function mostrarRelatorioDia(dia){
+
   const texto = gerarRelatorioDia(dia);
 
-  navigator.clipboard.writeText(texto).then(() => {
-    alert("Relatório copiado para área de transferência!");
-  });
+  mostrarMensagemPainel(
+    `📅 Relatório de aulas vagas - ${dia}`,
+    texto
+  );
 }
 
 function gerarRelatorioSemana() {
@@ -842,11 +1117,16 @@ function gerarRelatorioSemana() {
   const listaFinal = Object.values(agrupado);
 
   if (listaFinal.length === 0) {
-    texto += "Não há aulas vagas na semana.";
-    navigator.clipboard.writeText(texto);
-    alert("Relatório semanal copiado!");
-    return;
-  }
+
+  texto += "Não há aulas vagas na semana.";
+
+  mostrarMensagemPainel(
+    "📊 Relatório semanal de aulas vagas",
+    texto
+  );
+
+  return;
+}
 
   // 🔥 ORGANIZA POR DIA
   listaFinal.sort((a, b) => {
@@ -871,9 +1151,10 @@ function gerarRelatorioSemana() {
     texto += `⏰ AULAS VAGAS: ${horariosUnicos.join(", ")}\n\n`;
   });
 
-  navigator.clipboard.writeText(texto).then(() => {
-    alert("Relatório semanal copiado!");
-  });
+  mostrarMensagemPainel(
+  "📊 Relatório semanal de aulas vagas",
+  texto
+);
 }
   
 function exportarPDF(){
@@ -1061,25 +1342,58 @@ pdf.save(nomeArquivo);
 }
 
 function criarBotoesDias() {
+
   const sem = document.getElementById('selectSemana').value;
+
   const dias = semanasAgrupadas[sem].dias;
 
   let html = `
-    <div style="padding:10px;display:flex;gap:10px;flex-wrap:wrap;">
+    <div style="
+      padding:10px;
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+    ">
   `;
 
   Object.keys(dias).forEach(dia => {
+
+    const [d,m,a] = dia.split('/');
+
+    const data = new Date(a,m-1,d);
+
+    const diaSemana = data.getDay();
+
+    // ignora sábado e domingo
+    if (diaSemana === 6 || diaSemana === 0) return;
+
     html += `
-      <button onclick="copiarRelatorioDia('${dia}')"
-        style="padding:10px;background:#2e7d32;color:white;border:none;border-radius:6px;cursor:pointer;">
+      <button
+        onclick="mostrarRelatorioDia('${dia}')"
+        style="
+          padding:10px;
+          background:#2e7d32;
+          color:white;
+          border:none;
+          border-radius:6px;
+          cursor:pointer;
+        ">
         📅 ${dia}
       </button>
     `;
   });
 
   html += `
-      <button onclick="gerarRelatorioSemana()"
-        style="padding:10px;background:#d32f2f;color:white;border:none;border-radius:6px;cursor:pointer;">
+      <button
+        onclick="gerarRelatorioSemana()"
+        style="
+          padding:10px;
+          background:#d32f2f;
+          color:white;
+          border:none;
+          border-radius:6px;
+          cursor:pointer;
+        ">
         📊 Semana inteira
       </button>
     </div>
@@ -1091,8 +1405,52 @@ function criarBotoesDias() {
 window.addEventListener("beforeunload", () => {
   salvarSnapshotAtual();
 });
+
+  document.getElementById("btnTema").addEventListener("click", () => {
+
+  const html = document.documentElement;
+
+  if (html.getAttribute("data-theme") === "dark") {
+
+    html.removeAttribute("data-theme");
+
+    localStorage.setItem("tema","light");
+
+    document.getElementById("btnTema").innerHTML = "🌙";
+
+  } else {
+
+    html.setAttribute("data-theme","dark");
+
+    localStorage.setItem("tema","dark");
+
+    document.getElementById("btnTema").innerHTML = "☀️";
+
+  }
+
+});
   
-window.onload=init;
+window.onload = () => {
+
+  const tema = localStorage.getItem("tema");
+
+  if (tema === "dark") {
+
+    document.documentElement.setAttribute("data-theme","dark");
+
+    document.getElementById("btnTema").innerHTML = "☀️";
+
+  } else {
+
+    document.documentElement.removeAttribute("data-theme");
+
+    document.getElementById("btnTema").innerHTML = "🌙";
+
+  }
+
+  init();
+};
+  
 </script>
 
 </body>
