@@ -165,7 +165,27 @@ placeholder="🔍 Buscar Professor..." onkeyup="filtrarProfessor()">
 </div>
    
 <div id="professores" class="tab-content">
-    Em construção...
+
+  <div class="header-sticky">
+    <div class="controls-card">
+
+      <select id="selectProfessor"
+              onchange="gerarRelatorioProfessor()">
+      </select>
+
+      <select id="selectSemanaProfessor"
+              onchange="gerarRelatorioProfessor()">
+      </select>
+
+    </div>
+  </div>
+
+  <div id="cardsProfessor"></div>
+
+  <div id="tabelaProfessor"></div>
+
+  <div id="historicoProfessor"></div>
+
 </div>
 
 <div id="turmas" class="tab-content">
@@ -1226,5 +1246,6 @@ window.onload = () => {
 </script>
 <script src="js/pdf.js"></script>
 <script src="js/sabados.js"></script>
+<script src="js/professores.js"></script>
 </body>
 </html>
