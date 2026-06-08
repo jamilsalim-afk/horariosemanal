@@ -1,269 +1,457 @@
-:root {
+:root{
   --primary:#2e7d32;
-  --primary-dark:#1b5e20;
 
-  --bg:#f5f7fb;
+  --bg:#f4f7f6;
   --surface:#ffffff;
 
-  --text:#111827;
-  --muted:#6b7280;
+  --text:#000000;
+  --text-soft:#333333;
+  --border:#bbbbbb;
+  --time-bg:#f1f3f4;
 
-  --border:#e5e7eb;
+  --footer-bg:#2e7d32;
+  --footer-text:#ffffff;
 
-  --shadow:0 8px 25px rgba(0,0,0,.08);
+  --shadow:0 2px 10px rgba(0,0,0,.12);
 
-  --radius:14px;
+  /* Cursos */
+  --agroec:#e8f5e9;
+  --agropec:#e3f2fd;
+  --info:#fff8e1;
+  --geo:#f3e5f5;
+  --mat:#e0f7fa;
+  --agroneg:#efebe9;
+  --zoo:#fce4ec;
+  --agron:#f1f8e9;
 
-  --highlight:#fbbf24;
-  --danger:#ef4444;
+  /* Destaques */
+  --highlight:#fbc02d;
+  --intervalo:#e0e0e0;
+  --caed:#fff3cd;
 }
 
-/* DARK */
-[data-theme="dark"] {
-  --bg:#0b1220;
-  --surface:#111a2e;
+[data-theme="dark"]{
+  --bg:#0f172a;
+  --surface:#1e293b;
 
-  --text:#f9fafb;
-  --muted:#9ca3af;
+  --text:#f8fafc;
+  --text-soft:#cbd5e1;
 
-  --border:#243042;
+  --border:#475569;
+  --time-bg:#334155;
 
-  --shadow:0 10px 30px rgba(0,0,0,.35);
+  --footer-bg:#14532d;
+  --footer-text:#ffffff;
+
+  --shadow:0 4px 18px rgba(0,0,0,.35);
+
+  /* Cursos (versões escuras) */
+  --agroec:#1f3b2a;
+  --agropec:#1c3245;
+  --info:#4a3f16;
+  --geo:#3b2942;
+  --mat:#173944;
+  --agroneg:#3a312e;
+  --zoo:#4a2732;
+  --agron:#2e4020;
+
+  /* Destaques */
+  --highlight:#b8860b;
+  --intervalo:#374151;
+  --caed:#665200;
 }
 
-/* BASE */
-* {
+*{
   box-sizing:border-box;
 }
 
-body {
-  margin:0;
-  font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;
+body{
+  font-family:'Segoe UI',sans-serif;
   background:var(--bg);
   color:var(--text);
+  margin:0;
+  transition:.3s;
 }
 
-/* HEADER */
-.ifro-header {
+/* CABEÇALHO */
+
+.ifro-header{
   position:sticky;
   top:0;
-  z-index:1000;
+  z-index:1100;
   background:var(--surface);
-  border-bottom:1px solid var(--border);
-  box-shadow:var(--shadow);
+  border-bottom:4px solid var(--primary);
 }
 
-.ifro-header-content {
+.ifro-header-content{
   text-align:center;
-  padding:14px;
-}
-
-.ifro-linha1 {font-size:14px; font-weight:600;}
-.ifro-linha2 {font-size:16px; font-weight:700;}
-.ifro-linha3 {font-size:12px; color:var(--muted);}
-.ifro-linha4 {font-size:14px; font-weight:700; margin-top:4px;}
-
-/* TABS */
-.tabs-container {
-  display:flex;
-  gap:8px;
-  padding:10px;
-  flex-wrap:wrap;
-  justify-content:center;
-  background:var(--surface);
-  border-bottom:1px solid var(--border);
-}
-
-.tab-btn {
-  border:1px solid var(--border);
-  background:var(--surface);
-  color:var(--text);
-  padding:10px 14px;
-  border-radius:999px;
-  cursor:pointer;
-  font-weight:600;
-  transition:.2s;
-}
-
-.tab-btn:hover {
-  transform:translateY(-1px);
-  border-color:var(--primary);
-}
-
-.tab-btn.active {
-  background:var(--primary);
-  color:#fff;
-  border-color:var(--primary);
-}
-
-/* CONTEÚDO */
-.tab-content {
-  display:none;
-  padding:16px;
-}
-
-.tab-content.active {
-  display:block;
-}
-
-/* CARDS */
-.controls-card {
-  background:var(--surface);
   padding:12px;
-  border-radius:var(--radius);
-  box-shadow:var(--shadow);
+}
+
+.ifro-linha1{
+  font-size:20px;
+  font-weight:bold;
+  color:var(--text);
+}
+
+.ifro-linha2{
+  font-size:18px;
+  font-weight:bold;
+  color:var(--text);
+}
+
+.ifro-linha3{
+  font-size:16px;
+  color:var(--text);
+}
+
+.ifro-linha4{
+  font-size:17px;
+  font-weight:bold;
+  color:var(--text);
+}
+
+/* CONTROLES */
+
+.header-sticky{
+  position:sticky;
+  top:110px;
+  z-index:1000;
+  background:var(--bg);
+  padding:9px;
+}
+
+.controls-card{
+  background:var(--surface);
+  padding:15px;
+  border-radius:12px;
   display:flex;
   flex-wrap:wrap;
   gap:10px;
-  align-items:center;
   justify-content:center;
+  box-shadow:var(--shadow);
 }
 
-/* INPUTS */
 select,
-.search-box {
-  padding:10px 12px;
-  border-radius:10px;
-  border:1px solid var(--border);
+.search-box,
+.btn-pdf{
+  padding:12px;
+  font-size:14px;
+  border-radius:6px;
+}
+
+select,
+.search-box{
   background:var(--surface);
   color:var(--text);
-  outline:none;
-  min-width:180px;
+  border:2px solid var(--primary);
 }
 
-/* BOTÕES */
-button {
-  font-family:inherit;
+.search-box{
+  width:260px;
 }
 
-.btn-pdf,
-#btnTema {
-  border:none;
-  padding:10px 14px;
-  border-radius:999px;
-  cursor:pointer;
-  font-weight:600;
-  transition:.2s;
-}
-
-.btn-pdf {
-  background:var(--danger);
+.btn-pdf{
+  background:#d32f2f;
   color:#fff;
+  border:none;
+  cursor:pointer;
+  font-weight:bold;
 }
 
-.btn-pdf:hover {
-  transform:translateY(-2px);
-  opacity:.95;
+.btn-pdf:hover{
+  opacity:.92;
 }
 
-/* TABELA */
-.table-responsive {
-  overflow:auto;
+/* CONTEÚDO */
+
+.week-container{
+  padding:14px;
+}
+
+.table-responsive{
+  width:100%;
+  overflow-x:auto;
   background:var(--surface);
-  border-radius:var(--radius);
+  border-radius:8px;
   box-shadow:var(--shadow);
 }
 
-table {
-  border-collapse:collapse;
+table{
+  min-width:1400px;
   width:100%;
-  min-width:1000px;
-  font-size:11px;
+  border-collapse:separate;
+  border-spacing:0;
+  font-size:9px;
+  table-layout:fixed;
 }
 
-th, td {
+th,
+td{
   border:1px solid var(--border);
-  padding:8px;
+  padding:6px;
   text-align:center;
+  vertical-align:middle;
+  color:var(--text);
 }
 
-.day-divider {
+td,
+th{
+  word-break:break-word;
+}
+
+.aula-cell{
+  white-space:normal;
+}
+
+/* CORES CURSOS */
+
+.c-agroec{background:var(--agroec) !important;}
+.c-agropec{background:var(--agropec) !important;}
+.c-info{background:var(--info) !important;}
+.c-geo{background:var(--geo) !important;}
+.c-mat{background:var(--mat) !important;}
+.c-agroneg{background:var(--agroneg) !important;}
+.c-zoo{background:var(--zoo) !important;}
+.c-agron{background:var(--agron) !important;}
+
+/* DIVISOR DIA */
+
+.day-divider{
   background:var(--primary);
   color:#fff;
-  font-weight:700;
+  font-weight:bold;
+  font-size:15px;
 }
 
-.time-col {
-  background:#f3f4f6;
-  font-weight:700;
+.day-divider td{
+  color:#fff;
+}
+
+/* HORÁRIO */
+
+.time-col{
+  font-weight:bold;
+  width:85px;
+  background:var(--time-bg);
   position:sticky;
   left:0;
+  z-index:2;
 }
 
-/* DASHBOARD */
-.dashboard-grid {
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
-  gap:12px;
+th.time-col{
+  z-index:3;
 }
 
-.dash-card {
-  background:var(--surface);
-  padding:16px;
-  border-radius:var(--radius);
+/* BUSCA */
+
+.highlight{
+  background:var(--highlight) !important;
+}
+
+.opaco{
+  opacity:.1;
+}
+
+/* INTERVALOS */
+
+.intervalo,
+.marcacao-extra{
+  background:var(--intervalo) !important;
+  font-weight:bold;
+}
+
+/* FERIADO */
+
+.feriado{
+  font-size:120px;
+  text-align:center;
+  font-weight:bold;
+  color:rgba(200,0,0,.4);
+  height:200px;
+}
+
+/* LINHAS VAZIAS */
+
+tr.linha-vazia td{
+  padding:2px !important;
+  font-size:8px !important;
+  height:10px !important;
+}
+
+/* DESTAQUES */
+
+.reserva-ensino{
+  color:#fbc02d;
+  font-weight:bold;
+}
+
+.pps{
+  color:#0b3d91;
+  font-weight:bold;
+}
+
+.estudos{
+  color:#1e7e34;
+  font-weight:bold;
+}
+
+.reuniao{
+  color:#fb8c00;
+  font-weight:bold;
+}
+
+.caed{
+  background:var(--caed) !important;
+}
+
+.reposicao{
+  color:#0b3d91;
+  font-weight:bold;
+}
+
+/* PAINEL ALTERAÇÕES */
+
+#painelAlteracoes{
+  background:var(--surface) !important;
+  color:var(--text);
   box-shadow:var(--shadow);
 }
 
-.dash-card h2 {
-  margin:0 0 10px;
-  font-size:16px;
+#conteudoAlteracoes{
+  color:var(--text);
 }
 
-/* RELATÓRIOS */
-#botoesRelatorio {
-  display:flex;
-  flex-wrap:wrap;
-  gap:8px;
-}
+/* BOTÕES RELATÓRIO */
 
-#botoesRelatorio button {
-  padding:8px 12px;
-  border-radius:999px;
-  border:1px solid var(--border);
-  background:var(--surface);
-  cursor:pointer;
+#botoesRelatorio button{
   transition:.2s;
 }
 
-#botoesRelatorio button:hover {
-  background:var(--primary);
-  color:#fff;
+#botoesRelatorio button:hover{
+  transform:translateY(-1px);
 }
 
-/* PAINEL */
-#painelAlteracoes {
-  border-radius:var(--radius);
+/* RODAPÉ */
+
+.ifro-footer{
+  background:var(--footer-bg);
+  color:var(--footer-text);
+  padding:20px;
+  text-align:center;
+  margin-top:15px;
 }
 
-/* MOBILE */
-@media (max-width:768px) {
+/* SCROLL */
 
-  .controls-card {
-    flex-direction:column;
-  }
-
-  select,
-  .search-box {
-    width:100%;
-  }
-
-  table {
-    font-size:10px;
-  }
-
-  .tab-btn {
-    flex:1;
-    text-align:center;
-  }
+::-webkit-scrollbar{
+  height:10px;
+  width:10px;
 }
 
-/* SCROLL MELHOR */
-::-webkit-scrollbar {
-  height:8px;
-  width:8px;
-}
-
-::-webkit-scrollbar-thumb {
+::-webkit-scrollbar-thumb{
   background:#999;
-  border-radius:10px;
+  border-radius:8px;
+}
+
+#btnTema{
+  width:48px;
+  height:48px;
+
+  border:none;
+  border-radius:50%;
+
+  background:var(--surface);
+  color:var(--text);
+
+  cursor:pointer;
+
+  font-size:22px;
+
+  display:flex;
+  justify-content:center;
+  align-items:center;
+
+  box-shadow:var(--shadow);
+
+  transition:.3s;
+}
+
+#btnTema:hover{
+  transform:rotate(15deg) scale(1.08);
+}
+
+.tabs-container{
+  display:flex;
+  gap:10px;
+  padding:10px;
+  justify-content:center;
+  background:var(--surface);
+  border-bottom:1px solid var(--border);
+}
+
+.tab-btn{
+  padding:12px 20px;
+  border:none;
+  border-radius:8px;
+  cursor:pointer;
+  background:#e0e0e0;
+  font-weight:bold;
+}
+
+.tab-btn.active{
+  background:var(--primary);
+  color:white;
+}
+
+.tab-content{
+  display:none;
+}
+
+.tab-content.active{
+  display:block;
+}
+
+.dashboard-grid{
+  display:grid;
+  grid-template-columns:
+      repeat(auto-fit,minmax(350px,1fr));
+
+  gap:20px;
+  padding:20px;
+}
+
+.dash-card{
+  background:var(--surface);
+  border-radius:12px;
+  padding:20px;
+  box-shadow:var(--shadow);
+}
+
+.dash-card h2{
+  margin-top:0;
+  color:var(--primary);
+}
+
+.dash-item{
+  display:flex;
+  justify-content:space-between;
+  padding:12px 0;
+  border-bottom:1px solid var(--border);
+}
+
+.dash-item strong{
+  font-size:24px;
+}
+
+#sabados .controls-card{
+    display:flex;
+    gap:15px;
+    align-items:center;
+    flex-wrap:wrap;
+}
+
+#sabados label{
+    font-weight:600;
+    color:#2e7d32;
 }
