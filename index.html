@@ -28,12 +28,12 @@ if(localStorage.getItem("tema")==="dark"){
 <div class="tabs-container">
 
   <button class="tab-btn active"
-          onclick="abrirAba('dashboard')">
+          onclick="abrirAba('dashboard',this)">
           📊 Dashboard
   </button>
 
   <button class="tab-btn"
-          onclick="abrirAba('horarios')">
+          onclick="abrirAba('horarios',this)">
           📅 Horários
   </button>
 
@@ -43,17 +43,17 @@ if(localStorage.getItem("tema")==="dark"){
   </button>
    
 <button class="tab-btn"
-          onclick="abrirAba('professores')">
+          onclick="abrirAba('professores',this)">
           👨‍🏫 Professores
   </button>
 
   <button class="tab-btn"
-          onclick="abrirAba('turmas')">
+          onclick="abrirAba('turmas',this)">
           🏫 Turmas
   </button>
 
   <button class="tab-btn"
-          onclick="abrirAba('estatisticas')">
+          onclick="abrirAba('estatisticas',this)">
           📈 Estatísticas
   </button>
 
@@ -139,24 +139,23 @@ placeholder="🔍 Buscar Professor..." onkeyup="filtrarProfessor()">
   <div class="header-sticky">
     <div class="controls-card">
 
-      <select id="selectModalidadeSabado"
-              onchange="carregarSabados()">
-
+    <label>Modalidade</label>
+    <select id="selectModalidadeSabado"
+            onchange="carregarSabados()">
         <option value="INTEGRADO">
-          CURSOS TÉCNICOS INTEGRADOS
+            CURSOS TÉCNICOS INTEGRADOS
         </option>
-
         <option value="SUPERIOR">
-          CURSOS SUPERIORES
+            CURSOS SUPERIORES
         </option>
+    </select>
 
-      </select>
+    <label>Sábado Letivo</label>
+    <select id="selectSabado"
+            onchange="renderizarSabadoSelecionado()">
+    </select>
 
-      <select id="selectSabado"
-              onchange="renderizarSabadoSelecionado()">
-      </select>
-
-    </div>
+</div>
   </div>
 
   <div class="week-container">
@@ -169,9 +168,17 @@ placeholder="🔍 Buscar Professor..." onkeyup="filtrarProfessor()">
 
 </div>
    
-<div id="professores"></div>
-<div id="turmas"></div>
-<div id="estatisticas"></div>
+<div id="professores" class="tab-content">
+    Em construção...
+</div>
+
+<div id="turmas" class="tab-content">
+    Em construção...
+</div>
+
+<div id="estatisticas" class="tab-content">
+    Em construção...
+</div>
 
 <footer class="ifro-footer">
 IFRO - Campus Cacoal<br>
