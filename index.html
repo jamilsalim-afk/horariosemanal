@@ -1406,26 +1406,46 @@ window.addEventListener("beforeunload", () => {
   const html = document.documentElement;
 
   if (html.getAttribute("data-theme") === "dark") {
+
     html.removeAttribute("data-theme");
+
+    localStorage.setItem("tema","light");
+
     document.getElementById("btnTema").innerHTML = "🌙";
+
   } else {
-    html.setAttribute("data-theme", "dark");
+
+    html.setAttribute("data-theme","dark");
+
+    localStorage.setItem("tema","dark");
+
     document.getElementById("btnTema").innerHTML = "☀️";
+
   }
 
 });
   
-localStorage.setItem("tema","dark");
+window.onload = () => {
 
-  window.onload=()=>{
-   const tema=localStorage.getItem("tema");
+  const tema = localStorage.getItem("tema");
 
-   if(tema==="dark"){
-      document.documentElement.setAttribute("data-theme","dark");
-   }
+  if (tema === "dark") {
 
-   init();
-}
+    document.documentElement.setAttribute("data-theme","dark");
+
+    document.getElementById("btnTema").innerHTML = "☀️";
+
+  } else {
+
+    document.documentElement.removeAttribute("data-theme");
+
+    document.getElementById("btnTema").innerHTML = "🌙";
+
+  }
+
+  init();
+};
+  
 </script>
 
 </body>
