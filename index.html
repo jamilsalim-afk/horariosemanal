@@ -134,6 +134,38 @@ placeholder="🔍 Buscar Professor..." onkeyup="filtrarProfessor()">
 <div class="table-responsive" id="tabelaHorario"></div>
 </div>
 
+<div id="sabados"
+     class="tab-content">
+
+  <div class="header-sticky">
+
+    <div class="controls-card">
+
+      <select id="selectModalidadeSabado"
+              onchange="renderizarSabados()">
+
+        <option value="INTEGRADO">
+          CURSOS TÉCNICOS INTEGRADOS
+        </option>
+
+        <option value="SUPERIOR">
+          CURSOS SUPERIORES
+        </option>
+
+      </select>
+
+    </div>
+
+  </div>
+
+  <div class="week-container">
+
+      <div id="tabelaSabados"></div>
+
+  </div>
+
+</div>   
+   
 <div id="professores"></div>
 <div id="turmas"></div>
 <div id="estatisticas"></div>
