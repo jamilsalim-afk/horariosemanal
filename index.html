@@ -1415,7 +1415,17 @@ window.addEventListener("beforeunload", () => {
 
 });
   
-window.onload=init;
+localStorage.setItem("tema","dark");
+
+  window.onload=()=>{
+   const tema=localStorage.getItem("tema");
+
+   if(tema==="dark"){
+      document.documentElement.setAttribute("data-theme","dark");
+   }
+
+   init();
+}
 </script>
 
 </body>
