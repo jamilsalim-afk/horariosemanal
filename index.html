@@ -368,7 +368,7 @@ return `
 function calcularIndicadores(dados){
 
   let dias = new Set();
-  let diasSabado = new Set();
+  let sabadosComAula = new Set();
 
   let aulas = 0;
   let vagas = 0;
@@ -398,38 +398,45 @@ function calcularIndicadores(dados){
 
       dias.add(dataStr);
 
-      // 🔥 agora conta DIAS de sábado (não linhas)
-      if(data.getDay() === 6){
-         diasSabado.add(dataStr);
-      }
+      const isSabado = data.getDay() === 6;
 
       const horario = normalizarTexto(row[1] || "");
 
-      // ignora linhas de intervalo
-      if(
+      // ignora linhas especiais
+      const linhaIgnorada =
         horario.includes("INTERVALO") ||
         horario.includes("[+]") ||
         horario.includes("[R]") ||
-        horario.includes("*")
-      ){
-        continue;
+        horario.includes("*");
+
+      let temAulaNaLinha = false;
+
+      if(!linhaIgnorada){
+
+          for(let j=2;j<row.length;j++){
+
+              const val = (row[j] || "").trim();
+
+              if(!val) continue;
+
+              temAulaNaLinha = true;
+
+              aulas++;
+
+              const norm = normalizarTexto(val);
+
+              if(
+                  norm.includes("RESERVA ENSINO") ||
+                  norm.includes("ESTUDOS INDIVIDUAIS")
+              ){
+                  vagas++;
+              }
+          }
       }
 
-      for(let j=2;j<row.length;j++){
-
-         const val = (row[j] || "").trim();
-         if(!val) continue;
-
-         const norm = normalizarTexto(val);
-
-         aulas++;
-
-         if(
-            norm.includes("RESERVA ENSINO") ||
-            norm.includes("ESTUDOS INDIVIDUAIS")
-         ){
-            vagas++;
-         }
+      // 🔥 só conta sábado se tiver aula REAL
+      if(isSabado && temAulaNaLinha){
+          sabadosComAula.add(dataStr);
       }
   }
 
@@ -437,7 +444,7 @@ function calcularIndicadores(dados){
       diasLetivos: dias.size,
       aulas,
       vagas,
-      sabados: diasSabado.size
+      sabados: sabadosComAula.size
   };
 }
 
