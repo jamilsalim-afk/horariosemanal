@@ -154,3 +154,15 @@ function mostrarAvisoAlteracoes(lista) {
   document.getElementById("conteudoAlteracoes").innerText = texto;
   document.getElementById("painelAlteracoes").style.display = "block";
 }
+
+  function fecharPainel(){
+  document.getElementById("painelAlteracoes").style.display = "none";
+}
+
+function copiarAlteracoes(){
+  const texto = document.getElementById("conteudoAlteracoes").innerText;
+
+  navigator.clipboard.writeText(texto).then(()=>{
+    alert("Copiado!");
+  });
+}
