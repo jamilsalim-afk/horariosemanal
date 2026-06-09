@@ -203,18 +203,6 @@ let turmasDaPlanilha = [];
 let semanasAgrupadas = {};
 
 
-
-  function fecharPainel(){
-  document.getElementById("painelAlteracoes").style.display = "none";
-}
-
-function copiarAlteracoes(){
-  const texto = document.getElementById("conteudoAlteracoes").innerText;
-
-  navigator.clipboard.writeText(texto).then(()=>{
-    alert("Copiado!");
-  });
-}
   
 const FERIADOS=[
 "01/01/2026","16/02/2026","17/02/2026","18/02/2026","03/04/2026","20/04/2026","21/04/2026","01/05/2026",
