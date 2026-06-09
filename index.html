@@ -222,21 +222,6 @@ function normalizarTexto(txt){
   
 function isFeriado(d){return FERIADOS.includes(d);}
 
-
-
-function getCursoInfo(t){
-t=t.toUpperCase();
-if(t.includes("AGROEC")) return {cl:"c-agroec",rgb:[232,245,233]};
-if(t.includes("AGROPEC")) return {cl:"c-agropec",rgb:[227,242,253]};
-if(t.includes("INFO")) return {cl:"c-info",rgb:[255,248,225]};
-if(t.includes("GEO")) return {cl:"c-geo",rgb:[243,229,245]};
-if(t.includes("MAT")) return {cl:"c-mat",rgb:[224,247,250]};
-if(t.includes("AGRONEG")) return {cl:"c-agroneg",rgb:[239,235,233]};
-if(t.includes("ZOO")) return {cl:"c-zoo",rgb:[252,228,236]};
-if(t.includes("AGRON")) return {cl:"c-agron",rgb:[241,248,233]};
-return {cl:"",rgb:[255,255,255]};
-}
-
 function ordenarDatasBR(arr){
 return arr.sort((a,b)=>{
 const pa=a.split('/'),pb=b.split('/');
@@ -259,8 +244,6 @@ function getSemanaAtual(){
 
   return `${d}/${m}/${a}`;
 }
-  
-
 
 function getTurmasAtivasNaSemana(dias){
 return turmasDaPlanilha.filter(t=>{
@@ -271,8 +254,6 @@ return v && v!=="-" && !r[1].toUpperCase().includes("INTERVALO");
 }));
 });
 }
-
-
 
 function coletarVagasDoDia(dia) {
   const sem = document.getElementById('selectSemana').value;
@@ -305,76 +286,6 @@ function coletarVagasDoDia(dia) {
 }
 
 
-
-function gerarRelatorioSemana() {
-  const sem = document.getElementById('selectSemana').value;
-  const dias = semanasAgrupadas[sem].dias;
-
-  let texto = `Olá Professores, identificamos várias turmas com aula vaga esta semana. Segue a lista dos dias, turmas e horários.\n\n`;
-
-  const agrupado = {};
-
-  // 🔥 AGRUPA DIA + TURMA
-  Object.keys(dias).forEach(dia => {
-    const vagas = coletarVagasDoDia(dia);
-
-    vagas.forEach(v => {
-      const chave = `${dia}__${v.turma}`;
-
-      if (!agrupado[chave]) {
-        agrupado[chave] = {
-          dia,
-          turma: v.turma,
-          horarios: []
-        };
-      }
-
-      agrupado[chave].horarios.push(v.horario);
-    });
-  });
-
-  const listaFinal = Object.values(agrupado);
-
-  if (listaFinal.length === 0) {
-
-  texto += "Não há aulas vagas na semana.";
-
-  mostrarMensagemPainel(
-    "📊 Relatório semanal de aulas vagas",
-    texto
-  );
-
-  return;
-}
-
-  // 🔥 ORGANIZA POR DIA
-  listaFinal.sort((a, b) => {
-    const [da, ma, aa] = a.dia.split('/');
-    const [db, mb, ab] = b.dia.split('/');
-    return new Date(aa, ma-1, da) - new Date(ab, mb-1, db);
-  });
-
-  let diaAtual = "";
-
-  listaFinal.forEach(item => {
-
-    // 🔥 quebra por dia
-    if (item.dia !== diaAtual) {
-      texto += `📅 DATA: ${item.dia}\n\n`;
-      diaAtual = item.dia;
-    }
-
-    const horariosUnicos = [...new Set(item.horarios)];
-
-    texto += `🏫 TURMA: ${item.turma}\n`;
-    texto += `⏰ AULAS VAGAS: ${horariosUnicos.join(", ")}\n\n`;
-  });
-
-  mostrarMensagemPainel(
-  "📊 Relatório semanal de aulas vagas",
-  texto
-);
-}
   
 function abrirAba(nome,botao){
 
