@@ -56,3 +56,17 @@ function valorMudou(v1, v2){
 
   return n1 !== n2;
 }
+
+function parseCSV(text){
+return text.split(/\r?\n/).map(l=>{
+let r=[],c='',q=false;
+for(let i=0;i<l.length;i++){
+let ch=l[i];
+if(ch=='"') q=!q;
+else if(ch==','&&!q){r.push(c.trim());c='';}
+else c+=ch;
+}
+r.push(c.trim());
+return r;
+});
+}
