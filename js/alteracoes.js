@@ -30,3 +30,11 @@ function salvarSnapshotAtual() {
     JSON.stringify(snapshot)
   );
 }
+
+function obterSnapshotAntigo() {
+  const sem = document.getElementById('selectSemana').value;
+  const mod = document.getElementById('selectModalidade').value;
+
+  const data = localStorage.getItem(`snapshot_${mod}_${sem}`);
+  return data ? JSON.parse(data) : null;
+}
