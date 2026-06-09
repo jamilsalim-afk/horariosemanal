@@ -44,3 +44,15 @@ function isSemanaPassada(dataStr){
 
   return data < segundaAtual;
 }
+
+function valorMudou(v1, v2){
+  const t1 = (v1 || "").trim();
+  const t2 = (v2 || "").trim();
+
+  if (t1 !== t2) return true;
+
+  const n1 = normalizarTexto(t1);
+  const n2 = normalizarTexto(t2);
+
+  return n1 !== n2;
+}
