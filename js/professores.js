@@ -1,158 +1,167 @@
-let professoresLista = [];
 let mapaProfessores = {};
+let professoresLista = [];
 
-async function carregarProfessores(){
-
+/* =========================
+   CARREGA LISTA DE PROFESSORES
+   ========================= */
+async function carregarProfessores() {
   const url =
     `https://docs.google.com/spreadsheets/d/${SHEETS.PROFESSORES.id}/export?format=csv&gid=${SHEETS.PROFESSORES.gid}`;
 
   const res = await fetch(url);
-  const dados = parseCSV(await res.text());
+  const csv = await res.text();
+  const dados = parseCSV(csv);
 
-  professoresLista = [];
+  // A = nome completo / B = variação
   mapaProfessores = {};
+  professoresLista = [];
 
-  for(let i=1;i<dados.length;i++){
-
-    const nomeExibicao = (dados[i][0] || "").trim();
+  for (let i = 1; i < dados.length; i++) {
+    const nomeCompleto = (dados[i][0] || "").trim();
     const variacao = (dados[i][1] || "").trim();
 
-    if(!nomeExibicao || !variacao) continue;
+    if (!nomeCompleto || !variacao) continue;
 
-    professoresLista.push({
-      nome: nomeExibicao,
-      variacao: variacao
-    });
-
-    mapaProfessores[variacao.toUpperCase()] = nomeExibicao;
+    mapaProfessores[variacao.toUpperCase()] = nomeCompleto;
+    professoresLista.push(nomeCompleto);
   }
 
-  popularSelectProfessores();
+  preencherSelectProfessores();
 }
 
-function popularSelectProfessores(){
-
+/* =========================
+   POPULA SELECT
+   ========================= */
+function preencherSelectProfessores() {
   const sel = document.getElementById("selectProfessor");
-  sel.innerHTML = "";
 
-  professoresLista.forEach(p=>{
-    sel.innerHTML += `
-      <option value="${p.variacao}">
-        ${p.nome}
-      </option>
-    `;
+  sel.innerHTML = `<option value="">Selecione um professor</option>`;
+
+  professoresLista.sort().forEach(p => {
+    sel.innerHTML += `<option value="${p}">${p}</option>`;
   });
 
   sel.onchange = renderizarProfessor;
-  renderizarProfessor();
 }
 
-function renderizarProfessor(){
+/* =========================
+   PEGA VARIAÇÃO (NOME CURTO)
+   ========================= */
+function obterVariacaoProfessor(nomeCompleto) {
+  for (const k in mapaProfessores) {
+    if (mapaProfessores[k] === nomeCompleto) {
+      return k; // VARIAÇÃO
+    }
+  }
+  return nomeCompleto.toUpperCase();
+}
 
-  const variacao =
-    document.getElementById("selectProfessor").value;
+/* =========================
+   FILTRO PRINCIPAL
+   ========================= */
+function filtrarPorProfessor(valorCelula, variacao) {
+  const v = normalizarTexto(valorCelula);
+  return v.includes(variacao);
+}
 
-  const nomeCompleto =
-    mapaProfessores[variacao.toUpperCase()] || variacao;
+/* =========================
+   RENDER PRINCIPAL
+   ========================= */
+function renderizarProfessor() {
+  const professor = document.getElementById("selectProfessor").value;
+  const sem = document.getElementById("selectSemana").value;
 
-  const sem =
-    document.getElementById("selectSemana").value;
+  if (!professor || !semanasAgrupadas[sem]) return;
 
-  const dias =
-    semanasAgrupadas[sem].dias;
+  const variacao = obterVariacaoProfessor(professor);
+  const dias = semanasAgrupadas[sem].dias;
 
-  const linhas = [];
+  let htmlLista = `<h3>📅 Relatório semanal - ${professor}</h3>`;
+  let htmlTabela = `<h3>📊 Resumo por disciplina</h3>`;
 
-  Object.keys(dias).forEach(dia=>{
+  const resumo = {};
 
-    dias[dia].forEach(r=>{
+  Object.keys(dias).forEach(dia => {
+
+    dias[dia].forEach(r => {
 
       const horario = r[1];
+      if (normalizarTexto(horario).includes("INTERVALO")) return;
 
-      for(let j=2;j<r.length;j++){
+      for (let j = 2; j < r.length; j++) {
 
-        const cell = (r[j] || "").trim();
+        const valor = (r[j] || "").trim();
+        if (!valor) continue;
 
-        if(!cell) continue;
+        const valNorm = normalizarTexto(valor);
 
-        if(cell.toUpperCase().includes(variacao.toUpperCase())){
+        if (!filtrarPorProfessor(valNorm, variacao)) continue;
 
-          const turma =
-            dadosGlobais[0][j];
+        const turma = dadosGlobais[0][j];
 
-          const disciplina =
-            cell.split("-")[0].trim();
+        htmlLista += `
+          <div class="card-prof">
+            📅 ${dia} | ⏰ ${horario} | 🏫 ${turma}<br>
+            📚 ${valor}
+          </div>
+        `;
 
-          linhas.push({
-            dia,
-            horario,
-            turma,
-            disciplina
-          });
+        // disciplina
+        const disc = valor.split("-")[0].trim();
+
+        if (!resumo[disc]) {
+          resumo[disc] = {
+            meses: {},
+            total: 0
+          };
         }
+
+        const mes = dia.split("/")[1];
+
+        resumo[disc].meses[mes] =
+          (resumo[disc].meses[mes] || 0) + 1;
+
+        resumo[disc].total++;
       }
     });
   });
 
-  montarTabelaProfessor(nomeCompleto, linhas);
-  montarResumoProfessor(linhas);
-}
-
-function montarTabelaProfessor(nome, linhas){
-
-  let html = `
-    <h2 style="margin:10px 0;">👨‍🏫 ${nome}</h2>
-
-    <table style="width:100%;border-collapse:collapse;">
-      <tr>
-        <th>Dia</th>
-        <th>Horário</th>
-        <th>Turma</th>
-        <th>Disciplina</th>
-      </tr>
+  /* =========================
+     TABELA RESUMO
+     ========================= */
+  htmlTabela += `<table border="1" style="width:100%;border-collapse:collapse;">
+    <tr>
+      <th>Disciplina</th>
+      <th>Jan</th><th>Fev</th><th>Mar</th><th>Abr</th>
+      <th>Mai</th><th>Jun</th><th>Jul</th><th>Ago</th>
+      <th>Set</th><th>Out</th><th>Nov</th><th>Dez</th>
+      <th>Total</th>
+    </tr>
   `;
 
-  linhas.forEach(l=>{
-    html += `
-      <tr>
-        <td>${l.dia}</td>
-        <td>${l.horario}</td>
-        <td>${l.turma}</td>
-        <td>${l.disciplina}</td>
-      </tr>
-    `;
+  Object.keys(resumo).forEach(disc => {
+    const m = resumo[disc].meses;
+
+    htmlTabela += `<tr>
+      <td>${disc}</td>
+      <td>${m["01"] || 0}</td>
+      <td>${m["02"] || 0}</td>
+      <td>${m["03"] || 0}</td>
+      <td>${m["04"] || 0}</td>
+      <td>${m["05"] || 0}</td>
+      <td>${m["06"] || 0}</td>
+      <td>${m["07"] || 0}</td>
+      <td>${m["08"] || 0}</td>
+      <td>${m["09"] || 0}</td>
+      <td>${m["10"] || 0}</td>
+      <td>${m["11"] || 0}</td>
+      <td>${m["12"] || 0}</td>
+      <td><b>${resumo[disc].total}</b></td>
+    </tr>`;
   });
 
-  html += "</table>";
+  htmlTabela += `</table>`;
 
-  document.getElementById("tabelaProfessor").innerHTML = html;
-}
-
-function montarResumoProfessor(linhas){
-
-  const total = linhas.length;
-
-  const turmas = [...new Set(linhas.map(l=>l.turma))];
-  const disciplinas = [...new Set(linhas.map(l=>l.disciplina))];
-
-  document.getElementById("cardsProfessor").innerHTML = `
-    <div class="dashboard-grid">
-
-      <div class="dash-card">
-        <h3>Total de Aulas</h3>
-        <strong>${total}</strong>
-      </div>
-
-      <div class="dash-card">
-        <h3>Turmas</h3>
-        <strong>${turmas.length}</strong>
-      </div>
-
-      <div class="dash-card">
-        <h3>Disciplinas</h3>
-        <strong>${disciplinas.length}</strong>
-      </div>
-
-    </div>
-  `;
+  document.getElementById("cardsProfessor").innerHTML = htmlLista;
+  document.getElementById("tabelaProfessor").innerHTML = htmlTabela;
 }
