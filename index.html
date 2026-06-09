@@ -269,101 +269,6 @@ return r;
 });
 }
 
-async function init(){
-
-  document.getElementById('searchProf').value = "";
-
-  document.getElementById("painelAlteracoes").style.display = "none";
-
-  try{
-
-    // ==========================
-    // CARREGA INTEGRADO
-    // ==========================
-
-    const urlIntegrado =
-      `https://docs.google.com/spreadsheets/d/${SHEETS.INTEGRADO.id}/export?format=csv&gid=${SHEETS.INTEGRADO.gid}`;
-
-    // ==========================
-    // CARREGA SUPERIOR
-    // ==========================
-
-    const urlSuperior =
-      `https://docs.google.com/spreadsheets/d/${SHEETS.SUPERIOR.id}/export?format=csv&gid=${SHEETS.SUPERIOR.gid}`;
-
-    // ==========================
-    // DOWNLOAD EM PARALELO
-    // ==========================
-
-    const [resIntegrado,resSuperior] =
-      await Promise.all([
-        fetch(urlIntegrado),
-        fetch(urlSuperior)
-      ]);
-
-    // ==========================
-    // CONVERTE CSV
-    // ==========================
-
-    dadosIntegrado =
-      parseCSV(await resIntegrado.text());
-
-    dadosSuperior =
-      parseCSV(await resSuperior.text());
-
-    // ==========================
-    // DEFINE MODALIDADE ATIVA
-    // ==========================
-
-    const modalidadeAtual =
-      document.getElementById(
-        'selectModalidade'
-      ).value;
-
-    if(modalidadeAtual === "INTEGRADO"){
-      dadosGlobais = dadosIntegrado;
-    }else{
-      dadosGlobais = dadosSuperior;
-    }
-
-    // ==========================
-    // PROCESSA HORÁRIOS
-    // ==========================
-
-    processarDados();
-
-    // ==========================
-    // GERA DASHBOARD
-    // ==========================
-
-    gerarDashboard();
-
-    // ==========================
-    // VERIFICA ALTERAÇÕES
-    // ==========================
-
-    setTimeout(() => {
-
-      if(
-        document.getElementById(
-          'selectModalidade'
-        ).value
-      ){
-        verificarMudancaAoAbrir();
-      }
-
-    },200);
-
-  }catch(erro){
-
-    console.error(erro);
-
-    alert(
-      "Erro ao carregar planilhas."
-    );
-  }
-}
-
 function getCursoInfo(t){
 t=t.toUpperCase();
 if(t.includes("AGROEC")) return {cl:"c-agroec",rgb:[232,245,233]};
@@ -400,40 +305,7 @@ function getSemanaAtual(){
   return `${d}/${m}/${a}`;
 }
   
-function processarDados(){
-semanasAgrupadas={};
-turmasDaPlanilha=dadosGlobais[0].slice(2).filter(t=>t);
-let ultima="";
-for(let i=1;i<dadosGlobais.length;i++){
-let r=[...dadosGlobais[i]];
-if(r[0]) ultima=r[0];
-r[0]=ultima;
-if(!r[0]) continue;
 
-const [d,m,a]=r[0].split('/');
-const dt=new Date(a,m-1,d);
-const seg=new Date(dt.setDate(dt.getDate()-dt.getDay()+1)).toLocaleDateString('pt-BR');
-
-if(!semanasAgrupadas[seg]) semanasAgrupadas[seg]={dias:{}};
-if(!semanasAgrupadas[seg].dias[r[0]]) semanasAgrupadas[seg].dias[r[0]]=[];
-semanasAgrupadas[seg].dias[r[0]].push(r);
-}
-
-const sel=document.getElementById('selectSemana');
-sel.innerHTML="";
-const semanaAtual = getSemanaAtual();
-
-ordenarDatasBR(Object.keys(semanasAgrupadas)).forEach(s=>{
-  sel.innerHTML+=`<option value="${s}">Semana de ${s}</option>`;
-});
-
-/* 🔥 SELECIONA SEMANA ATUAL SE EXISTIR */
-if(semanasAgrupadas[semanaAtual]){
-  sel.value = semanaAtual;
-}
-
-renderizarTabela();
-}
 
 function getTurmasAtivasNaSemana(dias){
 return turmasDaPlanilha.filter(t=>{
