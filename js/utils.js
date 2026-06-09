@@ -70,3 +70,20 @@ r.push(c.trim());
 return r;
 });
 }
+
+const CURSOS_MAP = [
+  { key: "AGROEC", cl:"c-agroec", rgb:[232,245,233] },
+  { key: "AGROPEC", cl:"c-agropec", rgb:[227,242,253] },
+  { key: "INFO", cl:"c-info", rgb:[255,248,225] },
+  { key: "GEO", cl:"c-geo", rgb:[243,229,245] },
+  { key: "MAT", cl:"c-mat", rgb:[224,247,250] },
+  { key: "AGRONEG", cl:"c-agroneg", rgb:[239,235,233] },
+  { key: "ZOO", cl:"c-zoo", rgb:[252,228,236] },
+  { key: "AGRON", cl:"c-agron", rgb:[241,248,233] }
+];
+
+function getCursoInfo(t){
+  t = t.toUpperCase();
+  const found = CURSOS_MAP.find(c => t.includes(c.key));
+  return found || { cl:"", rgb:[255,255,255] };
+}
