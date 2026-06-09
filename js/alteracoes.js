@@ -121,3 +121,36 @@ function verificarMudancaAoAbrir() {
 
   salvarSnapshotAtual();
 }
+
+function mostrarMensagemPainel(titulo, texto){
+
+  const tituloPainel =
+    document.querySelector("#painelAlteracoes strong");
+
+  tituloPainel.innerText = titulo;
+
+  document.getElementById("conteudoAlteracoes").innerText = texto;
+
+  document.getElementById("painelAlteracoes").style.display = "block";
+}
+  
+function mostrarAvisoAlteracoes(lista) {
+
+  let texto = "⚠️ ALTERAÇÕES DE AULAS DETECTADAS:\n\n";
+
+  lista.forEach(item => {
+
+    texto += `📅 Dia: ${item.dia}\n`;
+    texto += `🏫 Turma: ${item.turma}\n`;
+    texto += `⏰ Horário: ${item.horario}\n`;
+
+    item.alteracoes.forEach(a => {
+      texto += `➡️ ${a.antes} → ${a.depois}\n`;
+    });
+
+    texto += "\n";
+  });
+
+  document.getElementById("conteudoAlteracoes").innerText = texto;
+  document.getElementById("painelAlteracoes").style.display = "block";
+}
