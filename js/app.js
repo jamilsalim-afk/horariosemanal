@@ -95,22 +95,22 @@ async function init(){
   }
 }
 
-function trocarModalidade(){
+async function trocarModalidade(){
 
   limparPainelAlteracoes();
 
   const mod =
-    document.getElementById(
-      "selectModalidade"
-    ).value;
+    document.getElementById("selectModalidade").value;
 
-  if(mod==="INTEGRADO"){
-    dadosGlobais = dadosIntegrado;
-  }else{
-    dadosGlobais = dadosSuperior;
-  }
+  dadosGlobais =
+    mod === "INTEGRADO"
+      ? dadosIntegrado
+      : dadosSuperior;
 
   processarDados();
+  gerarDashboard();
+
+  await carregarProfessores(); // 🔥 ESSENCIAL
 
   setTimeout(()=>{
     verificarMudancaAoAbrir();
