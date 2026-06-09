@@ -24,8 +24,6 @@ async function init(){
     // DOWNLOAD EM PARALELO
     // ==========================
 
-    carregarProfessores();
-
     const [resIntegrado,resSuperior] =
       await Promise.all([
         fetch(urlIntegrado),
@@ -72,6 +70,8 @@ async function init(){
     // ==========================
     // VERIFICA ALTERAÇÕES
     // ==========================
+
+    await carregarProfessores();
 
     setTimeout(() => {
 
