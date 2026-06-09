@@ -203,26 +203,6 @@ let turmasDaPlanilha = [];
 let semanasAgrupadas = {};
 
 
-
-function obterSnapshotAntigo() {
-  const sem = document.getElementById('selectSemana').value;
-  const mod = document.getElementById('selectModalidade').value;
-
-  const data = localStorage.getItem(`snapshot_${mod}_${sem}`);
-  return data ? JSON.parse(data) : null;
-}
-
-function valorMudou(v1, v2){
-  const t1 = (v1 || "").trim();
-  const t2 = (v2 || "").trim();
-
-  if (t1 !== t2) return true;
-
-  const n1 = normalizarTexto(t1);
-  const n2 = normalizarTexto(t2);
-
-  return n1 !== n2;
-}
   
 function verificarMudancaAoAbrir() {
 
