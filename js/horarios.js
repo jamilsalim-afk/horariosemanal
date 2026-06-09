@@ -174,3 +174,13 @@ function filtrarProfessor(){
     }
   }
 }
+
+function mostrarRelatorioDia(dia){
+
+  const texto = gerarRelatorioDia(dia);
+
+  mostrarMensagemPainel(
+    `📅 Relatório de aulas vagas - ${dia}`,
+    texto
+  );
+}
