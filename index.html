@@ -368,13 +368,12 @@ return `
 function calcularIndicadores(dados){
 
   let dias = new Set();
+  let diasSabado = new Set();
 
   let aulas = 0;
   let vagas = 0;
-  let sabados = 0;
 
   const hoje = new Date();
-
   hoje.setHours(23,59,59,999);
 
   let ultimaData = "";
@@ -386,11 +385,9 @@ function calcularIndicadores(dados){
       if(row[0]) ultimaData = row[0];
 
       const dataStr = ultimaData;
-
       if(!dataStr) continue;
 
       const [d,m,a] = dataStr.split('/');
-
       const data = new Date(a,m-1,d);
 
       // ignora datas futuras
@@ -401,9 +398,9 @@ function calcularIndicadores(dados){
 
       dias.add(dataStr);
 
-      // sábado letivo
+      // 🔥 agora conta DIAS de sábado (não linhas)
       if(data.getDay() === 6){
-         sabados++;
+         diasSabado.add(dataStr);
       }
 
       const horario = normalizarTexto(row[1] || "");
@@ -421,7 +418,6 @@ function calcularIndicadores(dados){
       for(let j=2;j<row.length;j++){
 
          const val = (row[j] || "").trim();
-
          if(!val) continue;
 
          const norm = normalizarTexto(val);
@@ -441,7 +437,7 @@ function calcularIndicadores(dados){
       diasLetivos: dias.size,
       aulas,
       vagas,
-      sabados
+      sabados: diasSabado.size
   };
 }
 
