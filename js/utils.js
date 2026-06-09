@@ -30,3 +30,17 @@
 
   return true;
 }
+
+function isSemanaPassada(dataStr){
+  const [d,m,a] = dataStr.split('/');
+  const data = new Date(a, m-1, d);
+
+  const hoje = new Date();
+
+  // pega segunda-feira da semana atual
+  const dia = hoje.getDay();
+  const diff = hoje.getDate() - dia + (dia === 0 ? -6 : 1);
+  const segundaAtual = new Date(hoje.setDate(diff));
+
+  return data < segundaAtual;
+}
