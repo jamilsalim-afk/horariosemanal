@@ -367,7 +367,7 @@ return `
 
 function calcularIndicadores(dados){
 
-  let dias = new Set();
+  let diasLetivos = new Set();
   let sabadosComAula = new Set();
 
   let aulas = 0;
@@ -396,10 +396,6 @@ function calcularIndicadores(dados){
       // ignora feriados
       if(isFeriado(dataStr)) continue;
 
-      dias.add(dataStr);
-
-      const isSabado = data.getDay() === 6;
-
       const horario = normalizarTexto(row[1] || "");
 
       // ignora linhas especiais
@@ -409,7 +405,7 @@ function calcularIndicadores(dados){
         horario.includes("[R]") ||
         horario.includes("*");
 
-      let temAulaNaLinha = false;
+      let temAulaNoDia = false;
 
       if(!linhaIgnorada){
 
@@ -419,7 +415,7 @@ function calcularIndicadores(dados){
 
               if(!val) continue;
 
-              temAulaNaLinha = true;
+              temAulaNoDia = true;
 
               aulas++;
 
@@ -434,14 +430,19 @@ function calcularIndicadores(dados){
           }
       }
 
-      // 🔥 só conta sábado se tiver aula REAL
-      if(isSabado && temAulaNaLinha){
-          sabadosComAula.add(dataStr);
+      // 🔥 só conta o dia se tiver aula REAL
+      if(temAulaNoDia){
+          diasLetivos.add(dataStr);
+
+          // 🔥 sábado letivo real (com aula)
+          if(data.getDay() === 6){
+              sabadosComAula.add(dataStr);
+          }
       }
   }
 
   return {
-      diasLetivos: dias.size,
+      diasLetivos: diasLetivos.size,
       aulas,
       vagas,
       sabados: sabadosComAula.size
