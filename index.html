@@ -202,32 +202,7 @@ let dadosSuperior = [];
 let turmasDaPlanilha = [];
 let semanasAgrupadas = {};
 
-function limparPainelAlteracoes(){
-  document.getElementById("conteudoAlteracoes").innerText = "";
-  document.getElementById("painelAlteracoes").style.display = "none";
-}
-  
-function trocarModalidade(){
 
-  limparPainelAlteracoes();
-
-  const mod =
-    document.getElementById(
-      "selectModalidade"
-    ).value;
-
-  if(mod==="INTEGRADO"){
-    dadosGlobais = dadosIntegrado;
-  }else{
-    dadosGlobais = dadosSuperior;
-  }
-
-  processarDados();
-
-  setTimeout(()=>{
-    verificarMudancaAoAbrir();
-  },200);
-}
 
   function trocarSemana(){
   limparPainelAlteracoes(); // 🔥 ESSENCIAL
