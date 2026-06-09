@@ -5,3 +5,8 @@ function semanaSelecionadaEhAtual(){
 
   return semanaSelecionada === getSemanaAtual();
 }
+
+function limparPainelAlteracoes(){
+  document.getElementById("conteudoAlteracoes").innerText = "";
+  document.getElementById("painelAlteracoes").style.display = "none";
+}
