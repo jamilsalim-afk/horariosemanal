@@ -1196,3 +1196,117 @@ body {
   color: var(--text-primary);
   letter-spacing: 1px;
 }
+
+
+/* =========================
+   LAYOUT GERAL
+========================= */
+
+body{
+  margin:0;
+  font-family: Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+}
+
+/* CONTAINER PRINCIPAL */
+.app-container{
+  padding-bottom: 70px; /* espaço para menu inferior no mobile */
+}
+
+/* =========================
+   CONTEÚDO (CARDS MODERNOS)
+========================= */
+
+.week-container,
+.dashboard-panel,
+.controls-card,
+.estatistica-cards{
+  border-radius: 14px;
+}
+
+/* =========================
+   MENU INFERIOR (MOBILE APP)
+========================= */
+
+.mobile-nav{
+  display:none;
+}
+
+/* BOTÕES DO MENU */
+.mobile-nav button{
+  flex:1;
+  border:none;
+  background:transparent;
+  color: var(--text);
+
+  font-size:12px;
+
+  padding:10px 0;
+
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+
+  gap:4px;
+
+  cursor:pointer;
+}
+
+/* ÍCONE + TEXTO */
+.mobile-nav button span{
+  font-size:20px;
+}
+
+/* ATIVO */
+.mobile-nav button.active{
+  color: var(--primary);
+  font-weight:bold;
+}
+
+/* =========================
+   MOBILE FIRST
+========================= */
+
+@media (max-width: 768px){
+
+  /* esconde tabs antigas */
+  .tabs,
+  .tabs-container{
+    display:none !important;
+  }
+
+  /* menu inferior aparece */
+  .mobile-nav{
+    display:flex;
+
+    position:fixed;
+    bottom:0;
+    left:0;
+    right:0;
+
+    background: var(--surface);
+
+    border-top:1px solid var(--border);
+
+    z-index:99999;
+
+    height:60px;
+  }
+
+  /* layout mais espaçado */
+  .controls-card{
+    flex-direction:column;
+    align-items:stretch;
+  }
+
+  .search-box{
+    width:100%;
+  }
+
+  /* tabelas melhor adaptadas */
+  .table-responsive{
+    overflow-x:auto;
+  }
+}
