@@ -1037,24 +1037,12 @@ window.addEventListener("beforeunload", () => {
   salvarSnapshotAtual();
 });
 
-function abrirAba(id, botao){
+function abrirAba(id){
+  document.querySelectorAll('.tab-content')
+    .forEach(el => el.classList.remove('active'));
 
-    document.querySelectorAll('.tab-content')
-        .forEach(el => el.classList.remove('active'));
-
-    document.querySelectorAll('.tab')
-        .forEach(el => el.classList.remove('active'));
-
-    document.getElementById(id)
-        .classList.add('active');
-
-    if(botao){
-        botao.classList.add('active');
-    }
-
-    if(id === "sabados"){
-        renderSabados();
-    }
+  document.getElementById(id)
+    .classList.add('active');
 }
 
 function montarRelatorioBase() {
@@ -1604,6 +1592,35 @@ window.onload = async () => {
 
   esconderLoaderAbas(); // 🔥 some quando tudo pronto
 };
+
+  <div class="mobile-nav">
+
+  <button onclick="abrirAba('dashboard')">
+    <span>📊</span>
+    Dash
+  </button>
+
+  <button onclick="abrirAba('horarios')">
+    <span>📅</span>
+    Horários
+  </button>
+
+  <button onclick="abrirAba('professores')">
+    <span>👨‍🏫</span>
+    Prof
+  </button>
+
+  <button onclick="abrirAba('turmas')">
+    <span>🏫</span>
+    Turmas
+  </button>
+
+  <button onclick="abrirAba('relatorios')">
+    <span>📑</span>
+    Rel
+  </button>
+
+</div>
   
 </script>
 <script src="js/config.js"></script>
