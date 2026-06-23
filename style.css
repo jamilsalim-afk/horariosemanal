@@ -195,15 +195,6 @@ select,
     top: 60px;
   }
 
-  .controls-card{
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .search-box{
-    width: 100%;
-  }
-
 }
 
 /* CONTEÚDO */
