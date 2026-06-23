@@ -1217,7 +1217,7 @@ body {
     left:0;
     right:0;
 
-    height:60px;
+    height:50px;
 
     background:var(--surface);
 
@@ -1241,7 +1241,7 @@ body {
 
     gap:2px;
 
-    font-size:10px;
+    font-size:8px;
 
     color:var(--text);
 
@@ -1249,11 +1249,11 @@ body {
   }
 
   .mobile-nav span{
-    font-size:16px;
+    font-size:14px;
   }
 
   .app-container{
-    padding-bottom:60px;
+    padding-bottom:50px;
   }
 }
 
@@ -1289,16 +1289,6 @@ body {
 
   .dashboard-card strong{
     font-size:14px;
-  }
-
-}
-
-@media (max-width: 768px){
-
-  table{
-    font-size: 6px;
-    transform: scale(1);
-    transform-origin: top left;
   }
 
 }
