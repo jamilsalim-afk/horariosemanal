@@ -1292,3 +1292,13 @@ body {
   }
 
 }
+
+@media (max-width: 768px){
+
+  table{
+    font-size: 11px;
+    transform: scale(0.75);
+    transform-origin: top left;
+  }
+
+}
