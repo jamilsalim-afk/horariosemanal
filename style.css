@@ -962,3 +962,55 @@ details[open] summary::before{ content:'▼ '; }
   min-width:unset !important;
   max-width:unset !important;
 }
+
+/* =========================
+   CORREÇÕES DE TABELAS v2
+========================= */
+
+#tabelaHorario table,
+#containerSabados table{
+  font-size:7px !important;
+}
+
+#tabelaHorario th,
+#tabelaHorario td,
+#containerSabados th,
+#containerSabados td{
+  font-size:7px !important;
+  padding:2px !important;
+}
+
+#tabelaProfessor table,
+#tabelaTurma table{
+  font-size:7px !important;
+}
+
+#tabelaProfessor th,
+#tabelaProfessor td,
+#tabelaTurma th,
+#tabelaTurma td{
+  font-size:7px !important;
+  padding:2px !important;
+}
+
+#tabelaEstatistica th,
+#tabelaEstatistica td{
+  font-size:8px !important;
+  padding:3px !important;
+}
+
+#tabelaRelatorioEstatistica thead th,
+#tabelaRelatorioEstatistica tbody td{
+  font-size:8px !important;
+  padding:3px !important;
+}
+
+#tabelaResumoRelatorio th,
+#tabelaResumoRelatorio td,
+#tabelaDetalhadaRelatorio th,
+#tabelaDetalhadaRelatorio td,
+#relatorioContainer th,
+#relatorioContainer td{
+  font-size:7px !important;
+  padding:2px !important;
+}
