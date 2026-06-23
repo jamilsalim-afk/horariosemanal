@@ -1264,3 +1264,47 @@ body {
     padding-bottom:70px;
   }
 }
+
+/* =========================
+   AJUSTE GLOBAL MOBILE (SEM ZOOM)
+========================= */
+
+@media (max-width:768px){
+
+  body{
+    font-size:13px;
+  }
+
+  select,
+  .search-box,
+  .btn-pdf{
+    font-size:12px;
+    padding:8px;
+  }
+
+  .controls-card{
+    padding:8px;
+    gap:6px;
+  }
+
+  .dashboard-card{
+    padding:10px;
+  }
+
+  table{
+    font-size:11px;
+  }
+
+  th, td{
+    padding:4px;
+  }
+
+  .brand-title{
+    font-size:16px;
+  }
+
+  .brand-subtitle{
+    font-size:11px;
+  }
+
+}
