@@ -860,157 +860,95 @@ details[open] summary::before{ content:'▼ '; }
 }
 
 /* =========================
-   CORREÇÕES DE TABELAS
-========================= */
-
-/* Horários e Sábados - fonte original */
-#tabelaHorario table,
-#containerSabados table{
-  font-size:9px !important;
-}
-
-#tabelaHorario th,
-#tabelaHorario td,
-#containerSabados th,
-#containerSabados td{
-  font-size:9px !important;
-  padding:4px !important;
-  word-break:break-word;
-}
-
-/* Professor e Turma - fonte menor */
-#tabelaProfessor table,
-#tabelaTurma table{
-  font-size:10px !important;
-}
-
-#tabelaProfessor th,
-#tabelaProfessor td,
-#tabelaTurma th,
-#tabelaTurma td{
-  font-size:10px !important;
-  padding:4px !important;
-}
-
-/* Estatística - fonte menor */
-#tabelaEstatistica th{
-  font-size:11px !important;
-  padding:6px !important;
-  white-space:normal !important;
-  word-break:break-word !important;
-}
-
-#tabelaEstatistica td{
-  font-size:11px !important;
-  padding:6px !important;
-  white-space:normal !important;
-  word-break:break-word !important;
-}
-
-#tabelaRelatorioEstatistica thead th{
-  font-size:11px !important;
-  padding:6px !important;
-}
-
-#tabelaRelatorioEstatistica tbody td{
-  font-size:11px !important;
-  padding:6px !important;
-}
-
-/* Relatórios - colunas proporcionais */
-#tabelaResumoRelatorio,
-#tabelaDetalhadaRelatorio{
-  font-size:10px !important;
-  table-layout:fixed !important;
-  width:100% !important;
-}
-
-#tabelaResumoRelatorio th,
-#tabelaResumoRelatorio td,
-#tabelaDetalhadaRelatorio th,
-#tabelaDetalhadaRelatorio td{
-  font-size:10px !important;
-  padding:4px !important;
-  word-break:break-word !important;
-  overflow-wrap:anywhere !important;
-  white-space:normal !important;
-}
-
-/* Relatório por professor - col disciplina */
-#relatorioContainer table{
-  font-size:10px !important;
-  table-layout:fixed !important;
-  width:100% !important;
-}
-
-#relatorioContainer th,
-#relatorioContainer td{
-  font-size:10px !important;
-  padding:4px !important;
-  word-break:break-word !important;
-  overflow-wrap:anywhere !important;
-  white-space:normal !important;
-}
-
-.col-texto{
-  min-width:unset !important;
-  width:40% !important;
-}
-
-.col-mes{
-  width:8% !important;
-  min-width:unset !important;
-  max-width:unset !important;
-}
 
 /* =========================
-   CORREÇÕES DE TABELAS v2
+
+/* =========================
+   TABELAS MOBILE APENAS
 ========================= */
 
-#tabelaHorario table,
-#containerSabados table{
-  font-size:7px !important;
-}
+@media (max-width:480px){
 
-#tabelaHorario th,
-#tabelaHorario td,
-#containerSabados th,
-#containerSabados td{
-  font-size:7px !important;
-  padding:2px !important;
-}
+  #tabelaHorario table,
+  #containerSabados table{
+    font-size:4px !important;
+  }
 
-#tabelaProfessor table,
-#tabelaTurma table{
-  font-size:7px !important;
-}
+  #tabelaHorario th,
+  #tabelaHorario td,
+  #containerSabados th,
+  #containerSabados td{
+    font-size:4px !important;
+    padding:1px !important;
+  }
 
-#tabelaProfessor th,
-#tabelaProfessor td,
-#tabelaTurma th,
-#tabelaTurma td{
-  font-size:7px !important;
-  padding:2px !important;
-}
+  #tabelaProfessor table,
+  #tabelaTurma table{
+    font-size:4px !important;
+  }
 
-#tabelaEstatistica th,
-#tabelaEstatistica td{
-  font-size:8px !important;
-  padding:3px !important;
-}
+  #tabelaProfessor th,
+  #tabelaProfessor td,
+  #tabelaTurma th,
+  #tabelaTurma td{
+    font-size:4px !important;
+    padding:1px !important;
+  }
 
-#tabelaRelatorioEstatistica thead th,
-#tabelaRelatorioEstatistica tbody td{
-  font-size:8px !important;
-  padding:3px !important;
-}
+  #tabelaEstatistica th,
+  #tabelaEstatistica td{
+    font-size:4px !important;
+    padding:2px !important;
+    white-space:normal !important;
+    word-break:break-word !important;
+  }
 
-#tabelaResumoRelatorio th,
-#tabelaResumoRelatorio td,
-#tabelaDetalhadaRelatorio th,
-#tabelaDetalhadaRelatorio td,
-#relatorioContainer th,
-#relatorioContainer td{
-  font-size:7px !important;
-  padding:2px !important;
+  #tabelaRelatorioEstatistica thead th,
+  #tabelaRelatorioEstatistica tbody td{
+    font-size:4px !important;
+    padding:2px !important;
+  }
+
+  #tabelaResumoRelatorio,
+  #tabelaDetalhadaRelatorio{
+    font-size:4px !important;
+    table-layout:fixed !important;
+    width:100% !important;
+  }
+
+  #tabelaResumoRelatorio th,
+  #tabelaResumoRelatorio td,
+  #tabelaDetalhadaRelatorio th,
+  #tabelaDetalhadaRelatorio td{
+    font-size:4px !important;
+    padding:1px !important;
+    word-break:break-word !important;
+    white-space:normal !important;
+  }
+
+  #relatorioContainer table{
+    font-size:4px !important;
+    table-layout:fixed !important;
+    width:100% !important;
+  }
+
+  #relatorioContainer th,
+  #relatorioContainer td{
+    font-size:4px !important;
+    padding:1px !important;
+    word-break:break-word !important;
+    white-space:normal !important;
+  }
+
+  .col-texto{
+    min-width:unset !important;
+    width:40% !important;
+  }
+
+  .col-mes{
+    width:8% !important;
+    min-width:unset !important;
+    max-width:unset !important;
+  }
+
 }
