@@ -1201,7 +1201,6 @@ body {
    ABAS: PC x MOBILE
 ========================= */
 
-/* MOBILE NAV */
 .mobile-nav{
   display:none;
   position:fixed;
@@ -1231,10 +1230,4 @@ body {
 
 .mobile-nav span{
   font-size:18px;
-}
-
-@media (max-width:768px){
-  .tabs{ display:none !important; }
-  .mobile-nav{ display:flex !important; }
-  .app-container{ padding-bottom:70px; }
 }
