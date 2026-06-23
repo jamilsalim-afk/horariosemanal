@@ -1210,3 +1210,9 @@ body {
   justify-content:space-around;
   align-items:center;
 }
+
+@media (min-width:769px){
+  .mobile-nav{
+    display:none;
+  }
+}
