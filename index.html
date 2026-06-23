@@ -1661,7 +1661,6 @@ window.onload = async () => {
     document.querySelector(".tab-btn")
   );
 
-      esconderLoaderAbas();
 };
 
 function ajustarNavegacao() {
@@ -1675,7 +1674,7 @@ function ajustarNavegacao() {
   }
 }
 
-ajustarNavegacao();
+window.addEventListener('load', ajustarNavegacao);
 window.addEventListener('resize', ajustarNavegacao);
 
 </script>
