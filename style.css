@@ -1197,49 +1197,70 @@ body {
   letter-spacing: 1px;
 }
 
+/* =========================
+   ABAS: PC x MOBILE
+========================= */
+
+/* MOBILE - mostra menu inferior */
 .mobile-nav{
   display:none;
 }
 
+/* PC - mostra abas no topo */
+.tabs{
+  display:flex;
+}
+
+/* =========================
+   MOBILE
+========================= */
 @media (max-width:768px){
 
-  .mobile-nav{
-    display:flex;
-    justify-content:space-around;
-    align-items:center;
+  /* esconde abas do topo */
+  .tabs{
+    display:none !important;
+  }
 
+  /* mostra menu inferior */
+  .mobile-nav{
+    display:flex !important;
     position:fixed;
     bottom:0;
     left:0;
     right:0;
 
-    height:50px;
+    height:58px;
 
     background:var(--surface);
-
     border-top:1px solid var(--border);
 
     z-index:99999;
+
+    justify-content:space-around;
+    align-items:center;
   }
 
   .mobile-nav button{
-
     flex:1;
-
-    background:none;
     border:none;
+    background:none;
 
     display:flex;
     flex-direction:column;
-
     align-items:center;
     justify-content:center;
 
-    gap:2px;
-
-    font-size:8px;
-
+    font-size:10px;
     color:var(--text);
 
-    cursor:pointer;
+    gap:2px;
   }
+
+  .mobile-nav span{
+    font-size:18px;
+  }
+
+  .app-container{
+    padding-bottom:70px;
+  }
+}
