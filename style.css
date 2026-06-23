@@ -1266,45 +1266,54 @@ body {
 }
 
 /* =========================
-   AJUSTE GLOBAL MOBILE (SEM ZOOM)
+   AJUSTE FINAL MOBILE (COMPATIBILIDADE TOTAL)
+   NÃO MEXE EM TABELAS EXISTENTES
 ========================= */
 
 @media (max-width:768px){
 
-  body{
-    font-size:13px;
+  /* reduz leve escala geral sem quebrar seu layout atual */
+  .app-container{
+    font-size: 12px;
+  }
+
+  /* deixa controles mais compactos */
+  .controls-card{
+    padding:6px;
+    gap:5px;
   }
 
   select,
   .search-box,
   .btn-pdf{
-    font-size:12px;
-    padding:8px;
-  }
-
-  .controls-card{
-    padding:8px;
-    gap:6px;
-  }
-
-  .dashboard-card{
-    padding:10px;
-  }
-
-  table{
     font-size:11px;
+    padding:7px;
   }
 
+  /* header menor */
+  .brand-title{
+    font-size:15px;
+  }
+
+  .brand-subtitle{
+    font-size:10px;
+  }
+
+  /* cards mais compactos */
+  .dashboard-card,
+  .info-card,
+  .recuperacao-card,
+  .exame-card{
+    padding:8px;
+  }
+
+  /* melhora leitura sem aumentar tamanho */
   th, td{
     padding:4px;
   }
 
-  .brand-title{
-    font-size:16px;
+  /* garante que nada “estoura” horizontalmente */
+  .table-responsive{
+    overflow-x:auto;
   }
-
-  .brand-subtitle{
-    font-size:11px;
-  }
-
 }
