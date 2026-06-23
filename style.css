@@ -1203,10 +1203,6 @@ body {
 
 @media (max-width:768px){
 
-  .tabs{
-    display:none !important;
-  }
-
   .mobile-nav{
     display:flex;
     justify-content:space-around;
@@ -1247,48 +1243,3 @@ body {
 
     cursor:pointer;
   }
-
-  .mobile-nav span{
-    font-size:14px;
-  }
-
-  .app-container{
-    padding-bottom:50px;
-  }
-}
-
-@media (max-width:768px){
-
-  body{
-    font-size:8px;
-  }
-
-  .brand-title{
-    font-size:16px;
-  }
-
-  .brand-subtitle{
-    font-size:10px;
-  }
-
-  .controls-card{
-    padding:8px;
-    gap:6px;
-  }
-
-  select,
-  .search-box,
-  .btn-pdf{
-    font-size:11px;
-    padding:8px;
-  }
-
-  .dashboard-card{
-    padding:8px;
-  }
-
-  .dashboard-card strong{
-    font-size:14px;
-  }
-
-}
