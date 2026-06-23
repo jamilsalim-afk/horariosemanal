@@ -1078,12 +1078,23 @@ window.addEventListener("beforeunload", () => {
   salvarSnapshotAtual();
 });
 
-function abrirAba(id){
-  document.querySelectorAll('.tab-content')
+function abrirAba(id, botao = null){
+
+  document
+    .querySelectorAll('.tab-content')
     .forEach(el => el.classList.remove('active'));
 
-  document.getElementById(id)
+  document
+    .getElementById(id)
     .classList.add('active');
+
+  document
+    .querySelectorAll('.tab, .tab-btn')
+    .forEach(el => el.classList.remove('active'));
+
+  if(botao){
+    botao.classList.add('active');
+  }
 }
 
 function montarRelatorioBase() {
