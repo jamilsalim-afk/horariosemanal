@@ -185,6 +185,27 @@ select,
   z-index: 1;
 }
 
+/* =========================
+   RESPONSIVO
+========================= */
+
+@media (max-width: 768px){
+
+  .header-sticky{
+    top: 60px;
+  }
+
+  .controls-card{
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .search-box{
+    width: 100%;
+  }
+
+}
+
 /* CONTEÚDO */
 
 .week-container{
@@ -515,6 +536,40 @@ tr.linha-vazia td{
 }
 
 /* ==========================
+   TABLET
+========================== */
+
+@media (max-width: 768px){
+
+  .tab-btn{
+    flex: 1 1 calc(50% - 10px);
+
+    padding:14px 10px;
+
+    font-size:13px;
+
+    text-align:center;
+  }
+}
+
+/* ==========================
+   CELULAR
+========================== */
+
+@media (max-width: 480px){
+
+  .tab-btn{
+    flex: 1 1 100%;
+
+    padding:16px 12px;
+
+    font-size:14px;
+
+    border-radius:12px;
+  }
+}
+
+  /* ==========================
    DASHBOARD MODERNO
 ========================== */
 .dashboard-header{
@@ -553,16 +608,8 @@ tr.linha-vazia td{
 }
 
 .dashboard-panel h2{
-    margin:0;
+    margin-top:0;
     color:var(--primary);
-}
-
-.dashboard-panel{
-    color:var(--text);
-}
-
-.dashboard-panel strong{
-    color:inherit;
 }
 
 .dashboard-card{
@@ -585,7 +632,7 @@ tr.linha-vazia td{
 .card-aulas *,
 .card-vagas *,
 .card-sabados *{
-    color:white !important;
+color:white !important;
 }
 
 .dashboard-card strong{
@@ -667,6 +714,66 @@ tr.linha-vazia td{
     margin-bottom:8px;
 }
 
+@media(max-width:1100px){
+
+    .dashboard-grid{
+        grid-template-columns:1fr 1fr;
+    }
+}
+
+@media(max-width:768px){
+
+    .dashboard-grid{
+        grid-template-columns:1fr;
+    }
+}
+
+  /* DASHBOARD */
+
+.dashboard-grid{
+    display:grid;
+    grid-template-columns:
+        1.2fr
+        1.2fr
+        1fr;
+
+    gap:20px;
+    padding:20px;
+    align-items:start;
+}
+
+.dashboard-column{
+    display:flex;
+    flex-direction:column;
+    gap:15px;
+}
+
+.dashboard-panel{
+    background:var(--surface);
+    border-radius:15px;
+    padding:15px;
+    box-shadow:var(--shadow);
+}
+
+.dashboard-panel h2{
+    margin-top:0;
+    color:var(--primary);
+}
+
+  .dashboard-panel{
+    color:var(--text);
+}
+
+.dashboard-panel strong{
+    color:inherit;
+}
+
+.info-card,
+.recuperacao-card,
+.exame-card{
+    color:var(--text);
+}
+
 .info-card,
 .recuperacao-card,
 .exame-card{
@@ -682,6 +789,20 @@ tr.linha-vazia td{
     gap:6px;
 }
 
+/* NÃO altera os cards coloridos */
+.dashboard-card{
+    padding:18px;
+    border-radius:14px;
+    position:relative;
+    overflow:hidden;
+    box-shadow:0 4px 12px rgba(0,0,0,.12);
+    min-height:110px;
+}
+  
+.dashboard-card strong{
+    font-size:22px;
+}
+
 .dashboard-header{
     text-align:center;
     padding:20px;
@@ -695,6 +816,12 @@ tr.linha-vazia td{
     overflow:hidden;
 }
 
+.progress-bar{
+    height:100%;
+    background:#2e7d32;
+    border-radius:20px;
+}
+
 .mini-table{
     width:100%;
     border-collapse:collapse;
@@ -706,22 +833,17 @@ tr.linha-vazia td{
     padding:5px;
 }
 
-@media(max-width:1100px){
-    .dashboard-grid{
-        grid-template-columns:1fr 1fr;
-    }
-}
-
 @media(max-width:1000px){
     .dashboard-grid{
         grid-template-columns:1fr;
     }
+
 }
 
-[data-theme="dark"] .dashboard-card,
-[data-theme="dark"] .info-card,
-[data-theme="dark"] .recuperacao-card,
-[data-theme="dark"] .exame-card{
+    [data-theme="dark"] .dashboard-card,
+    [data-theme="dark"] .info-card,
+    [data-theme="dark"] .recuperacao-card,
+    [data-theme="dark"] .exame-card{
     background:#1e293b;
     color:#f8fafc;
     border-left:5px solid #4caf50;
@@ -731,7 +853,7 @@ tr.linha-vazia td{
     color:#f8fafc;
 }
 
-details{
+  details{
     cursor:pointer;
     padding:10px;
     border-radius:10px;
@@ -745,16 +867,16 @@ summary{
     margin-bottom:10px;
 }
 
-[data-theme="dark"] .dashboard-panel{
+    [data-theme="dark"] .dashboard-panel{
     background:#1e293b;
     color:#f8fafc;
 }
 
-[data-theme="dark"] .dashboard-panel h2{
+    [data-theme="dark"] .dashboard-panel h2{
     color:#66bb6a;
 }
 
-[data-theme="dark"] summary{
+    [data-theme="dark"] summary{
     color:#66bb6a;
 }
 
@@ -862,6 +984,7 @@ body {
     font-size:32px;
     color:#2e7d32;
     margin-bottom:5px;
+
 }
 
 .estatistica-header p{
@@ -871,7 +994,8 @@ body {
 
 .estatistica-cards{
     display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+    grid-template-columns:
+        repeat(auto-fit,minmax(180px,1fr));
     gap:15px;
     margin:20px;
 }
@@ -882,7 +1006,8 @@ body {
     border-radius:12px;
     padding:20px;
     text-align:center;
-    box-shadow:0 3px 12px rgba(0,0,0,.08);
+    box-shadow:
+      0 3px 12px rgba(0,0,0,.08);
 }
 
 .estat-card span{
@@ -900,7 +1025,6 @@ body {
 #tabelaRelatorioEstatistica{
     width:100%;
     border-collapse:collapse;
-    table-layout:fixed;
 }
 
 #tabelaRelatorioEstatistica thead th{
@@ -927,13 +1051,6 @@ body {
     background:rgba(46,125,50,.15);
 }
 
-#tabelaRelatorioEstatistica th,
-#tabelaRelatorioEstatistica td{
-    white-space:normal;
-    word-break:break-word;
-    overflow-wrap:anywhere;
-}
-
 .coluna-periodo{
     font-weight:bold;
     color:#2e7d32;
@@ -944,6 +1061,18 @@ body {
     word-break: break-word;
     overflow-wrap: anywhere;
     max-width: 100%;
+}
+
+#tabelaRelatorioEstatistica{
+    width:100%;
+    table-layout:fixed;
+}
+
+#tabelaRelatorioEstatistica th,
+#tabelaRelatorioEstatistica td{
+    white-space:normal;
+    word-break:break-word;
+    overflow-wrap:anywhere;
 }
 
 #estatisticas .table-responsive{
@@ -999,10 +1128,12 @@ body {
   margin-bottom:5px;
 }
 
+/* =========================
+   RELATÓRIOS - AJUSTE FORTE
+========================= */
+
 #relatorioContainer table {
   font-size: 12px !important;
-  table-layout: fixed;
-  border-collapse: collapse;
 }
 
 #relatorioContainer th {
@@ -1014,22 +1145,34 @@ body {
   font-size: 12px !important;
 }
 
+/* aumenta ainda mais se quiser leitura confortável */
 #relatorioContainer {
   font-size: 13px;
 }
 
+/* COLUNAS DE TEXTO (disciplina, turma, professor) */
 .col-texto {
   min-width: 150px;
   text-align: left;
   padding-left: 8px !important;
 }
 
+/* COLUNAS NUMÉRICAS (meses, sab, rec, ex, total) */
 .col-mes {
   width: 55px !important;
   min-width: 55px !important;
   max-width: 55px !important;
   text-align: center;
   padding: 4px !important;
+}
+
+/* melhora leitura geral */
+#relatorioContainer table {
+  table-layout: fixed;
+}
+
+#relatorioContainer table {
+  border-collapse: collapse;
 }
 
 #relatorioContainer th,
@@ -1054,37 +1197,6 @@ body {
   letter-spacing: 1px;
 }
 
-/* =========================
-   MOBILE NAV
-========================= */
-
 .mobile-nav{
   display:none;
-  position:fixed;
-  bottom:0;
-  left:0;
-  right:0;
-  height:58px;
-  background:var(--surface);
-  border-top:1px solid var(--border);
-  z-index:99999;
-  justify-content:space-around;
-  align-items:center;
-}
-
-.mobile-nav button{
-  flex:1;
-  border:none;
-  background:none;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  font-size:10px;
-  color:var(--text);
-  gap:2px;
-}
-
-.mobile-nav span{
-  font-size:18px;
 }
