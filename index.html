@@ -1084,9 +1084,8 @@ function abrirAba(id, botao = null){
     .querySelectorAll('.tab-content')
     .forEach(el => el.classList.remove('active'));
 
-  document
-    .getElementById(id)
-    .classList.add('active');
+  const aba = document.getElementById(id);
+  aba.classList.add('active');
 
   document
     .querySelectorAll('.tab, .tab-btn')
@@ -1094,6 +1093,27 @@ function abrirAba(id, botao = null){
 
   if(botao){
     botao.classList.add('active');
+  }
+
+  // 🔥 GARANTE RENDERIZAÇÃO DAS ABAS
+  if(id === "sabados"){
+    renderSabados();
+  }
+
+  if(id === "horarios"){
+    renderizarTabela();
+  }
+
+  if(id === "professores"){
+    renderProfessor();
+  }
+
+  if(id === "turmas"){
+    renderTurma();
+  }
+
+  if(id === "dashboard"){
+    gerarDashboard();
   }
 }
 
