@@ -1664,20 +1664,6 @@ window.onload = async () => {
 
 };
 
-function ajustarNavegacao() {
-  const isMobile = window.innerWidth <= 768;
-  document.querySelector('.tabs').style.display = isMobile ? 'none' : 'flex';
-  document.querySelector('.mobile-nav').style.display = isMobile ? 'flex' : 'none';
-  if (isMobile) {
-    document.querySelector('.app-container').style.paddingBottom = '70px';
-  } else {
-    document.querySelector('.app-container').style.paddingBottom = '';
-  }
-}
-
-window.addEventListener('load', ajustarNavegacao);
-window.addEventListener('resize', ajustarNavegacao);
-
 </script>
 <script src="js/config.js"></script>
 <script src="js/core.js"></script>
