@@ -1297,6 +1297,7 @@ body {
 
   table{
     font-size: 6px;
+    transform: scale(1);
     transform-origin: top left;
   }
 
