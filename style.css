@@ -1249,46 +1249,46 @@ body {
   }
 
   .mobile-nav span{
-    font-size:18px;
+    font-size:16px;
   }
 
   .app-container{
-    padding-bottom:70px;
+    padding-bottom:60px;
   }
 }
 
 @media (max-width:768px){
 
   body{
-    font-size:14px;
-  }
-
-  .brand-title{
-    font-size:18px;
-  }
-
-  .brand-subtitle{
     font-size:12px;
   }
 
+  .brand-title{
+    font-size:16px;
+  }
+
+  .brand-subtitle{
+    font-size:10px;
+  }
+
   .controls-card{
-    padding:10px;
-    gap:8px;
+    padding:8px;
+    gap:6px;
   }
 
   select,
   .search-box,
   .btn-pdf{
-    font-size:13px;
-    padding:10px;
+    font-size:11px;
+    padding:8px;
   }
 
   .dashboard-card{
-    padding:12px;
+    padding:10px;
   }
 
   .dashboard-card strong{
-    font-size:22px;
+    font-size:18px;
   }
 
 }
