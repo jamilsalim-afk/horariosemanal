@@ -1262,7 +1262,7 @@ body.dark .tipo-extra {
   color: #c7a6ff;
 }
 
-/* ===== BOTTOM NAV MOBILE APP STYLE ===== */
+/* ===== BOTTOM NAV MOBILE APP STYLE (FIX DEFINITIVO) ===== */
 
 .bottom-tabs {
   display: none;
@@ -1270,27 +1270,29 @@ body.dark .tipo-extra {
 
 @media only screen and (max-width: 768px) {
 
-  /* 🔥 garante que o menu superior suma MESMO no iPhone */
-  nav.tabs {
+  /* 🔥 garante que o menu superior suma no mobile */
+  .tabs {
     display: none !important;
   }
 
+  /* 🔥 força aparecer o bottom menu */
   .bottom-tabs {
-    display: flex;
+    display: flex !important;
     position: fixed;
     bottom: 0;
     left: 0;
     right: 0;
 
     height: 60px;
-    background: #fff;
 
-    border-top: 1px solid #ddd;
+    background: var(--surface);
+
+    border-top: 1px solid var(--border);
 
     justify-content: space-around;
     align-items: center;
 
-    z-index: 9999;
+    z-index: 99999;
   }
 
   .bottom-tabs button {
@@ -1299,6 +1301,7 @@ body.dark .tipo-extra {
     border: none;
     font-size: 20px;
     padding: 10px 0;
+    color: var(--text);
   }
 
   body {
