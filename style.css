@@ -110,9 +110,13 @@
 
 .header-sticky{
   position: sticky;
-  top: 120px;
-  z-index: 9999;
+  top: 55px;
+  z-index: 4999;
   background: var(--bg);
+  padding: 10px 0;
+  width: 100%;
+  border-bottom: 1px solid var(--border);
+  box-shadow: 0 4px 10px rgba(0,0,0,.15);
 }
 
 /* CARD DOS CONTROLES */
@@ -909,9 +913,12 @@ body {
   display: flex;
   gap: 8px;
   padding: 10px;
-  background:var(--surface);
+  background: var(--surface);
   border-bottom: 1px solid #e5e7eb;
   overflow-x: auto;
+  position: sticky;
+  top: 0;
+  z-index: 5000;
 }
 
 .tab {
