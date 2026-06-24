@@ -1308,3 +1308,30 @@ body.dark .tipo-extra {
     padding-bottom: 70px;
   }
 }
+
+/* ==============================
+   CONTROLE DEFINITIVO DE TABS
+   (EVITA DUPLICAÇÃO)
+============================== */
+
+/* DESKTOP: mostra topo, esconde bottom */
+@media (min-width: 769px) {
+  .tabs {
+    display: flex !important;
+  }
+
+  .bottom-tabs {
+    display: none !important;
+  }
+}
+
+/* MOBILE: esconde topo, mostra bottom */
+@media (max-width: 768px) {
+  .tabs {
+    display: none !important;
+  }
+
+  .bottom-tabs {
+    display: flex !important;
+  }
+}
