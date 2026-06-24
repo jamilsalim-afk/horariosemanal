@@ -1262,36 +1262,35 @@ body.dark .tipo-extra {
   color: #c7a6ff;
 }
 
-/* ===== BOTTOM NAV MOBILE APP STYLE (FIX DEFINITIVO) ===== */
+/* ======= NAVEGAÇÃO ======= */
+
+/* Desktop: topo visível, bottom escondido */
+.tabs {
+  display: flex;
+}
 
 .bottom-tabs {
   display: none;
 }
 
-@media only screen and (max-width: 768px) {
+/* Mobile: topo escondido, bottom visível */
+@media (max-width: 768px) {
 
-  /* 🔥 garante que o menu superior suma no mobile */
   .tabs {
     display: none !important;
   }
 
-  /* 🔥 força aparecer o bottom menu */
   .bottom-tabs {
     display: flex !important;
     position: fixed;
     bottom: 0;
     left: 0;
     right: 0;
-
     height: 60px;
-
     background: var(--surface);
-
     border-top: 1px solid var(--border);
-
     justify-content: space-around;
     align-items: center;
-
     z-index: 99999;
   }
 
@@ -1302,36 +1301,10 @@ body.dark .tipo-extra {
     font-size: 20px;
     padding: 10px 0;
     color: var(--text);
+    cursor: pointer;
   }
 
   body {
     padding-bottom: 70px;
-  }
-}
-
-/* ==============================
-   CONTROLE DEFINITIVO DE TABS
-   (EVITA DUPLICAÇÃO)
-============================== */
-
-/* DESKTOP: mostra topo, esconde bottom */
-@media (min-width: 769px) {
-  .tabs {
-    display: flex !important;
-  }
-
-  .bottom-tabs {
-    display: none !important;
-  }
-}
-
-/* MOBILE: esconde topo, mostra bottom */
-@media (max-width: 768px) {
-  .tabs {
-    display: none !important;
-  }
-
-  .bottom-tabs {
-    display: flex !important;
   }
 }
