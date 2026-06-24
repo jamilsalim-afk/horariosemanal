@@ -1261,3 +1261,47 @@ body.dark .tipo-extra {
   background: #2a1f3f;
   color: #c7a6ff;
 }
+
+/* ===== BOTTOM NAV MOBILE APP STYLE ===== */
+
+.bottom-tabs {
+  display: none;
+}
+
+/* só ativa no mobile */
+@media (max-width: 768px) {
+
+  .tabs {
+    display: none; /* esconde menu de cima */
+  }
+
+  .bottom-tabs {
+    display: flex;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+
+    height: 60px;
+    background: #fff;
+
+    border-top: 1px solid #ddd;
+
+    justify-content: space-around;
+    align-items: center;
+
+    z-index: 9999;
+  }
+
+  .bottom-tabs button {
+    flex: 1;
+    background: none;
+    border: none;
+    font-size: 20px;
+    padding: 10px 0;
+  }
+
+  body {
+    padding-bottom: 70px; /* evita esconder conteúdo atrás da barra */
+  }
+}
