@@ -1306,10 +1306,10 @@ function exportarRelatorioDisciplinaPDF() {
 
         columnStyles: {
 
-            0: { cellWidth: 28 },
-            1: { cellWidth: 28 },
-            2: { cellWidth: 85 },
-            3: { cellWidth: 35 }
+            0: { cellWidth: 30 },
+            1: { cellWidth: 30 },
+            2: { cellWidth: 90 },
+            3: { cellWidth: 36 }
 
         },
 
