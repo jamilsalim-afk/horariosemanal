@@ -429,14 +429,43 @@ function renderTabelaDetalhadaDisciplina(dados) {
 
   dados.forEach(a => {
 
-    const tr = document.createElement("tr");
+    const tipo = classificarTipoRelatorio(a.valor, a.data);
 
-    tr.innerHTML = `
-      <td>${a.data}</td>
-      <td>${a.horario}</td>
-      <td>${obterProfessorRelatorio(a.valor)}</td>
-      <td>${classificarTipoRelatorio(a.valor, a.data)}</td>
-    `;
+let classeTipo = "";
+
+switch (tipo) {
+  case "SÁBADO":
+    classeTipo = "tipo-sabado";
+    break;
+
+  case "RECUPERAÇÃO":
+    classeTipo = "tipo-rec";
+    break;
+
+  case "EXAME":
+    classeTipo = "tipo-ex";
+    break;
+
+  case "REPOSIÇÃO":
+    classeTipo = "tipo-rep";
+    break;
+
+  case "EXTRA":
+    classeTipo = "tipo-extra";
+    break;
+
+  default:
+    classeTipo = "tipo-normal";
+}
+
+const tr = document.createElement("tr");
+
+tr.innerHTML = `
+  <td>${a.data}</td>
+  <td>${a.horario}</td>
+  <td>${obterProfessorRelatorio(a.valor)}</td>
+  <td class="${classeTipo}">${tipo}</td>
+`;
 
     tbody.appendChild(tr);
   });
@@ -748,14 +777,43 @@ function renderTabelaDetalhadaRelatorio(dados) {
 
   dados.forEach(a => {
 
-    const tr = document.createElement("tr");
+    const tipo = classificarTipoRelatorio(a.valor, a.data);
 
-    tr.innerHTML = `
-      <td>${a.data}</td>
-      <td>${a.horario}</td>
-      <td>${obterProfessorRelatorio(a.valor)}</td>
-      <td>${classificarTipoRelatorio(a.valor, a.data)}</td>
-    `;
+let classeTipo = "";
+
+switch (tipo) {
+  case "SÁBADO":
+    classeTipo = "tipo-sabado";
+    break;
+
+  case "RECUPERAÇÃO":
+    classeTipo = "tipo-rec";
+    break;
+
+  case "EXAME":
+    classeTipo = "tipo-ex";
+    break;
+
+  case "REPOSIÇÃO":
+    classeTipo = "tipo-rep";
+    break;
+
+  case "EXTRA":
+    classeTipo = "tipo-extra";
+    break;
+
+  default:
+    classeTipo = "tipo-normal";
+}
+
+const tr = document.createElement("tr");
+
+tr.innerHTML = `
+  <td>${a.data}</td>
+  <td>${a.horario}</td>
+  <td>${obterProfessorRelatorio(a.valor)}</td>
+  <td class="${classeTipo}">${tipo}</td>
+`;
 
     tbody.appendChild(tr);
   });
