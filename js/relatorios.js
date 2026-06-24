@@ -318,7 +318,7 @@ function esconderTodosSelects() {
   document.getElementById("selectDisciplinaRelatorio").style.display = "none";
 }
 
-function classificarTipoRelatorio(valor) {
+function classificarTipoRelatorio(valor, data = null) {
 
   if (!valor) return "NORMAL";
 
@@ -328,6 +328,18 @@ function classificarTipoRelatorio(valor) {
   if (v.includes("[EX]")) return "EXAME";
   if (v.includes("[+]")) return "EXTRA";
   if (v.includes("[R]") || v.includes("[REP]")) return "REPOSIÇÃO";
+
+  // 🔥 verifica sábado
+  if (data) {
+
+    const [d, m, y] = data.split("/");
+
+    const dt = new Date(y, m - 1, d);
+
+    if (dt.getDay() === 6) {
+      return "SÁBADO";
+    }
+  }
 
   return "NORMAL";
 }
@@ -423,7 +435,7 @@ function renderTabelaDetalhadaDisciplina(dados) {
       <td>${a.data}</td>
       <td>${a.horario}</td>
       <td>${obterProfessorRelatorio(a.valor)}</td>
-      <td>${classificarTipoRelatorio(a.valor)}</td>
+      <td>${classificarTipoRelatorio(a.valor, a.data)}</td>
     `;
 
     tbody.appendChild(tr);
@@ -742,7 +754,7 @@ function renderTabelaDetalhadaRelatorio(dados) {
       <td>${a.data}</td>
       <td>${a.horario}</td>
       <td>${obterProfessorRelatorio(a.valor)}</td>
-      <td>${classificarTipoRelatorio(a.valor)}</td>
+      <td>${classificarTipoRelatorio(a.valor, a.data)}</td>
     `;
 
     tbody.appendChild(tr);
