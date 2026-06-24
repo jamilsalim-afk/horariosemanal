@@ -43,7 +43,7 @@ async function carregarProfessores(){
     console.log("LISTA PROFESSORES:", listaProfessores);
 }
   
-async function init(){
+async function init() {
 
   document.getElementById('searchProf').value = "";
 
@@ -53,7 +53,8 @@ async function init(){
 
   document.getElementById("painelAlteracoes").style.display = "none";
 
-  window.trocouModalidade = true;
+  // 🔥 controle correto de estado
+  window.horariosProntos = false;
 
   const url = `https://docs.google.com/spreadsheets/d/${SHEETS[mod].id}/export?format=csv&gid=${SHEETS[mod].gid}`;
   const res = await fetch(url);
@@ -64,32 +65,35 @@ async function init(){
 
   await carregarIntegrado();
   await carregarSuperior();
-
-  // 🔥 FALTAVA AQUI
   await carregarProfessores();
 
-montarBaseGeral(
+  montarBaseGeral(
     dadosIntegrado,
     dadosSuperior
-);
-montarRelatorioBase();
-montarCacheRelatorioDisciplinas();
+  );
 
-// PROFESSORES
-carregarListaProfessores();
-carregarSemanasProfessor();
+  montarRelatorioBase();
+  montarCacheRelatorioDisciplinas();
 
-// TURMAS
-carregarListaTurmas();
-carregarSemanasTurma();
+  // PROFESSORES
+  carregarListaProfessores();
+  carregarSemanasProfessor();
 
-gerarDashboard();
+  // TURMAS
+  carregarListaTurmas();
+  carregarSemanasTurma();
 
-esconderLoaderAbas();
+  gerarDashboard();
 
+  esconderLoaderAbas();
+
+  // 🔥 marca como pronto SOMENTE AQUI
+  window.horariosProntos = true;
+
+  // 🔥 garante execução correta da detecção
   setTimeout(() => {
     verificarMudancaAoAbrir();
-  }, 200);
+  }, 0);
 }
   
 function processarDados(){
