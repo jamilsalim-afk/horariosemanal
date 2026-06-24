@@ -1268,11 +1268,11 @@ body.dark .tipo-extra {
   display: none;
 }
 
-/* só ativa no mobile */
-@media (max-width: 768px) {
+@media only screen and (max-width: 768px) {
 
-  .tabs {
-    display: none; /* esconde menu de cima */
+  /* 🔥 garante que o menu superior suma MESMO no iPhone */
+  nav.tabs {
+    display: none !important;
   }
 
   .bottom-tabs {
@@ -1302,6 +1302,6 @@ body.dark .tipo-extra {
   }
 
   body {
-    padding-bottom: 70px; /* evita esconder conteúdo atrás da barra */
+    padding-bottom: 70px;
   }
 }
