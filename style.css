@@ -1198,37 +1198,66 @@ body {
   letter-spacing: 1px;
 }
 
-.tipo-normal {
-    background: #f5f5f5;
-    font-weight: 600;
+body.light .tipo-normal {
+  background: #f5f5f5;
+  color: #333;
 }
 
-.tipo-sabado {
-    background: #fff3cd;
-    color: #856404;
-    font-weight: 700;
+body.light .tipo-sabado {
+  background: #fff3cd;
+  color: #7a5d00;
 }
 
-.tipo-rec {
-    background: #d1ecf1;
-    color: #0c5460;
-    font-weight: 700;
+body.light .tipo-rec {
+  background: #d1ecf1;
+  color: #0c5460;
 }
 
-.tipo-ex {
-    background: #f8d7da;
-    color: #721c24;
-    font-weight: 700;
+body.light .tipo-ex {
+  background: #f8d7da;
+  color: #721c24;
 }
 
-.tipo-rep {
-    background: #d4edda;
-    color: #155724;
-    font-weight: 700;
+body.light .tipo-rep {
+  background: #d4edda;
+  color: #155724;
 }
 
-.tipo-extra {
-    background: #e2d9f3;
-    color: #4b286d;
-    font-weight: 700;
+body.light .tipo-extra {
+  background: #e2d9f3;
+  color: #4b286d;
+}
+
+/* ========================= */
+/* 🌙 DARK MODE */
+/* ========================= */
+
+body.dark .tipo-normal {
+  background: #2a2a2a;
+  color: #e0e0e0;
+}
+
+body.dark .tipo-sabado {
+  background: #3a3418;
+  color: #f5d76e;
+}
+
+body.dark .tipo-rec {
+  background: #1e3a3f;
+  color: #76d1e0;
+}
+
+body.dark .tipo-ex {
+  background: #3a1e22;
+  color: #ff7b7b;
+}
+
+body.dark .tipo-rep {
+  background: #1f3a2a;
+  color: #7be0a1;
+}
+
+body.dark .tipo-extra {
+  background: #2a1f3f;
+  color: #c7a6ff;
 }
