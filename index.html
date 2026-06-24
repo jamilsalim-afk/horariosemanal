@@ -424,10 +424,12 @@ function limparPainelAlteracoes(){
   document.getElementById("painelAlteracoes").style.display = "none";
 }
   
-function trocarModalidade(){
-  window.trocouModalidade = true;
+function trocarModalidade() {
 
-  limparPainelAlteracoes(); // 🔥 ESSENCIAL
+  limparPainelAlteracoes();
+
+  // 🔥 força novo ciclo limpo
+  window.horariosProntos = false;
 
   init();
 }
@@ -514,6 +516,9 @@ function valorMudou(v1, v2){
   
 function verificarMudancaAoAbrir() {
 
+  // 🔥 trava de segurança obrigatória
+  if (!window.horariosProntos) return;
+
   if (!semanaSelecionadaEhAtual()) {
     return;
   }
@@ -521,9 +526,7 @@ function verificarMudancaAoAbrir() {
   const sem = document.getElementById('selectSemana').value;
   const mod = document.getElementById('selectModalidade').value;
 
-  if (!sem || !mod) {
-    return;
-  }
+  if (!sem || !mod) return;
 
   const chave = `snapshot_${mod}_${sem}`;
 
