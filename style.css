@@ -1268,7 +1268,7 @@ body.dark .tipo-extra {
   display: none;
 }
 
-@media only screen and (max-width: 768px) {
+@media only screen and (max-width: 480px) {
 
   /* 🔥 garante que o menu superior suma no mobile */
   .tabs {
@@ -1315,7 +1315,7 @@ body.dark .tipo-extra {
 ============================== */
 
 /* DESKTOP: mostra topo, esconde bottom */
-@media (min-width: 769px) {
+@media (min-width: 481px) {
   .tabs {
     display: flex !important;
   }
@@ -1326,7 +1326,7 @@ body.dark .tipo-extra {
 }
 
 /* MOBILE: esconde topo, mostra bottom */
-@media (max-width: 768px) {
+@media (max-width: 480px) {
   .tabs {
     display: none !important;
   }
