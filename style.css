@@ -110,15 +110,9 @@
 
 .header-sticky{
   position: sticky;
-  top: 70px;
-
+  top: 120px;
   z-index: 9999;
-
   background: var(--bg);
-
-  padding: 10px 0;
-
-  width: 100%;
 }
 
 /* CARD DOS CONTROLES */
