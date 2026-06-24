@@ -3,9 +3,7 @@
 
 <head>
 <meta charset="UTF-8">
-<meta name="viewport"
-      content="width=device-width, initial-scale=1">
-<title>Consulta de Horários Semanais - </title>
+<title>Consulta de Horários Semanais - IFRO</title>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
@@ -360,46 +358,6 @@
   BR 364, Km 228, Lote 2-A - Zona Rural<br>
   ☎ (69) 3443-2445 | ✉ dape.cacoal@ifro.edu.br
 </footer>
-
-
- <div class="mobile-nav">
-
-  <button onclick="abrirAba('dashboard')">
-    <span>📊</span>
-    Dash
-  </button>
-
-  <button onclick="abrirAba('horarios')">
-    <span>📅</span>
-    Horários
-  </button>
-
-<button onclick="abrirAba('sabados')">
-    <span>📅</span>
-    Sábados
-  </button>
-
-  <button onclick="abrirAba('professores')">
-    <span>👨‍🏫</span>
-    Prof
-  </button>
-
-  <button onclick="abrirAba('turmas')">
-    <span>🏫</span>
-    Turmas
-  </button>
-
-  <button onclick="abrirAba('estatisticas')">
-    <span>📅</span>
-    Est
-  </button>
-
-  <button onclick="abrirAba('relatorios')">
-    <span>📑</span>
-    Rel
-  </button>
-
-</div>
 
 </div>
 
@@ -1079,44 +1037,24 @@ window.addEventListener("beforeunload", () => {
   salvarSnapshotAtual();
 });
 
-function abrirAba(id, botao = null){
+function abrirAba(id, botao){
 
-  document
-    .querySelectorAll('.tab-content')
-    .forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.tab-content')
+        .forEach(el => el.classList.remove('active'));
 
-  const aba = document.getElementById(id);
-  aba.classList.add('active');
+    document.querySelectorAll('.tab')
+        .forEach(el => el.classList.remove('active'));
 
-  document
-    .querySelectorAll('.tab, .tab-btn')
-    .forEach(el => el.classList.remove('active'));
+    document.getElementById(id)
+        .classList.add('active');
 
-  if(botao){
-    botao.classList.add('active');
-  }
+    if(botao){
+        botao.classList.add('active');
+    }
 
-  // 🔥 GARANTE RENDERIZAÇÃO DAS ABAS
-  if(id === "sabados"){
-    renderSabados();
-  }
-
-  if(id === "horarios"){
-    renderizarTabela();
-  }
-
-  if(id === "professores"){
-    renderProfessor();
-  }
-
-  if(id === "turmas"){
-    renderTurma();
-  }
-
-  if(id === "dashboard"){
-    gerarDashboard();
-  }
-
+    if(id === "sabados"){
+        renderSabados();
+    }
 }
 
 function montarRelatorioBase() {
@@ -1595,7 +1533,10 @@ function mostrarLoaderAbas(texto = "Carregando") {
   const loader = document.getElementById("abaLoader");
   const dots = document.getElementById("dots");
 
-  loader.classList.remove("hidden");
+  if(!loader) return;
+
+  loader.style.display = "flex";
+  loader.style.opacity = "1";
 
   dotsCount = 0;
 
@@ -1614,9 +1555,16 @@ function esconderLoaderAbas() {
 
   const loader = document.getElementById("abaLoader");
 
+  if(!loader) return;
+
   clearInterval(dotsInterval);
 
-  loader.classList.add("hidden");
+  loader.style.opacity = "0";
+  loader.style.pointerEvents = "none";
+
+  setTimeout(() => {
+    loader.style.display = "none";
+  }, 200);
 }
   
 window.onload = async () => {
@@ -1662,22 +1610,11 @@ window.onload = async () => {
     document.querySelector(".tab-btn")
   );
 
+  gerarDashboard();
+
+  esconderLoaderAbas(); // 🔥 some quando tudo pronto
 };
-
-function ajustarNavegacao() {
-  const isMobile = window.innerWidth <= 768;
-  document.querySelector('.tabs').style.display = isMobile ? 'none' : 'flex';
-  document.querySelector('.mobile-nav').style.display = isMobile ? 'flex' : 'none';
-  if (isMobile) {
-    document.querySelector('.app-container').style.paddingBottom = '70px';
-  } else {
-    document.querySelector('.app-container').style.paddingBottom = '';
-  }
-}
-
-window.addEventListener('load', ajustarNavegacao);
-window.addEventListener('resize', ajustarNavegacao);
-      
+  
 </script>
 <script src="js/config.js"></script>
 <script src="js/core.js"></script>
