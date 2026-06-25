@@ -41,6 +41,7 @@
   <button class="tab" onclick="abrirAba('professores',this)">👨‍🏫 Professores</button>
   <button class="tab" onclick="abrirAba('turmas',this)">🏫 Turmas</button>
   <button class="tab" onclick="abrirAba('estatisticas',this)">📈 Estatísticas</button>
+  <button class="tab" onclick="abrirAba('projecao',this)">🔮 Projeção</button>
   <button class="tab" onclick="abrirAba('relatorios',this)">📑 Relatórios</button>
 </nav>
 
@@ -253,6 +254,35 @@
 </table>
       </div>
 </div>
+</section>
+
+  <!-- PROJEÇÃO DE AULAS -->
+<section id="projecao" class="tab-content">
+
+  <div class="estatistica-header">
+    <h1>🔮 Projeção de Aulas</h1>
+    <p>Aulas já ministradas + projeção até 27/11/2026 por professor</p>
+  </div>
+
+  <div class="header-sticky">
+    <div class="controls-card">
+
+      <input type="text" id="searchProjecao"
+        class="search-box"
+        placeholder="🔍 Buscar professor..."
+        onkeyup="renderProjecao()">
+
+      <button class="btn-pdf" onclick="exportarProjecaoPDF()">
+        📄 Baixar PDF
+      </button>
+
+    </div>
+  </div>
+
+  <div class="week-container">
+    <div id="containerProjecao"></div>
+  </div>
+
 </section>
 
 <!-- RELATÓRIOS -->
@@ -1058,6 +1088,10 @@ function abrirAba(id, botao){
     if(id === "sabados"){
         renderSabados();
     }
+  
+  if(id === "projecao"){
+    renderProjecao();
+}
 }
 
 function montarRelatorioBase() {
@@ -1628,5 +1662,6 @@ window.onload = async () => {
 <script src="js/sabado.js"></script>
 <script src="js/horario.js"></script>
 <script src="js/relatorios.js"></script>
+<script src="js/projecao.js"></script>
 </body>
 </html>
