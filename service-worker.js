@@ -1,6 +1,6 @@
 // Service Worker - IFRO Campus Cacoal
-// Versão do cache - atualize este número sempre que fizer mudanças no site
-const CACHE_VERSION = 'ifro-v1';
+// Mude o número abaixo toda vez que fizer alterações no site
+const CACHE_VERSION = 'ifro-v2';
 
 const ARQUIVOS_CACHE = [
   '/horariosemanal/',
@@ -10,7 +10,7 @@ const ARQUIVOS_CACHE = [
   '/horariosemanal/icons/icon-512.png'
 ];
 
-// Instalação: salva os arquivos principais no cache
+// Instalação
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_VERSION).then((cache) => {
@@ -20,7 +20,7 @@ self.addEventListener('install', (event) => {
   self.skipWaiting();
 });
 
-// Ativação: remove caches antigos
+// Ativação: remove caches antigos e assume controle imediato
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((cacheNames) => {
@@ -29,23 +29,30 @@ self.addEventListener('activate', (event) => {
           .filter((name) => name !== CACHE_VERSION)
           .map((name) => caches.delete(name))
       );
+    }).then(() => {
+      return self.clients.claim();
+    }).then(() => {
+      // Avisa todas as abas abertas para recarregar
+      return self.clients.matchAll({ type: 'window' }).then(clients => {
+        clients.forEach(client => {
+          client.postMessage({ tipo: 'ATUALIZAR' });
+        });
+      });
     })
   );
-  self.clients.claim();
 });
 
-// Intercepta requisições: tenta rede primeiro, fallback para cache
+// Fetch: rede primeiro, cache como fallback
 self.addEventListener('fetch', (event) => {
-  // Ignora requisições ao Google Sheets (sempre precisa de rede)
   if (event.request.url.includes('googleapis.com') ||
-      event.request.url.includes('docs.google.com')) {
+      event.request.url.includes('docs.google.com') ||
+      event.request.url.includes('spreadsheets')) {
     return;
   }
 
   event.respondWith(
     fetch(event.request)
       .then((response) => {
-        // Salva cópia nova no cache se a requisição teve sucesso
         if (response && response.status === 200) {
           const responseClone = response.clone();
           caches.open(CACHE_VERSION).then((cache) => {
@@ -55,7 +62,6 @@ self.addEventListener('fetch', (event) => {
         return response;
       })
       .catch(() => {
-        // Se não tem internet, usa o cache
         return caches.match(event.request);
       })
   );
