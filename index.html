@@ -9,6 +9,19 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
 
 <link rel="stylesheet" href="style.css">
+
+  <!-- PWA: Manifest -->
+<link rel="manifest" href="manifest.json">
+
+<!-- PWA: Cor da barra do navegador no Android -->
+<meta name="theme-color" content="#1a472a">
+
+<!-- PWA: Ícone para iPhone -->
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="IFRO Cacoal">
+  
 </head>
 
 <body>
@@ -391,6 +404,22 @@
 </footer>
 
 </div>
+
+  <!-- PWA: Registro do Service Worker -->
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function() {
+      navigator.serviceWorker.register('/horariosemanal/service-worker.js')
+        .then(function(reg) {
+          console.log('PWA: Service Worker registrado com sucesso!', reg.scope);
+        })
+        .catch(function(err) {
+          console.log('PWA: Falha no registro do Service Worker', err);
+        });
+    });
+  }
+</script>
+  
 <script>
 
 function deveCompararDia(dataStr){
