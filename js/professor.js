@@ -1,48 +1,56 @@
 // ============================================================
 // professor.js — PRD/PGD integrado na grade com rowspan
+// Manhã: 5 períodos + intervalo = rowspan 6
+// Tarde: 5 períodos + intervalo = rowspan 6
+// PDF: formato original retrato
 // ============================================================
 
-// Horários da manhã e tarde (sem intervalos/almoço)
 const HORARIOS_MANHA = [
     "07:30 - 08:20",
     "08:20 - 09:10",
+    "__INTERVALO_1__",
     "09:30 - 10:20",
     "10:20 - 11:10",
     "11:10 - 12:00"
 ];
+
 const HORARIOS_TARDE = [
     "13:50 - 14:40",
     "14:40 - 15:30",
+    "__INTERVALO_2__",
     "15:50 - 16:40",
     "16:40 - 17:30",
     "17:30 - 18:20"
 ];
+
 const HORARIOS_NOITE = [
     "19:00 - 19:50",
     "19:50 - 20:40",
+    "__INTERVALO_3__",
     "20:50 - 21:40",
     "21:40 - 22:30"
 ];
 
 const TODOS_HORARIOS = [
-    "07:30 - 08:20","08:20 - 09:10",
-    "__INTERVALO_1__",
-    "09:30 - 10:20","10:20 - 11:10","11:10 - 12:00",
+    ...HORARIOS_MANHA,
     "__ALMOCO__",
-    "13:50 - 14:40","14:40 - 15:30",
-    "__INTERVALO_2__",
-    "15:50 - 16:40","16:40 - 17:30","17:30 - 18:20",
+    ...HORARIOS_TARDE,
     "__JANTAR__",
-    "19:00 - 19:50","19:50 - 20:40",
-    "__INTERVALO_3__",
-    "20:50 - 21:40","21:40 - 22:30"
+    ...HORARIOS_NOITE
 ];
 
 const DIAS_SEMANA = ["SEGUNDA","TERÇA","QUARTA","QUINTA","SEXTA","SÁBADO"];
 const DIAS_INDEX  = ["DOMINGO","SEGUNDA","TERÇA","QUARTA","QUINTA","SEXTA","SÁBADO"];
+const DIA_IDX     = { "SEGUNDA":0,"TERÇA":1,"QUARTA":2,"QUINTA":3,"SEXTA":4 };
 
-// Índice do dia na ordem SEG=0..SEX=4 (para PRD_PGD_LABELS)
-const DIA_IDX = { "SEGUNDA":0,"TERÇA":1,"QUARTA":2,"QUINTA":3,"SEXTA":4 };
+// Separadores visuais (não são horários reais)
+const SEPARADORES = {
+    "__INTERVALO_1__": ["09:10 - 09:30","INTERVALO","var(--intervalo)"],
+    "__INTERVALO_2__": ["15:30 - 15:50","INTERVALO","var(--intervalo)"],
+    "__INTERVALO_3__": ["20:40 - 20:50","INTERVALO","var(--intervalo)"],
+    "__ALMOCO__":      ["12:00 - 13:50","ALMOÇO",   "var(--caed)"],
+    "__JANTAR__":      ["18:20 - 19:00","JANTAR",   "var(--caed)"]
+};
 
 // ============================================================
 function montarIndiceProfessores() {
@@ -121,35 +129,47 @@ function obterPrdPgdProfessor(nomeCompleto) {
     return { prd:Array(10).fill(false), pgd:Array(10).fill(false) };
 }
 
-// Retorna o tipo de célula para um horário+dia: null | {tipo:'PRD'|'PGD', cor, rowspan, primeiro}
-// primeiro=true na primeira linha do bloco (onde vai renderizar a célula mesclada)
-// primeiro=false nas demais (pula a célula — já coberta pelo rowspan)
-function getPrdPgdCelula(horario, dia, prd, pgd) {
+// Verifica se um horário (incluindo separadores) pertence à manhã ou tarde
+function getTurnoDoHorario(h) {
+    if (HORARIOS_MANHA.includes(h)) return "M";
+    if (HORARIOS_TARDE.includes(h)) return "T";
+    return null;
+}
+
+// Retorna info do PRD/PGD para uma célula: null ou {tipo, cor, bgLight, rowspan, primeiro}
+// rowspan = 6 (5 períodos + 1 intervalo)
+function getPrdPgdCelula(h, dia, prd, pgd) {
     const diaIdx = DIA_IDX[dia];
     if (diaIdx === undefined) return null; // SÁBADO não tem PRD/PGD
 
-    const blocos = [
-        { label:"PRD", cor:"#2e7d32", bgLight:"#e8f5e9", horarios: HORARIOS_MANHA, turnoIdx: 0 },
-        { label:"PRD", cor:"#2e7d32", bgLight:"#e8f5e9", horarios: HORARIOS_TARDE, turnoIdx: 1 },
-        { label:"PGD", cor:"#1565c0", bgLight:"#e3f2fd", horarios: HORARIOS_MANHA, turnoIdx: 0, fonte: pgd },
-        { label:"PGD", cor:"#1565c0", bgLight:"#e3f2fd", horarios: HORARIOS_TARDE, turnoIdx: 1, fonte: pgd }
-    ];
+    const turno = getTurnoDoHorario(h);
+    if (!turno) return null;
 
-    for (const bloco of blocos) {
-        const fonte = bloco.fonte || prd;
-        const marcado = fonte[diaIdx * 2 + bloco.turnoIdx];
-        if (!marcado) continue;
-        if (!bloco.horarios.includes(horario)) continue;
+    const turnoIdx = turno === "M" ? 0 : 1;
+    const blocoHorarios = turno === "M" ? HORARIOS_MANHA : HORARIOS_TARDE;
 
-        const isPrimeiro = bloco.horarios[0] === horario;
+    // Verifica PRD
+    if (prd[diaIdx * 2 + turnoIdx]) {
         return {
-            tipo:     bloco.label,
-            cor:      bloco.cor,
-            bgLight:  bloco.bgLight,
-            rowspan:  bloco.horarios.length,
-            primeiro: isPrimeiro
+            tipo:    "PRD",
+            cor:     "#2e7d32",
+            bgLight: "#e8f5e9",
+            rowspan: blocoHorarios.length, // 6 (inclui intervalo)
+            primeiro: h === blocoHorarios[0]
         };
     }
+
+    // Verifica PGD
+    if (pgd[diaIdx * 2 + turnoIdx]) {
+        return {
+            tipo:    "PGD",
+            cor:     "#1565c0",
+            bgLight: "#e3f2fd",
+            rowspan: blocoHorarios.length,
+            primeiro: h === blocoHorarios[0]
+        };
+    }
+
     return null;
 }
 
@@ -187,10 +207,7 @@ function renderProfessor() {
 
     // Monta grade de aulas
     const grade = {};
-    TODOS_HORARIOS.forEach(h => {
-        grade[h] = {};
-        DIAS_SEMANA.forEach(d => { grade[h][d] = []; });
-    });
+    TODOS_HORARIOS.forEach(h => { grade[h]={}; DIAS_SEMANA.forEach(d=>{ grade[h][d]=[]; }); });
     aulas.forEach(aula => {
         const [d,m,a] = aula.data.split("/");
         const dia = DIAS_INDEX[new Date(a,m-1,d).getDay()];
@@ -202,7 +219,7 @@ function renderProfessor() {
             </div>`);
     });
 
-    // Cards de resumo
+    // Cards resumo
     let html = `
     <div style="display:flex;gap:15px;margin-bottom:15px;flex-wrap:wrap;">
         <div style="background:var(--surface);color:var(--text);padding:15px;border-radius:10px;box-shadow:0 2px 6px rgba(0,0,0,.15);min-width:150px;text-align:center;">
@@ -228,20 +245,13 @@ function renderProfessor() {
     </thead>
     <tbody>`;
 
-    // Células a pular por causa de rowspan
-    const pular = {}; // chave: "horario|dia"
+    // Células a pular por rowspan
+    const pular = {};
 
     TODOS_HORARIOS.forEach(h => {
-        // Separadores
-        const sep = {
-            "__INTERVALO_1__": ["09:10 - 09:30","INTERVALO","var(--intervalo)"],
-            "__INTERVALO_2__": ["15:30 - 15:50","INTERVALO","var(--intervalo)"],
-            "__INTERVALO_3__": ["20:40 - 20:50","INTERVALO","var(--intervalo)"],
-            "__ALMOCO__":      ["12:00 - 13:50","ALMOÇO",   "var(--caed)"],
-            "__JANTAR__":      ["18:20 - 19:00","JANTAR",   "var(--caed)"]
-        };
-        if (sep[h]) {
-            const [label,nome,bg] = sep[h];
+        // ALMOÇO e JANTAR — sempre linha inteira
+        if (h === "__ALMOCO__" || h === "__JANTAR__") {
+            const [label, nome, bg] = SEPARADORES[h];
             html += `<tr style="background:${bg};color:var(--text);font-weight:bold;text-align:center;">
                 <td style="border:1px solid #ccc;padding:6px;">${label}</td>
                 <td colspan="${DIAS_SEMANA.length}" style="border:1px solid #ccc;padding:6px;">${nome}</td>
@@ -249,23 +259,33 @@ function renderProfessor() {
             return;
         }
 
+        // Intervalos — podem ser cobertos por rowspan do PRD/PGD
+        if (SEPARADORES[h]) {
+            const [label, nome, bg] = SEPARADORES[h];
+            html += `<tr>`;
+            html += `<td style="border:1px solid #ccc;padding:4px;font-size:10px;text-align:center;background:${bg};color:var(--text);font-weight:bold;">${label}</td>`;
+            DIAS_SEMANA.forEach(dia => {
+                const chave = `${h}|${dia}`;
+                if (pular[chave]) return; // coberto por rowspan
+                html += `<td style="border:1px solid #ccc;padding:4px;text-align:center;background:${bg};color:var(--text);font-weight:bold;">${nome}</td>`;
+            });
+            html += `</tr>`;
+            return;
+        }
+
+        // Linha de horário normal
         html += `<tr>`;
         html += `<td style="border:1px solid #ccc;padding:6px;font-weight:bold;text-align:center;background:var(--time-bg);color:var(--text);">${h}</td>`;
 
         DIAS_SEMANA.forEach(dia => {
             const chave = `${h}|${dia}`;
-
-            // Célula já coberta por rowspan anterior
             if (pular[chave]) return;
 
             const prdpgd = getPrdPgdCelula(h, dia, prd, pgd);
 
             if (prdpgd && prdpgd.primeiro) {
-                // Marca as próximas linhas para pular
-                const blocoHorarios = prdpgd.rowspan === HORARIOS_MANHA.length
-                    ? (HORARIOS_MANHA.includes(h) ? HORARIOS_MANHA : HORARIOS_TARDE)
-                    : (HORARIOS_TARDE.includes(h) ? HORARIOS_TARDE : HORARIOS_MANHA);
-
+                // Marca todas as linhas do bloco (incluindo separador) para pular
+                const blocoHorarios = getTurnoDoHorario(h) === "M" ? HORARIOS_MANHA : HORARIOS_TARDE;
                 blocoHorarios.slice(1).forEach(hFuturo => {
                     pular[`${hFuturo}|${dia}`] = true;
                 });
@@ -276,18 +296,17 @@ function renderProfessor() {
                     text-align:center;
                     vertical-align:middle;
                     font-weight:bold;
-                    font-size:15px;
+                    font-size:16px;
                     color:${prdpgd.cor};
                     padding:6px;
                 ">${prdpgd.tipo}</td>`;
                 return;
             }
 
-            if (prdpgd && !prdpgd.primeiro) return; // pula — já marcado acima
+            if (prdpgd && !prdpgd.primeiro) return;
 
-            // Célula normal de aula
             const conteudo = grade[h]?.[dia] || [];
-            html += `<td style="border:1px solid #ccc;padding:6px;vertical-align:top;min-height:40px;">
+            html += `<td style="border:1px solid #ccc;padding:6px;vertical-align:top;">
                 ${Array.isArray(conteudo) ? conteudo.join("") : conteudo}
             </td>`;
         });
@@ -295,13 +314,13 @@ function renderProfessor() {
         html += `</tr>`;
     });
 
-    // Linha de totais por dia
+    // Linha totais por dia
     const aulasPorDia = {};
-    DIAS_SEMANA.forEach(d => { aulasPorDia[d] = 0; });
+    DIAS_SEMANA.forEach(d=>{ aulasPorDia[d]=0; });
     aulas.forEach(aula => {
         const [d,m,a] = aula.data.split("/");
         const dia = DIAS_INDEX[new Date(a,m-1,d).getDay()];
-        if (aulasPorDia[dia] !== undefined) aulasPorDia[dia]++;
+        if (aulasPorDia[dia]!==undefined) aulasPorDia[dia]++;
     });
 
     html += `<tr style="background:var(--intervalo);color:var(--text);font-weight:bold;text-align:center;">
@@ -313,13 +332,12 @@ function renderProfessor() {
 }
 
 // ============================================================
-// PDF
+// PDF — formato original retrato, PRD/PGD como texto simples
 // ============================================================
 function exportarFichaProfessorPDF() {
     const { jsPDF } = window.jspdf;
-    const pdf = new jsPDF('l', 'mm', 'a4'); // paisagem para caber tudo
-    const pageWidth  = pdf.internal.pageSize.getWidth();
-    const pageHeight = pdf.internal.pageSize.getHeight();
+    const pdf = new jsPDF('p', 'mm', 'a4');
+    const pageWidth = pdf.internal.pageSize.getWidth();
 
     const professor = document.getElementById("selectProfessor")?.value;
     const semana    = document.getElementById("selectSemanaProfessor")?.value;
@@ -328,28 +346,67 @@ function exportarFichaProfessorPDF() {
     const aulas = getDadosProfessor(professor, semana);
     const { prd, pgd } = obterPrdPgdProfessor(professor);
 
-    const totalAulas  = aulas.length;
+    const totalAulasSegSex = aulas.filter(a => { const [d,m,an]=a.data.split("/"); const dt=new Date(an,m-1,d); return dt.getDay()>=1&&dt.getDay()<=5; }).length;
+    const totalAulasSab    = aulas.filter(a => { const [d,m,an]=a.data.split("/"); const dt=new Date(an,m-1,d); return dt.getDay()===6; }).length;
+    const totalAulas  = totalAulasSegSex + totalAulasSab;
     const totalTurmas = new Set(aulas.map(a=>a.turma)).size;
     const totalDias   = new Set(aulas.map(a=>a.data)).size;
-    const totalSab    = aulas.filter(a=>{ const [d,m,an]=a.data.split("/"); return new Date(an,m-1,d).getDay()===6; }).length;
 
     // Cabeçalho
-    pdf.setFontSize(9);
-    pdf.text("INSTITUTO FEDERAL DE EDUCAÇÃO, CIÊNCIA E TECNOLOGIA DE RONDÔNIA - IFRO", pageWidth/2, 8, {align:"center"});
-    pdf.text("CAMPUS CACOAL - Departamento de Apoio ao Ensino - DAPE", pageWidth/2, 12, {align:"center"});
+    pdf.setFontSize(10);
+    pdf.text("INSTITUTO FEDERAL DE EDUCAÇÃO, CIÊNCIA E TECNOLOGIA DE RONDÔNIA - IFRO", pageWidth/2, 10, {align:"center"});
+    pdf.text("CAMPUS CACOAL - Departamento de Apoio ao Ensino - DAPE", pageWidth/2, 14, {align:"center"});
     pdf.setFontSize(11); pdf.setFont(undefined,"bold");
-    pdf.text(`FICHA DO PROFESSOR: ${professor}`, pageWidth/2, 18, {align:"center"});
+    pdf.text(`FICHA DO PROFESSOR: ${professor}`, pageWidth/2, 22, {align:"center"});
     pdf.setFontSize(9);  pdf.setFont(undefined,"normal");
-    pdf.text(`Semana de ${semana}`, pageWidth/2, 23, {align:"center"});
+    pdf.text(`Semana de ${semana}`, pageWidth/2, 27, {align:"center"});
 
     // Cards
-    [[10,"TOTAL AULAS",totalAulas],[80,"TURMAS",totalTurmas],[150,"DIAS COM AULA",totalDias],[220,"SÁBADOS",totalSab]].forEach(([x,label,val]) => {
-        pdf.setDrawColor(180); pdf.roundedRect(x,27,60,18,2,2);
-        pdf.setFontSize(7);  pdf.setFont(undefined,"normal"); pdf.text(label,x+30,32,{align:"center"});
-        pdf.setFontSize(16); pdf.setFont(undefined,"bold");   pdf.text(String(val),x+30,42,{align:"center"});
-    });
+    pdf.setDrawColor(180);
+    pdf.roundedRect(10,33,60,22,2,2); pdf.roundedRect(75,33,60,22,2,2); pdf.roundedRect(140,33,60,22,2,2);
+    pdf.setFontSize(8);
+    pdf.text("TOTAL DE AULAS",40,38,{align:"center"});
+    pdf.text("TURMAS",105,38,{align:"center"});
+    pdf.text("DIAS COM AULA",170,38,{align:"center"});
+    pdf.setFontSize(18); pdf.setFont(undefined,"bold");
+    pdf.text(String(totalAulas),40,46,{align:"center"});
+    pdf.text(String(totalTurmas),105,46,{align:"center"});
+    pdf.text(String(totalDias),170,46,{align:"center"});
+    pdf.setFontSize(7); pdf.setFont(undefined,"normal");
+    pdf.text(`Seg-Sex: ${totalAulasSegSex} | Sáb: ${totalAulasSab}`,40,52,{align:"center"});
 
-    // Monta grade + PRD/PGD para o autoTable
+    // PRD/PGD como texto simples abaixo dos cards
+    const nomesDia = ["Segunda","Terça","Quarta","Quinta","Sexta"];
+    const gerarTexto = (marcacoes) => nomesDia.map((dia,i) => {
+        const m = marcacoes[i*2], t = marcacoes[i*2+1];
+        if (m && t) return `${dia}: dia inteiro`;
+        if (m) return `${dia}: manhã`;
+        if (t) return `${dia}: tarde`;
+        return null;
+    }).filter(Boolean).join("   |   ");
+
+    const textoPrd = gerarTexto(prd);
+    const textoPgd = gerarTexto(pgd);
+
+    let yAtual = 57;
+    if (textoPrd) {
+        pdf.setFontSize(8); pdf.setFont(undefined,"bold");
+        pdf.text("PRD:", 12, yAtual);
+        pdf.setFont(undefined,"normal");
+        pdf.text(textoPrd, 25, yAtual);
+        yAtual += 5;
+    }
+    if (textoPgd) {
+        pdf.setFontSize(8); pdf.setFont(undefined,"bold");
+        pdf.text("PGD:", 12, yAtual);
+        pdf.setFont(undefined,"normal");
+        pdf.text(textoPgd, 25, yAtual);
+        yAtual += 5;
+    }
+
+    const startY = yAtual + 2;
+
+    // Grade — monta igual ao original
     const grade = {};
     TODOS_HORARIOS.forEach(h => { grade[h]={}; DIAS_SEMANA.forEach(d=>{ grade[h][d]=[]; }); });
     aulas.forEach(aula => {
@@ -360,94 +417,51 @@ function exportarFichaProfessorPDF() {
         grade[horario][dia].push(`${aula.turma}\n${aula.disciplina}`);
     });
 
-    // Monta body do autoTable com rowSpans para PRD/PGD
-    const body = [];
-    const pularPDF = {};
+    const horarios = TODOS_HORARIOS;
+    const dias = DIAS_SEMANA;
 
-    TODOS_HORARIOS.forEach(h => {
-        const sep = {
-            "__INTERVALO_1__":["09:10 - 09:30","INTERVALO"],
-            "__INTERVALO_2__":["15:30 - 15:50","INTERVALO"],
-            "__INTERVALO_3__":["20:40 - 20:50","INTERVALO"],
-            "__ALMOCO__":     ["12:00 - 13:50","ALMOÇO"],
-            "__JANTAR__":     ["18:20 - 19:00","JANTAR"]
-        };
-        if (sep[h]) {
-            const [label,nome] = sep[h];
-            body.push([
-                {content:label, styles:{fontStyle:"bold",fillColor:[230,230,230]}},
-                {content:nome, colSpan:DIAS_SEMANA.length, styles:{halign:"center",fontStyle:"bold",fillColor:[230,230,230]}}
-            ]);
-            return;
+    const body = horarios.map(h => {
+        if (SEPARADORES[h]) {
+            const [label, nome] = SEPARADORES[h];
+            return [label, {content:nome, colSpan:6, styles:{halign:"center",fontStyle:"bold",fillColor:[241,245,249]}}];
         }
-
-        const row = [{content:h, styles:{fontStyle:"bold",halign:"center",fillColor:[240,240,240]}}];
-
-        DIAS_SEMANA.forEach(dia => {
-            const chave = `${h}|${dia}`;
-            if (pularPDF[chave]) return;
-
-            const prdpgd = getPrdPgdCelula(h, dia, prd, pgd);
-
-            if (prdpgd && prdpgd.primeiro) {
-                const blocoHorarios = HORARIOS_MANHA.includes(h) ? HORARIOS_MANHA : HORARIOS_TARDE;
-                blocoHorarios.slice(1).forEach(hf => { pularPDF[`${hf}|${dia}`] = true; });
-
-                const corRGB = prdpgd.tipo === "PRD"
-                    ? [232,245,233]
-                    : [227,242,253];
-
-                row.push({
-                    content: prdpgd.tipo,
-                    rowSpan: prdpgd.rowspan,
-                    styles: {
-                        halign:"center", valign:"middle",
-                        fontStyle:"bold", fontSize:10,
-                        fillColor: corRGB,
-                        textColor: prdpgd.tipo==="PRD" ? [46,125,50] : [21,101,192]
-                    }
-                });
-                return;
-            }
-
-            if (prdpgd && !prdpgd.primeiro) return;
-
-            const conteudo = (grade[h]?.[dia]||[]).join("\n");
-            row.push({ content: conteudo, styles:{fontSize:6,halign:"center",valign:"middle"} });
+        const row = [h];
+        dias.forEach(d => {
+            let c = grade[h]?.[d] || [];
+            row.push((Array.isArray(c)?c.join(" "):String(c)).replace(/<[^>]*>/g," ").replace(/\s+/g," ").trim());
         });
-
-        body.push(row);
+        return row;
     });
 
     // Linha totais
-    const aulasPorDia = {};
-    DIAS_SEMANA.forEach(d=>{ aulasPorDia[d]=0; });
-    aulas.forEach(a => {
-        const [d,m,an] = a.data.split("/");
-        const dia = DIAS_INDEX[new Date(an,m-1,d).getDay()];
-        if (aulasPorDia[dia]!==undefined) aulasPorDia[dia]++;
-    });
-    body.push([
-        {content:"AULAS/DIA", styles:{fontStyle:"bold",fillColor:[232,245,233]}},
-        ...DIAS_SEMANA.map(d=>({content:String(aulasPorDia[d]||0), styles:{fontStyle:"bold",halign:"center",fillColor:[232,245,233]}}))
-    ]);
+    const aulasPorDia = dias.map(d => aulas.filter(a => {
+        const [da,m,an] = a.data.split("/");
+        return DIAS_INDEX[new Date(an,m-1,da).getDay()] === d;
+    }).length);
+    body.push(["AULAS/DIA",...aulasPorDia]);
 
     pdf.autoTable({
-        head: [["HORÁRIO",...DIAS_SEMANA]],
+        head: [["Horário",...dias]],
         body,
-        startY: 50,
-        theme: "grid",
-        styles: { fontSize:7, cellPadding:2, valign:"middle", overflow:"linebreak" },
-        headStyles: { fillColor:[21,128,61], textColor:255, halign:"center", fontStyle:"bold" },
-        columnStyles: {
-            0: { cellWidth:22, halign:"center" },
-            1: { cellWidth:38 }, 2: { cellWidth:38 },
-            3: { cellWidth:38 }, 4: { cellWidth:38 },
-            5: { cellWidth:38 }, 6: { cellWidth:38 }
+        startY,
+        theme:"grid",
+        styles:{fontSize:6,cellPadding:1,valign:"middle",halign:"center",overflow:"linebreak"},
+        headStyles:{fillColor:[21,128,61],textColor:[255,255,255],halign:"center"},
+        columnStyles:{
+            0:{cellWidth:20,halign:"center"},
+            1:{cellWidth:28},2:{cellWidth:28},
+            3:{cellWidth:28},4:{cellWidth:28},
+            5:{cellWidth:28},6:{cellWidth:28}
+        },
+        didParseCell:(data) => {
+            if (data.row.index === body.length-1) {
+                data.cell.styles.fillColor = [232,245,233];
+                data.cell.styles.fontStyle = "bold";
+            }
         }
     });
 
-    pdf.setFontSize(7);
-    pdf.text("IFRO - Campus Cacoal | BR 364, Km 228, Lote 2-A | (69) 3443-2445 | dape.cacoal@ifro.edu.br", pageWidth/2, pageHeight-5, {align:"center"});
-    pdf.save(`${professor.replace(/\s+/g,'_')}_${semana.replace(/\//g,'-')}.pdf`);
+    pdf.setFontSize(8);
+    pdf.text("IFRO - Campus Cacoal | BR 364, Km 228, Lote 2-A | (69) 3443-2445 | dape.cacoal@ifro.edu.br", pageWidth/2, 285, {align:"center"});
+    pdf.save(`${professor.replace(/\s+/g,'_')}_Semana_de_${semana.replace(/\//g,'-')}.pdf`);
 }
