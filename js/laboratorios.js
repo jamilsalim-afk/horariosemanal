@@ -81,6 +81,14 @@ function preencherSelectLaboratorios() {
 
 }
 
+function trocarSemanaLaboratorio() {
+
+    semanaLaboratorioSelecionada =
+        document.getElementById("selectSemanaLaboratorio").value;
+
+    renderLaboratorio();
+}
+
 function preencherSemanasLaboratorios() {
 
     const select = document.getElementById("selectSemanaLaboratorio");
