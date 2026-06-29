@@ -266,7 +266,7 @@ function renderLaboratorio() {
 
     const lab = document.getElementById("selectLaboratorio").value;
 
-    const semana = document.getElementById("selectSemanaLaboratorio").value;
+    const semana = semanaLaboratorioSelecionada;
 
     if (!lab) {
 
