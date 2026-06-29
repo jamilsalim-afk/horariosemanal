@@ -93,64 +93,197 @@ function preencherSemanasLaboratorios() {
 
 }
 
-function renderLaboratorio() {
+function getDadosLaboratorio(labSelecionado, semanaSelecionada) {
 
-    const tabela = document.getElementById("tabelaLaboratorio");
-    const laboratorio = document.getElementById("selectLaboratorio").value;
+    const registros = mapaLaboratorios[labSelecionado] || [];
 
-    if (!tabela) return;
-
-    if (laboratorio === "TODOS") {
-
-        tabela.innerHTML = `
-            <div style="
-                padding:40px;
-                text-align:center;
-                font-size:22px;
-                color:#666;">
-                Selecione um laboratório para visualizar os horários.
-            </div>
-        `;
-
-        return;
-
-    }
-
-    const registros = mapaLaboratorios[laboratorio] || [];
-
-    let html = `
-    <table class="tabelaHorario">
-        <thead>
-            <tr>
-                <th>Data</th>
-                <th>Horário</th>
-                <th>Turma</th>
-                <th>Disciplina</th>
-                <th>Modalidade</th>
-            </tr>
-        </thead>
-        <tbody>
-    `;
+    const resultado = [];
 
     registros.forEach(r => {
 
-        html += `
-        <tr>
-            <td>${r.data}</td>
-            <td>${r.horario}</td>
-            <td>${r.turma}</td>
-            <td>${normalizarDisciplinaLab(r.valor)}</td>
-            <td>${r.modalidade}</td>
-        </tr>
-        `;
+        const [d, m, a] = r.data.split("/");
+        const dt = new Date(a, m - 1, d);
+
+        const seg = new Date(dt.setDate(dt.getDate() - dt.getDay() + 1))
+            .toLocaleDateString("pt-BR");
+
+        if (!semanaSelecionada || semanaSelecionada === seg) {
+
+            resultado.push({
+                data: r.data,
+                horario: r.horario,
+                turma: r.turma,
+                disciplina: normalizarDisciplinaLab(r.valor),
+                modalidade: r.modalidade
+            });
+
+        }
 
     });
 
-    html += `
-        </tbody>
-    </table>
+    return resultado;
+}
+
+function montarGradeLaboratorio(labSelecionado, semanaSelecionada) {
+
+    const aulas = getDadosLaboratorio(labSelecionado, semanaSelecionada);
+
+    const dias = [
+        "SEGUNDA",
+        "TERÇA",
+        "QUARTA",
+        "QUINTA",
+        "SEXTA",
+        "SÁBADO"
+    ];
+
+    const horarios = [
+
+        "07:30 - 08:20",
+        "08:20 - 09:10",
+
+        "__INTERVALO_1__",
+
+        "09:30 - 10:20",
+        "10:20 - 11:10",
+        "11:10 - 12:00",
+
+        "__ALMOCO__",
+
+        "13:50 - 14:40",
+        "14:40 - 15:30",
+
+        "__INTERVALO_2__",
+
+        "15:50 - 16:40",
+        "16:40 - 17:30",
+        "17:30 - 18:20",
+
+        "__JANTAR__",
+
+        "19:00 - 19:50",
+        "19:50 - 20:40",
+
+        "__INTERVALO_3__",
+
+        "20:50 - 21:40",
+        "21:40 - 22:30"
+    ];
+
+    const grade = {};
+
+    horarios.forEach(h => {
+        grade[h] = {};
+        dias.forEach(d => grade[h][d] = []);
+    });
+
+    aulas.forEach(aula => {
+
+        const [d, m, a] = aula.data.split("/");
+        const dt = new Date(a, m - 1, d);
+
+        const diaSemana = [
+            "DOMINGO",
+            "SEGUNDA",
+            "TERÇA",
+            "QUARTA",
+            "QUINTA",
+            "SEXTA",
+            "SÁBADO"
+        ][dt.getDay()];
+
+        const horario = horarios.find(h =>
+            h.trim() === (aula.horario || "").trim()
+        );
+
+        if (!horario) return;
+
+        if (!grade[horario]) return;
+
+        if (!grade[horario][diaSemana]) return;
+
+        grade[horario][diaSemana].push({
+
+            turma: aula.turma,
+            disciplina: aula.disciplina,
+            modalidade: aula.modalidade
+
+        });
+
+    });
+
+    return { dias, horarios, grade };
+}
+
+function renderLaboratorio() {
+
+    const tabela = document.getElementById("tabelaLaboratorio");
+
+    const lab = document.getElementById("selectLaboratorio").value;
+
+    const semana = document.getElementById("selectSemanaLaboratorio").value;
+
+    if (!lab) {
+
+        tabela.innerHTML = `
+        <div class="relatorio-placeholder">
+            Selecione um laboratório.
+        </div>`;
+
+        return;
+    }
+
+    const { dias, horarios, grade } =
+        montarGradeLaboratorio(lab, semana);
+
+    let html = `
+    <table class="tabela-professor">
+        <thead>
+            <tr>
+                <th>Horário</th>
     `;
 
-    tabela.innerHTML = html;
+    dias.forEach(d => {
+        html += `<th>${d}</th>`;
+    });
 
+    html += `</tr></thead><tbody>`;
+
+    horarios.forEach(h => {
+
+        html += `<tr>`;
+        html += `<td><strong>${h}</strong></td>`;
+
+        dias.forEach(d => {
+
+            const celula = grade[h][d];
+
+            if (!celula || celula.length === 0) {
+
+                html += `
+                <td class="livre">
+                    🟢 LIVRE
+                </td>`;
+
+            } else {
+
+                const aula = celula[0];
+
+                html += `
+                <td>
+                    <strong>${aula.disciplina}</strong><br><br>
+                    ${aula.turma}<br>
+                    <small>${aula.modalidade}</small>
+                </td>`;
+
+            }
+
+        });
+
+        html += `</tr>`;
+    });
+
+    html += `</tbody></table>`;
+
+    tabela.innerHTML = html;
 }
