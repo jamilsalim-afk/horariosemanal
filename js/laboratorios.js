@@ -6,13 +6,13 @@ let mapaLaboratorios = {};
 
 function inicializarLaboratorios() {
 
-    mapaLaboratorios = {};
-
     preencherSelectLaboratorios();
 
     preencherSemanasLaboratorios();
 
     renderLaboratorio();
+
+    console.log("Mapa de Laboratórios:", mapaLaboratorios);
 
 }
 
@@ -34,39 +34,17 @@ function normalizarDisciplinaLab(texto) {
 
 }
 
-function adicionarAoMapaLaboratorios({
-    semana,
-    dia,
-    horario,
-    disciplina,
-    professor,
-    turma,
-    modalidade
-}) {
+function adicionarRegistroLaboratorio(registro) {
 
-    const laboratorio = extrairNomeLaboratorio(disciplina);
+    const laboratorio = extrairNomeLaboratorio(registro.valor);
 
     if (!laboratorio) return;
 
-    disciplina = normalizarDisciplinaLab(disciplina);
+    if (!mapaLaboratorios[laboratorio]) {
+        mapaLaboratorios[laboratorio] = [];
+    }
 
-    if (!mapaLaboratorios[laboratorio])
-        mapaLaboratorios[laboratorio] = {};
-
-    if (!mapaLaboratorios[laboratorio][semana])
-        mapaLaboratorios[laboratorio][semana] = {};
-
-    if (!mapaLaboratorios[laboratorio][semana][dia])
-        mapaLaboratorios[laboratorio][semana][dia] = {};
-
-    mapaLaboratorios[laboratorio][semana][dia][horario] = {
-
-        disciplina,
-        professor,
-        turma,
-        modalidade
-
-    };
+    mapaLaboratorios[laboratorio].push(registro);
 
 }
 
