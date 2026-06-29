@@ -72,7 +72,6 @@ montarBaseGeral(
     dadosIntegrado,
     dadosSuperior
 );,
-inicializarLaboratorios();
 montarRelatorioBase();
 montarCacheRelatorioDisciplinas();
 
@@ -85,6 +84,7 @@ carregarListaTurmas();
 carregarSemanasTurma();
 
 gerarDashboard();
+inicializarLaboratorios();
 
 esconderLoaderAbas();
 
