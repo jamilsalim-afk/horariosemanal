@@ -190,14 +190,23 @@
     <div class="controls-card">
 
       <select
-    id="selectLaboratorio"
-    onchange="renderLaboratorio()">
-        <option>Todos os Laboratórios</option>
+        id="selectLaboratorio"
+        onchange="renderLaboratorio()">
+
+        <option value="">
+          📌 Selecione um laboratório
+        </option>
+
       </select>
 
- <select id="selectSemanaLaboratorio"
-        onchange="trocarSemanaLaboratorio()">
-        <option>Semana</option>
+      <select
+        id="selectSemanaLaboratorio"
+        onchange="renderLaboratorio()">
+
+        <option value="">
+          Todas as semanas
+        </option>
+
       </select>
 
       <button class="btn-pdf">
