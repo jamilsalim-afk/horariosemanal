@@ -297,23 +297,36 @@ function renderLaboratorio() {
 
             if (!celula || celula.length === 0) {
 
-                html += `
-                <td class="livre">
-                    🟢 LIVRE
-                </td>`;
+    html += `
+    <td class="livre">
+        🟢 LIVRE
+    </td>`;
 
-            } else {
+} else if (celula.length === 1) {
 
-                const aula = celula[0];
+    const aula = celula[0];
 
-                html += `
-                <td>
-                    <strong>${aula.disciplina}</strong><br><br>
-                    ${aula.turma}<br>
-                    <small>${aula.modalidade}</small>
-                </td>`;
+    html += `
+    <td>
+        <strong>${aula.disciplina}</strong><br><br>
+        ${aula.turma}<br>
+        <small>${aula.professor || ""}</small><br>
+        <small style="color:${aula.modalidade === "INTEGRADO" ? "#16a34a" : "#2563eb"}">
+            ${aula.modalidade}
+        </small>
+    </td>`;
 
-            }
+} else {
+
+    html += `
+    <td style="background:#fee2e2; color:#991b1b;">
+        ⚠ CONFLITO<br><br>
+        ${celula.map(c => `
+            ${c.disciplina} - ${c.turma}<br>
+        `).join("")}
+    </td>`;
+
+}
 
         });
 
