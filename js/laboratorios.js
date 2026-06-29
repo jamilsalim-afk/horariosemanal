@@ -87,9 +87,46 @@ function preencherSemanasLaboratorios() {
 
     if (!select) return;
 
+    const semanas = new Set();
+
+    Object.values(mapaLaboratorios).forEach(lab => {
+
+        lab.forEach(r => {
+
+            const [d, m, a] = r.data.split("/");
+            const dt = new Date(a, m - 1, d);
+
+            const seg = new Date(dt.setDate(dt.getDate() - dt.getDay() + 1))
+                .toLocaleDateString("pt-BR");
+
+            semanas.add(seg);
+
+        });
+
+    });
+
+    const ordenadas = Array.from(semanas).sort((a, b) => {
+
+        const [da, ma, aa] = a.split("/");
+        const [db, mb, ab] = b.split("/");
+
+        return new Date(aa, ma - 1, da) - new Date(ab, mb - 1, db);
+
+    });
+
     select.innerHTML = `
-        <option value="">Semana</option>
+        <option value="">Todas as semanas</option>
     `;
+
+    ordenadas.forEach(s => {
+
+        select.innerHTML += `
+            <option value="${s}">
+                Semana de ${s}
+            </option>
+        `;
+
+    });
 
 }
 
