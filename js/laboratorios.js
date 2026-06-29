@@ -20,9 +20,11 @@ function extrairNomeLaboratorio(texto) {
 
     if (!texto) return null;
 
-    const match = texto.match(/_Lab\s*(.+)$/i);
+    const match = texto.match(/_Lab\s*([^-]+)/i);
 
-    return match ? "Lab " + match[1].trim() : null;
+    if (!match) return null;
+
+    return "Lab " + match[1].trim();
 
 }
 
@@ -30,7 +32,7 @@ function normalizarDisciplinaLab(texto) {
 
     if (!texto) return "";
 
-    return texto.replace(/_Lab\s*.+$/i, "").trim();
+    return texto.replace(/_Lab\s*.*$/i, "").trim();
 
 }
 
