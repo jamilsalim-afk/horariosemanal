@@ -96,17 +96,61 @@ function preencherSemanasLaboratorios() {
 function renderLaboratorio() {
 
     const tabela = document.getElementById("tabelaLaboratorio");
+    const laboratorio = document.getElementById("selectLaboratorio").value;
 
     if (!tabela) return;
 
-    tabela.innerHTML = `
-        <div style="
-            text-align:center;
-            padding:60px;
-            font-size:22px;
-            color:#777;">
-            💻 Laboratórios prontos para receber os dados.
-        </div>
+    if (laboratorio === "TODOS") {
+
+        tabela.innerHTML = `
+            <div style="
+                padding:40px;
+                text-align:center;
+                font-size:22px;
+                color:#666;">
+                Selecione um laboratório para visualizar os horários.
+            </div>
+        `;
+
+        return;
+
+    }
+
+    const registros = mapaLaboratorios[laboratorio] || [];
+
+    let html = `
+    <table class="tabelaHorario">
+        <thead>
+            <tr>
+                <th>Data</th>
+                <th>Horário</th>
+                <th>Turma</th>
+                <th>Disciplina</th>
+                <th>Modalidade</th>
+            </tr>
+        </thead>
+        <tbody>
     `;
+
+    registros.forEach(r => {
+
+        html += `
+        <tr>
+            <td>${r.data}</td>
+            <td>${r.horario}</td>
+            <td>${r.turma}</td>
+            <td>${normalizarDisciplinaLab(r.valor)}</td>
+            <td>${r.modalidade}</td>
+        </tr>
+        `;
+
+    });
+
+    html += `
+        </tbody>
+    </table>
+    `;
+
+    tabela.innerHTML = html;
 
 }
