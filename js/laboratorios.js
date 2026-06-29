@@ -16,6 +16,60 @@ function inicializarLaboratorios() {
 
 }
 
+function extrairNomeLaboratorio(texto) {
+
+    if (!texto) return null;
+
+    const match = texto.match(/_Lab\s*(.+)$/i);
+
+    return match ? "Lab " + match[1].trim() : null;
+
+}
+
+function normalizarDisciplinaLab(texto) {
+
+    if (!texto) return "";
+
+    return texto.replace(/_Lab\s*.+$/i, "").trim();
+
+}
+
+function adicionarAoMapaLaboratorios({
+    semana,
+    dia,
+    horario,
+    disciplina,
+    professor,
+    turma,
+    modalidade
+}) {
+
+    const laboratorio = extrairNomeLaboratorio(disciplina);
+
+    if (!laboratorio) return;
+
+    disciplina = normalizarDisciplinaLab(disciplina);
+
+    if (!mapaLaboratorios[laboratorio])
+        mapaLaboratorios[laboratorio] = {};
+
+    if (!mapaLaboratorios[laboratorio][semana])
+        mapaLaboratorios[laboratorio][semana] = {};
+
+    if (!mapaLaboratorios[laboratorio][semana][dia])
+        mapaLaboratorios[laboratorio][semana][dia] = {};
+
+    mapaLaboratorios[laboratorio][semana][dia][horario] = {
+
+        disciplina,
+        professor,
+        turma,
+        modalidade
+
+    };
+
+}
+
 function preencherSelectLaboratorios() {
 
     const select = document.getElementById("selectLaboratorio");
