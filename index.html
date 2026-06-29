@@ -9,19 +9,6 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
 
 <link rel="stylesheet" href="style.css">
-
-  <!-- PWA: Manifest -->
-<link rel="manifest" href="manifest.json">
-
-<!-- PWA: Cor da barra do navegador no Android -->
-<meta name="theme-color" content="#1a472a">
-
-<!-- PWA: Ícone para iPhone -->
-<link rel="apple-touch-icon" href="icons/icon-192.png">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="IFRO Cacoal">
-  
 </head>
 
 <body>
@@ -41,10 +28,7 @@
       </div>
     </div>
 
-<div style="display:flex;gap:8px;">
-  <button id="btnTema" class="theme-btn">🌙</button>
-  <button onclick="window.location.reload()" class="theme-btn" title="Atualizar">🔄</button>
-</div>
+    <button id="btnTema" class="theme-btn">🌙</button>
 
   </div>
 </header>
@@ -57,7 +41,6 @@
   <button class="tab" onclick="abrirAba('professores',this)">👨‍🏫 Professores</button>
   <button class="tab" onclick="abrirAba('turmas',this)">🏫 Turmas</button>
   <button class="tab" onclick="abrirAba('estatisticas',this)">📈 Estatísticas</button>
-  <button class="tab" onclick="abrirAba('projecao',this)">🔮 Projeção</button>
   <button class="tab" onclick="abrirAba('relatorios',this)">📑 Relatórios</button>
 </nav>
 
@@ -125,6 +108,17 @@
       <select id="selectModalidadeSabados" onchange="trocarModalidadeSabados()">
         <option value="INTEGRADO">CURSOS INTEGRADOS</option>
         <option value="SUPERIOR">CURSOS SUPERIORES</option>
+      </select>
+
+      <!-- 🔥 NOVO -->
+      <select
+        id="selectSemestreSabados"
+        style="display:none;"
+        onchange="renderSabados()">
+
+        <option value="0">1º SEMESTRE</option>
+        <option value="1">2º SEMESTRE</option>
+
       </select>
 
       <input type="text" id="searchSabados"
@@ -272,35 +266,6 @@
 </div>
 </section>
 
-  <!-- PROJEÇÃO DE AULAS -->
-<section id="projecao" class="tab-content">
-
-  <div class="estatistica-header">
-    <h1>🔮 Projeção de Aulas</h1>
-    <p>Aulas já ministradas + projeção até 27/11/2026 por professor</p>
-  </div>
-
-  <div class="header-sticky">
-    <div class="controls-card">
-
-      <input type="text" id="searchProjecao"
-        class="search-box"
-        placeholder="🔍 Buscar professor..."
-        onkeyup="renderProjecao()">
-
-      <button class="btn-pdf" onclick="exportarProjecaoPDF()">
-        📄 Baixar PDF
-      </button>
-
-    </div>
-  </div>
-
-  <div class="week-container">
-    <div id="containerProjecao"></div>
-  </div>
-
-</section>
-
 <!-- RELATÓRIOS -->
 <section id="relatorios" class="tab-content">
 
@@ -402,37 +367,11 @@
 <footer class="ifro-footer">
   IFRO - Campus Cacoal<br>
   BR 364, Km 228, Lote 2-A - Zona Rural<br>
-  ☎ (69) 3443-2445 | ✉ dape.cacoal@ifro.edu.br<br>
-  Desenvolvido por @JamilSalim
+  ☎ (69) 3443-2445 | ✉ dape.cacoal@ifro.edu.br
 </footer>
 
 </div>
 
-  <!-- PWA: Registro do Service Worker -->
-<script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', function() {
-      navigator.serviceWorker.register('/horariosemanal/service-worker.js')
-        .then(function(reg) {
-          console.log('PWA: Service Worker registrado com sucesso!', reg.scope);
-        })
-        .catch(function(err) {
-          console.log('PWA: Falha no registro do Service Worker', err);
-        });
-    });
-  }
-</script>
-
-  <script>
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.addEventListener('message', (event) => {
-      if (event.data?.tipo === 'ATUALIZAR') {
-        window.location.reload();
-      }
-    });
-  }
-</script>
-  
 <script>
 
 function deveCompararDia(dataStr){
@@ -495,12 +434,10 @@ function limparPainelAlteracoes(){
   document.getElementById("painelAlteracoes").style.display = "none";
 }
   
-function trocarModalidade() {
+function trocarModalidade(){
+  window.trocouModalidade = true;
 
-  limparPainelAlteracoes();
-
-  // 🔥 força novo ciclo limpo
-  window.horariosProntos = false;
+  limparPainelAlteracoes(); // 🔥 ESSENCIAL
 
   init();
 }
@@ -587,9 +524,6 @@ function valorMudou(v1, v2){
   
 function verificarMudancaAoAbrir() {
 
-  // 🔥 trava de segurança obrigatória
-  if (!window.horariosProntos) return;
-
   if (!semanaSelecionadaEhAtual()) {
     return;
   }
@@ -597,7 +531,9 @@ function verificarMudancaAoAbrir() {
   const sem = document.getElementById('selectSemana').value;
   const mod = document.getElementById('selectModalidade').value;
 
-  if (!sem || !mod) return;
+  if (!sem || !mod) {
+    return;
+  }
 
   const chave = `snapshot_${mod}_${sem}`;
 
@@ -1130,10 +1066,6 @@ function abrirAba(id, botao){
     if(id === "sabados"){
         renderSabados();
     }
-  
-  if(id === "projecao"){
-    renderProjecao();
-}
 }
 
 function montarRelatorioBase() {
@@ -1704,6 +1636,5 @@ window.onload = async () => {
 <script src="js/sabado.js"></script>
 <script src="js/horario.js"></script>
 <script src="js/relatorios.js"></script>
-<script src="js/projecao.js"></script>
 </body>
 </html>
