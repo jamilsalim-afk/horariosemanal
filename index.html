@@ -823,13 +823,18 @@ function montarBaseGeral(integrado, superior) {
 
                 const turma = header[c];
 
-                base.push({
-                    data,
-                    horario,
-                    turma,
-                    valor,
-                    modalidade: tipo
-                });
+                const registro = {
+    data,
+    horario,
+    turma,
+    valor,
+    modalidade: tipo
+};
+
+base.push(registro);
+
+// Alimenta o módulo de laboratórios
+adicionarRegistroLaboratorio(registro);
             }
         }
     }
