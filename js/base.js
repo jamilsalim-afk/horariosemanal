@@ -71,7 +71,8 @@ async function init(){
 montarBaseGeral(
     dadosIntegrado,
     dadosSuperior
-);
+);,
+inicializarLaboratorios();
 montarRelatorioBase();
 montarCacheRelatorioDisciplinas();
 
