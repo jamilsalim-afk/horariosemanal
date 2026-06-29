@@ -265,18 +265,21 @@ function renderLaboratorio() {
     const tabela = document.getElementById("tabelaLaboratorio");
 
     const lab = document.getElementById("selectLaboratorio").value;
+const semana = document.getElementById("selectSemanaLaboratorio").value;
 
-    const semana = document.getElementById("selectSemanaLaboratorio").value;
-
-    if (!lab) {
-
-        tabela.innerHTML = `
+if (!lab) {
+    tabela.innerHTML = `
         <div class="relatorio-placeholder">
             Selecione um laboratório.
         </div>`;
+    return;
+}
 
-        return;
-    }
+    if (lab === "TODOS") {
+
+    renderTodosLaboratorios(semana);
+    return;
+}
 
     const { dias, horarios, grade } =
         montarGradeLaboratorio(lab, semana);
@@ -335,6 +338,90 @@ function renderLaboratorio() {
     </td>`;
 
 }
+
+        });
+
+        html += `</tr>`;
+    });
+
+    html += `</tbody></table>`;
+
+    tabela.innerHTML = html;
+}
+
+function renderTodosLaboratorios(semanaSelecionada) {
+
+    const tabela = document.getElementById("tabelaLaboratorio");
+
+    const labs = Object.keys(mapaLaboratorios);
+
+    let html = `
+    <table class="tabela-professor">
+        <thead>
+            <tr>
+                <th>Horário</th>
+                ${labs.map(l => `<th>${l}</th>`).join("")}
+            </tr>
+        </thead>
+        <tbody>
+    `;
+
+    const dias = ["SEGUNDA","TERÇA","QUARTA","QUINTA","SEXTA","SÁBADO"];
+
+    const horarios = [
+        "07:30 - 08:20",
+        "08:20 - 09:10",
+        "__INTERVALO_1__",
+        "09:30 - 10:20",
+        "10:20 - 11:10",
+        "11:10 - 12:00",
+        "__ALMOCO__",
+        "13:50 - 14:40",
+        "14:40 - 15:30",
+        "__INTERVALO_2__",
+        "15:50 - 16:40",
+        "16:40 - 17:30",
+        "17:30 - 18:20",
+        "__JANTAR__",
+        "19:00 - 19:50",
+        "19:50 - 20:40",
+        "__INTERVALO_3__",
+        "20:50 - 21:40",
+        "21:40 - 22:30"
+    ];
+
+    horarios.forEach(h => {
+
+        html += `<tr>`;
+        html += `<td><strong>${h}</strong></td>`;
+
+        labs.forEach(lab => {
+
+            const aulas = mapaLaboratorios[lab];
+
+            let achou = null;
+
+            (aulas || []).forEach(r => {
+
+                if (r.horario === h) {
+                    achou = r;
+                }
+
+            });
+
+            if (!achou) {
+
+                html += `<td class="livre">🟢 LIVRE</td>`;
+
+            } else {
+
+                html += `
+                <td>
+                    <strong>${normalizarDisciplinaLab(achou.valor)}</strong><br>
+                    ${achou.turma}<br>
+                    <small>${achou.modalidade}</small>
+                </td>`;
+            }
 
         });
 
