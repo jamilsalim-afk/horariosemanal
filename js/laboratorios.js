@@ -355,17 +355,6 @@ function renderTodosLaboratorios(semanaSelecionada) {
 
     const labs = Object.keys(mapaLaboratorios);
 
-    let html = `
-    <table class="tabela-professor">
-        <thead>
-            <tr>
-                <th>Horário</th>
-                ${labs.map(l => `<th>${l}</th>`).join("")}
-            </tr>
-        </thead>
-        <tbody>
-    `;
-
     const dias = ["SEGUNDA","TERÇA","QUARTA","QUINTA","SEXTA","SÁBADO"];
 
     const horarios = [
@@ -390,23 +379,56 @@ function renderTodosLaboratorios(semanaSelecionada) {
         "21:40 - 22:30"
     ];
 
+    let html = `
+    <table class="tabela-professor">
+        <thead>
+            <tr>
+                <th>Horário</th>
+                ${labs.map(l => `<th>${l}</th>`).join("")}
+            </tr>
+        </thead>
+        <tbody>
+    `;
+
     horarios.forEach(h => {
 
+        const ehIntervalo =
+            h.includes("__INTERVALO") ||
+            h.includes("__ALMOCO") ||
+            h.includes("__JANTAR");
+
         html += `<tr>`;
+
+        // =========================
+        // 🔥 LINHA DE INTERVALO
+        // =========================
+        if (ehIntervalo) {
+
+            html += `
+                <td class="intervalo" colspan="${labs.length + 1}">
+                    ${formatarIntervalo(h)}
+                </td>
+            `;
+
+            html += `</tr>`;
+            return;
+        }
+
+        // =========================
+        // HORÁRIO NORMAL
+        // =========================
         html += `<td><strong>${h}</strong></td>`;
 
         labs.forEach(lab => {
 
-            const aulas = mapaLaboratorios[lab];
+            const aulas = mapaLaboratorios[lab] || [];
 
             let achou = null;
 
-            (aulas || []).forEach(r => {
-
+            aulas.forEach(r => {
                 if (r.horario === h) {
                     achou = r;
                 }
-
             });
 
             if (!achou) {
@@ -419,7 +441,13 @@ function renderTodosLaboratorios(semanaSelecionada) {
                 <td>
                     <strong>${normalizarDisciplinaLab(achou.valor)}</strong><br>
                     ${achou.turma}<br>
-                    <small>${achou.modalidade}</small>
+                    <span class="lab-modalidade ${
+                        achou.modalidade === "INTEGRADO"
+                        ? "lab-integrado"
+                        : "lab-superior"
+                    }">
+                        ${achou.modalidade}
+                    </span>
                 </td>`;
             }
 
@@ -431,4 +459,16 @@ function renderTodosLaboratorios(semanaSelecionada) {
     html += `</tbody></table>`;
 
     tabela.innerHTML = html;
+}
+
+function formatarIntervalo(h) {
+
+    if (h.includes("ALMOCO")) return "🍽 ALMOÇO";
+    if (h.includes("JANTAR")) return "🍽 JANTAR";
+
+    if (h.includes("INTERVALO_1")) return "⏸ INTERVALO";
+    if (h.includes("INTERVALO_2")) return "⏸ INTERVALO";
+    if (h.includes("INTERVALO_3")) return "⏸ INTERVALO";
+
+    return "⏸ INTERVALO";
 }
