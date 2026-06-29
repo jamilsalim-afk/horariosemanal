@@ -192,27 +192,27 @@ function carregarListaTurmas() {
         if (!horario) return;
 
         const disciplina =
-            aula.disciplina || "";
+        aula.disciplina || "";
 
-        const professor =
-            aula.professor || "";
+    const professor =
+        aula.professor || "";
 
-        grade[horario][diaSemana].push(`
+    grade[horario][diaSemana].push(`
 
-            <div style="
-                margin-bottom:4px;
-                padding:3px;
-                border-left:3px solid #1565c0;
-            ">
+        <div style="
+            margin-bottom:4px;
+            padding:3px;
+            border-left:3px solid #1565c0;
+        ">
 
-                <b>${disciplina}</b><br>
+            <b>${disciplina}</b><br>
 
-                ${professor}
+            ${professor}
 
-            </div>
+        </div>
 
-        `);
-
+    `);
+      
     });
 
     return {
