@@ -54,9 +54,28 @@ function preencherSelectLaboratorios() {
 
     if (!select) return;
 
+    const labs = Object.keys(mapaLaboratorios).sort((a, b) => {
+
+        const na = parseInt(a.match(/\d+/)?.[0] || 999);
+        const nb = parseInt(b.match(/\d+/)?.[0] || 999);
+
+        return na - nb;
+
+    });
+
     select.innerHTML = `
         <option value="TODOS">Todos os Laboratórios</option>
     `;
+
+    labs.forEach(lab => {
+
+        select.innerHTML += `
+            <option value="${lab}">
+                ${lab}
+            </option>
+        `;
+
+    });
 
 }
 
