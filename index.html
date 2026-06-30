@@ -1125,6 +1125,49 @@ function abrirAba(id, botao){
     }
 }
 
+function obterPeriodoRelatorio(dataStr, modalidade){
+
+    // Integrado é anual.
+    if(modalidade === "INTEGRADO")
+        return "ANUAL";
+
+    const [d,m,a] = dataStr.split('/');
+
+    const data = new Date(a, m-1, d);
+    data.setHours(0,0,0,0);
+
+    const semestres =
+        CALENDARIO_LETIVO[modalidade].semestres;
+
+    for(let i=0;i<semestres.length;i++){
+
+        const [di,mi,ai] =
+            semestres[i].inicio.split('/');
+
+        const [df,mf,af] =
+            semestres[i].fim.split('/');
+
+        const inicio =
+            new Date(ai, mi-1, di);
+
+        const fim =
+            new Date(af, mf-1, df);
+
+        inicio.setHours(0,0,0,0);
+        fim.setHours(23,59,59,999);
+
+        if(
+            data >= inicio &&
+            data <= fim
+        ){
+            return i + 1;
+        }
+
+    }
+
+    return "FORA";
+}
+
 function montarRelatorioBase() {
 
     const mapa = {};
@@ -1239,24 +1282,31 @@ professor =
     );
 
         const data =
-            parseDataBR(a.data);
+    parseDataBR(a.data);
 
-        const chave =
-            `${disciplina}__${professor}__${a.turma}`;
+const periodo =
+    obterPeriodoRelatorio(
+        a.data,
+        a.modalidade
+    );
+
+const chave =
+    `${disciplina}__${professor}__${a.turma}__${periodo}`;
 
         if (!mapa.has(chave)) {
 
             mapa.set(chave, {
 
-                disciplina,
-                professor,
-                turma: a.turma || "",
-                modalidade: a.modalidade || "",
+    disciplina,
+    professor,
+    turma: a.turma || "",
+    modalidade: a.modalidade || "",
+    periodo,
 
-                inicio: data,
-                fim: data
+    inicio: data,
+    fim: data
 
-            });
+});
 
         } else {
 
@@ -1396,11 +1446,12 @@ function montarRelatorioDisciplinas(
                 : "-";
 
         tr.innerHTML = `
-            <td>${item.disciplina}</td>
-            <td>${item.professor}</td>
-            <td>${item.turma}</td>
-            <td class="coluna-periodo">${periodo}</td>
-        `;
+    <td>${item.disciplina}</td>
+    <td>${item.professor}</td>
+    <td>${item.turma}</td>
+    <td>${item.periodo}</td>
+    <td class="coluna-periodo">${periodo}</td>
+`;
 
         fragment.appendChild(tr);
 
