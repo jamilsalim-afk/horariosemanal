@@ -304,12 +304,14 @@
     <div class="table-responsive">
         <table id="tabelaRelatorioEstatistica">
 <thead>
-<tr>
-<th>Disciplina</th>
-<th>Professor</th>
-<th>Turma</th>
-<th>Período</th>
-</tr>
+    <tr>
+        <th>Disciplina</th>
+        <th>Professor</th>
+        <th>Turma</th>
+        <th>Semestre</th>
+        <th>Período</th>
+    </tr>
+</thead>
 
 </thead>
 <tbody id="tabelaEstatistica"></tbody>
@@ -1124,7 +1126,20 @@ function abrirAba(id, botao){
         renderSabados();
     }
 }
-
+  
+const CALENDARIO_RELATORIO_SUPERIOR = [
+    {
+        semestre: 1,
+        inicio: "01/01/2026",
+        fim: "15/07/2026"
+    },
+    {
+        semestre: 2,
+        inicio: "16/07/2026",
+        fim: "31/12/2026"
+    }
+];
+  
 function obterPeriodoRelatorio(dataStr, modalidade){
 
     // Integrado é anual.
@@ -1137,7 +1152,7 @@ function obterPeriodoRelatorio(dataStr, modalidade){
     data.setHours(0,0,0,0);
 
     const semestres =
-        CALENDARIO_LETIVO[modalidade].semestres;
+        CALENDARIO_RELATORIO_SUPERIOR[modalidade].semestres;
 
     for(let i=0;i<semestres.length;i++){
 
@@ -1596,7 +1611,13 @@ function exportarRelatorioPDF() {
     // TABELA
     // =====================================
     pdf.autoTable({
-        head: [["Disciplina", "Professor", "Turma", "Período"]],
+        head: [[
+    "Disciplina",
+    "Professor",
+    "Turma",
+    "Semestre",
+    "Período"
+]],
         body: linhas,
         startY: 22,
         theme: "grid",
