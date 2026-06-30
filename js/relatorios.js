@@ -31,7 +31,8 @@ const Relatorio = {
   tipo: "",
   professor: "",
   turma: "",
-  disciplina: ""
+  disciplina: "",
+  periodo: ""
 };
 
 function inicializarRelatorio() {
@@ -41,6 +42,7 @@ function inicializarRelatorio() {
   Relatorio.professor = "";
   Relatorio.turma = "";
   Relatorio.disciplina = "";
+  Relatorio.periodo = "";
 
   // 🔥 LIMPEZA TOTAL DA TELA
   const container = document.getElementById("relatorioContainer");
@@ -156,27 +158,77 @@ function carregarListaTurmasRelatorio() {
 }
 
 function carregarDisciplinasRelatorio() {
-  const select = document.getElementById("selectDisciplinaRelatorio");
 
-  select.innerHTML = '<option value="">Selecione a disciplina</option>';
+    const select =
+        document.getElementById(
+            "selectDisciplinaRelatorio"
+        );
 
-  const set = new Set();
+    select.innerHTML =
+        '<option value="">Selecione a disciplina</option>';
 
-  BASE_GERAL.forEach(a => {
-    if (a.turma === Relatorio.turma) {
-      const disc = extrairDisciplinaRelatorio(a.valor);
-      if (disc) set.add(disc.trim());
-    }
-  });
+    const set = new Set();
 
-  [...set].sort().forEach(d => {
-    select.innerHTML += `<option value="${d}">${d}</option>`;
-  });
+    BASE_GERAL.forEach(a => {
 
-  select.onchange = () => {
-    Relatorio.disciplina = select.value;
-    gerarRelatorio();
-  };
+        if (a.turma !== Relatorio.turma)
+            return;
+
+        const disciplina =
+            extrairDisciplinaRelatorio(a.valor);
+
+        if (!disciplina)
+            return;
+
+        const periodo =
+            obterPeriodoRelatorio(
+                a.data,
+                a.modalidade
+            );
+
+        set.add(
+            `${disciplina}|||${periodo}`
+        );
+
+    });
+
+    [...set]
+        .sort((a, b) => a.localeCompare(b, "pt-BR"))
+        .forEach(item => {
+
+            const [disciplina, periodo] =
+                item.split("|||");
+
+            const texto =
+                periodo === "ANUAL"
+                    ? disciplina
+                    : `${disciplina} - ${periodo}º Semestre`;
+
+            select.innerHTML += `
+                <option value="${item}">
+                    ${texto}
+                </option>
+            `;
+        });
+
+    select.onchange = () => {
+
+        if (!select.value)
+            return;
+
+        const [disciplina, periodo] =
+            select.value.split("|||");
+
+        Relatorio.disciplina =
+            disciplina;
+
+        Relatorio.periodo =
+            periodo;
+
+        gerarRelatorio();
+
+    };
+
 }
 
 function gerarRelatorio() {
@@ -474,15 +526,26 @@ tr.innerHTML = `
 function gerarRelatorioDisciplina() {
 
   const dados = BASE_GERAL.filter(a =>
+
     a.turma === Relatorio.turma &&
+
     obterDisciplinaRelatorio(a.valor) === Relatorio.disciplina &&
-    a.valor && a.valor.trim() !== ""
+
+    obterPeriodoRelatorio(
+      a.data,
+      a.modalidade
+    ) === Relatorio.periodo &&
+
+    a.valor &&
+    a.valor.trim() !== ""
+
   );
 
   const resumo = criarResumoMensal(dados);
 
   renderTabelaResumoRelatorio(resumo);
   renderTabelaDetalhadaRelatorio(dados);
+
 }
 
 function gerarRelatorioProfessor() {
@@ -1169,12 +1232,24 @@ function exportarRelatorioDisciplinaPDF() {
             { align: "center" }
         );
 
-        pdf.text(
-            `Disciplina: ${Relatorio.disciplina}`,
-            pageWidth / 2,
-            28,
-            { align: "center" }
-        );
+        const descricaoPeriodo =
+    Relatorio.periodo === "ANUAL"
+        ? "Anual"
+        : `${Relatorio.periodo}º Semestre`;
+
+pdf.text(
+    `Disciplina: ${Relatorio.disciplina}`,
+    pageWidth / 2,
+    28,
+    { align: "center" }
+);
+
+pdf.text(
+    `Período Letivo: ${descricaoPeriodo}`,
+    pageWidth / 2,
+    32,
+    { align: "center" }
+);
     }
 
     const tabelaResumo =
@@ -1211,7 +1286,7 @@ function exportarRelatorioDisciplinaPDF() {
     pdf.text(
     "RESUMO MENSAL",
     pageWidth / 2,
-    38,
+    42,
     { align: "center" }
 );
   
@@ -1223,7 +1298,7 @@ function exportarRelatorioDisciplinaPDF() {
 
     tableWidth: 'auto',
 
-        startY: 42,
+        startY: 46,
 
         theme: "grid",
 
