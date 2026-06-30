@@ -1152,7 +1152,7 @@ function obterPeriodoRelatorio(dataStr, modalidade){
     data.setHours(0,0,0,0);
 
     const semestres =
-        CALENDARIO_RELATORIO_SUPERIOR[modalidade].semestres;
+        CALENDARIO_RELATORIO_SUPERIOR;
 
     for(let i=0;i<semestres.length;i++){
 
@@ -1570,13 +1570,15 @@ function exportarRelatorioPDF() {
 
     const linhas = dados.map(item => [
 
-        item.disciplina || "",
-        item.professor || "",
-        item.turma || "",
-        item.inicio && item.fim
-    ? `${formatarData(item.inicio)} até ${formatarData(item.fim)}`
-    : "-"
-    ]);
+    item.disciplina || "",
+    item.professor || "",
+    item.turma || "",
+    item.periodo || "",
+    item.inicio && item.fim
+        ? `${formatarData(item.inicio)} até ${formatarData(item.fim)}`
+        : "-"
+
+]);
 
     const pageWidth = pdf.internal.pageSize.getWidth();
     const pageHeight = pdf.internal.pageSize.getHeight();
@@ -1642,11 +1644,14 @@ function exportarRelatorioPDF() {
         },
 
         columnStyles: {
-            0: { cellWidth: 62, halign: "left" },   // disciplina
-            1: { cellWidth: 50, halign: "left" },   // professor
-            2: { cellWidth: 38, halign: "left" },  // turma
-            3: { cellWidth: 35, halign: "left" }   // período
-        },
+
+    0: { cellWidth: 55, halign: "left" },
+    1: { cellWidth: 45, halign: "left" },
+    2: { cellWidth: 35, halign: "left" },
+    3: { cellWidth: 20, halign: "center" },
+    4: { cellWidth: 40, halign: "left" }
+
+},
 
         didDrawPage: function () {
             cabecalho();
