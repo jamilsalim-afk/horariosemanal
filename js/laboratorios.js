@@ -636,3 +636,770 @@ function formatarIntervalo(h) {
 
     return "⏸ INTERVALO";
 }
+
+// ======================================================
+// 📄 EXPORTAR PDF DOS LABORATÓRIOS
+// ======================================================
+function exportarLaboratorioPDF() {
+
+    const laboratorio =
+        document.getElementById("selectLaboratorio")?.value;
+
+    const semana =
+        document.getElementById("selectSemanaLaboratorio")?.value;
+
+    if (!laboratorio) {
+
+        alert("Selecione um laboratório.");
+
+        return;
+
+    }
+
+    if (!semana) {
+
+        alert("Selecione uma semana.");
+
+        return;
+
+    }
+
+    if (laboratorio === "TODOS") {
+
+        gerarPDFTodosLaboratorios(semana);
+
+    } else {
+
+        gerarPDFLaboratorio(laboratorio, semana);
+
+    }
+
+}
+
+// ======================================================
+// 📄 GERAR PDF DO LABORATÓRIO (A4 RETRATO)
+// ======================================================
+function gerarPDFLaboratorio(laboratorio, semana) {
+
+    const { jsPDF } = window.jspdf;
+
+    const pdf = new jsPDF("p", "mm", "a4");
+
+    const pageWidth = pdf.internal.pageSize.getWidth();
+
+    const { dias, horarios, grade } =
+        montarGradeLaboratorio(laboratorio, semana);
+
+    const aulas =
+        getDadosLaboratorio(laboratorio, semana);
+
+    // =====================================
+    // ESTATÍSTICAS
+    // =====================================
+
+    const totalAulas = aulas.length;
+
+    const totalTurmas =
+        new Set(aulas.map(a => a.turma)).size;
+
+    const totalDias =
+        new Set(aulas.map(a => a.data)).size;
+
+    const horariosValidos =
+        horarios.filter(h => !h.startsWith("__"));
+
+    const totalSlots =
+        horariosValidos.length * dias.length;
+
+    const ocupacao =
+        totalSlots === 0
+            ? 0
+            : Math.round((totalAulas / totalSlots) * 100);
+
+    // =====================================
+    // CABEÇALHO
+    // =====================================
+
+    pdf.setFontSize(10);
+
+    pdf.text(
+        "INSTITUTO FEDERAL DE EDUCAÇÃO, CIÊNCIA E TECNOLOGIA DE RONDÔNIA - IFRO",
+        pageWidth / 2,
+        10,
+        { align: "center" }
+    );
+
+    pdf.text(
+        "CAMPUS CACOAL - Departamento de Apoio ao Ensino - DAPE",
+        pageWidth / 2,
+        14,
+        { align: "center" }
+    );
+
+    pdf.setFontSize(11);
+
+    pdf.setFont(undefined, "bold");
+
+    pdf.text(
+
+        `FICHA DO LABORATÓRIO: ${laboratorio.toUpperCase()}`,
+
+        pageWidth / 2,
+
+        22,
+
+        { align: "center" }
+
+    );
+
+    pdf.setFont(undefined, "normal");
+
+    pdf.setFontSize(9);
+
+    pdf.text(
+
+        `Semana de ${semana}`,
+
+        pageWidth / 2,
+
+        27,
+
+        { align: "center" }
+
+    );
+
+    // =====================================
+    // CAIXAS DE ESTATÍSTICAS
+    // =====================================
+
+    pdf.setDrawColor(180);
+
+    pdf.roundedRect(10,33,60,22,2,2);
+    pdf.roundedRect(75,33,60,22,2,2);
+    pdf.roundedRect(140,33,60,22,2,2);
+
+    pdf.setFontSize(8);
+
+    pdf.text("TOTAL DE AULAS",40,38,{align:"center"});
+    pdf.text("TURMAS",105,38,{align:"center"});
+    pdf.text("OCUPAÇÃO",170,38,{align:"center"});
+
+    pdf.setFont(undefined,"bold");
+    pdf.setFontSize(18);
+
+    pdf.text(String(totalAulas),40,46,{align:"center"});
+    pdf.text(String(totalTurmas),105,46,{align:"center"});
+    pdf.text(`${ocupacao}%`,170,46,{align:"center"});
+
+    pdf.setFont(undefined,"normal");
+    pdf.setFontSize(7);
+
+    pdf.text(
+
+        `${totalDias} dia(s) com utilização`,
+
+        170,
+
+        52,
+
+        {align:"center"}
+
+    );
+
+    // =====================================
+    // TABELA
+    // =====================================
+
+    const body = [];
+
+    horarios.forEach(h => {
+
+        const separadores = {
+
+            "__INTERVALO_1__":"INTERVALO",
+            "__INTERVALO_2__":"INTERVALO",
+            "__INTERVALO_3__":"INTERVALO",
+            "__ALMOCO__":"ALMOÇO",
+            "__JANTAR__":"JANTAR"
+
+        };
+
+        if (separadores[h]) {
+
+            body.push([
+
+                separadores[h],
+
+                {
+
+                    content: separadores[h],
+
+                    colSpan:6,
+
+                    styles:{
+
+                        halign:"center",
+
+                        fontStyle:"bold",
+
+                        fillColor:[241,245,249]
+
+                    }
+
+                }
+
+            ]);
+
+            return;
+
+        }
+
+        const row = [h];
+
+        dias.forEach(dia => {
+
+            const celula = grade[h][dia];
+
+            if (!celula.length){
+
+                row.push("");
+
+                return;
+
+            }
+
+            const texto = celula.map(a=>{
+
+                return `${a.disciplina}
+${a.turma}
+${a.modalidade}`;
+
+            }).join("\n\n");
+
+            row.push(texto);
+
+        });
+
+        body.push(row);
+
+    });
+
+    // =====================================
+    // TOTAL POR DIA
+    // =====================================
+
+    const totalDia=[];
+
+    dias.forEach(d=>{
+
+        let contador=0;
+
+        horarios.forEach(h=>{
+
+            if(h.startsWith("__")) return;
+
+            contador+=grade[h][d].length;
+
+        });
+
+        totalDia.push(contador);
+
+    });
+
+    body.push([
+
+        "AULAS/DIA",
+
+        ...totalDia
+
+    ]);
+
+    // =====================================
+    // AUTOTABLE
+    // =====================================
+
+    pdf.autoTable({
+
+        head:[
+
+            [
+
+                "Horário",
+
+                ...dias
+
+            ]
+
+        ],
+
+        body,
+
+        startY:62,
+
+        theme:"grid",
+
+        styles:{
+
+            fontSize:6,
+
+            cellPadding:1,
+
+            halign:"center",
+
+            valign:"middle",
+
+            overflow:"linebreak"
+
+        },
+
+        headStyles:{
+
+            fillColor:[21,128,61],
+
+            textColor:[255,255,255],
+
+            halign:"center"
+
+        },
+
+        columnStyles:{
+
+            0:{cellWidth:20},
+
+            1:{cellWidth:28},
+
+            2:{cellWidth:28},
+
+            3:{cellWidth:28},
+
+            4:{cellWidth:28},
+
+            5:{cellWidth:28},
+
+            6:{cellWidth:28}
+
+        },
+
+        didParseCell:(data)=>{
+
+            // Linha de totais
+            if(data.row.index===body.length-1){
+
+                data.cell.styles.fillColor=[232,245,233];
+
+                data.cell.styles.fontStyle="bold";
+
+            }
+
+            // Linhas cinza
+            if(
+
+                data.cell.raw==="INTERVALO" ||
+
+                data.cell.raw==="ALMOÇO" ||
+
+                data.cell.raw==="JANTAR"
+
+            ){
+
+                data.cell.styles.fillColor=[241,245,249];
+
+                data.cell.styles.fontStyle="bold";
+
+                data.cell.styles.halign="center";
+
+            }
+
+        }
+
+    });
+
+    // =====================================
+    // RODAPÉ
+    // =====================================
+
+    pdf.setFontSize(8);
+
+    pdf.text(
+
+        "IFRO - Campus Cacoal | BR 364, Km 228, Lote 2-A | (69) 3443-2445 | dape.cacoal@ifro.edu.br",
+
+        pageWidth/2,
+
+        285,
+
+        {align:"center"}
+
+    );
+
+    // =====================================
+    // SALVAR
+    // =====================================
+
+    pdf.save(
+
+        `${laboratorio.replace(/\s+/g,"_")}_Semana_${semana.replace(/\//g,"-")}.pdf`
+
+    );
+
+}
+
+// ======================================================
+// 📄 GERAR PDF - VISÃO GERAL DOS LABORATÓRIOS (A4 PAISAGEM)
+// ======================================================
+function gerarPDFTodosLaboratorios(semana) {
+
+    const { jsPDF } = window.jspdf;
+
+    const pdf = new jsPDF("l", "mm", "a4");
+
+    const pageWidth = pdf.internal.pageSize.getWidth();
+
+    const labs = Object.keys(mapaLaboratorios).sort((a, b) => {
+
+        const na = parseInt(a.match(/\d+/)?.[0] || 999);
+        const nb = parseInt(b.match(/\d+/)?.[0] || 999);
+
+        return na - nb;
+
+    });
+
+    const dias = [
+
+        "SEGUNDA",
+        "TERÇA",
+        "QUARTA",
+        "QUINTA",
+        "SEXTA",
+        "SÁBADO"
+
+    ];
+
+    const horarios = [
+
+        "07:30 - 08:20",
+        "08:20 - 09:10",
+
+        "__INTERVALO_1__",
+
+        "09:30 - 10:20",
+        "10:20 - 11:10",
+        "11:10 - 12:00",
+
+        "__ALMOCO__",
+
+        "13:50 - 14:40",
+        "14:40 - 15:30",
+
+        "__INTERVALO_2__",
+
+        "15:50 - 16:40",
+        "16:40 - 17:30",
+        "17:30 - 18:20",
+
+        "__JANTAR__",
+
+        "19:00 - 19:50",
+        "19:50 - 20:40",
+
+        "__INTERVALO_3__",
+
+        "20:50 - 21:40",
+        "21:40 - 22:30"
+
+    ];
+
+    // =====================================
+    // CABEÇALHO
+    // =====================================
+
+    pdf.setFontSize(10);
+
+    pdf.text(
+        "INSTITUTO FEDERAL DE EDUCAÇÃO, CIÊNCIA E TECNOLOGIA DE RONDÔNIA - IFRO",
+        pageWidth / 2,
+        10,
+        { align: "center" }
+    );
+
+    pdf.text(
+        "CAMPUS CACOAL - Departamento de Apoio ao Ensino - DAPE",
+        pageWidth / 2,
+        14,
+        { align: "center" }
+    );
+
+    pdf.setFontSize(11);
+    pdf.setFont(undefined, "bold");
+
+    pdf.text(
+        "VISÃO GERAL DOS LABORATÓRIOS",
+        pageWidth / 2,
+        22,
+        { align: "center" }
+    );
+
+    pdf.setFont(undefined, "normal");
+    pdf.setFontSize(9);
+
+    pdf.text(
+        `Semana de ${semana}`,
+        pageWidth / 2,
+        27,
+        { align: "center" }
+    );
+
+    // =====================================
+    // ESTATÍSTICAS
+    // =====================================
+
+    let totalAulas = 0;
+
+    labs.forEach(lab => {
+
+        totalAulas += getDadosLaboratorio(lab, semana).length;
+
+    });
+
+    pdf.setDrawColor(180);
+
+    pdf.roundedRect(15,33,75,22,2,2);
+    pdf.roundedRect(105,33,75,22,2,2);
+    pdf.roundedRect(195,33,75,22,2,2);
+
+    pdf.setFontSize(8);
+
+    pdf.text("LABORATÓRIOS",52,38,{align:"center"});
+    pdf.text("TOTAL DE AULAS",142,38,{align:"center"});
+    pdf.text("SEMANA",232,38,{align:"center"});
+
+    pdf.setFont(undefined,"bold");
+    pdf.setFontSize(18);
+
+    pdf.text(String(labs.length),52,47,{align:"center"});
+    pdf.text(String(totalAulas),142,47,{align:"center"});
+    pdf.text(semana,232,47,{align:"center"});
+
+    pdf.setFont(undefined,"normal");
+
+    // =====================================
+    // MONTA TABELA
+    // =====================================
+
+    const body = [];
+
+    horarios.forEach(h => {
+
+        const separadores = {
+
+            "__INTERVALO_1__":"INTERVALO",
+            "__INTERVALO_2__":"INTERVALO",
+            "__INTERVALO_3__":"INTERVALO",
+            "__ALMOCO__":"ALMOÇO",
+            "__JANTAR__":"JANTAR"
+
+        };
+
+        if (separadores[h]) {
+
+            body.push([
+
+                separadores[h],
+
+                {
+
+                    content: separadores[h],
+
+                    colSpan: labs.length + 1,
+
+                    styles: {
+
+                        halign: "center",
+
+                        fillColor: [241,245,249],
+
+                        fontStyle: "bold"
+
+                    }
+
+                }
+
+            ]);
+
+            return;
+
+        }
+
+        dias.forEach((dia, indice) => {
+
+            const row = [];
+
+            if (indice === 0) {
+
+                row.push(h);
+
+            } else {
+
+                row.push("");
+
+            }
+
+            row.push(dia);
+
+            labs.forEach(lab => {
+
+                const { grade } =
+                    montarGradeLaboratorio(lab, semana);
+
+                const celula =
+                    grade[h][dia];
+
+                if (!celula.length) {
+
+                    row.push("");
+
+                    return;
+
+                }
+
+                const texto = celula.map(a =>
+
+                    `${a.disciplina}
+${a.turma}`
+
+                ).join("\n\n");
+
+                row.push(texto);
+
+            });
+
+            body.push(row);
+
+        });
+
+    });
+
+    // =====================================
+    // LARGURA DAS COLUNAS
+    // =====================================
+
+    const columnStyles = {
+
+        0:{cellWidth:22},
+        1:{cellWidth:20}
+
+    };
+
+    labs.forEach((lab, i)=>{
+
+        columnStyles[i+2]={cellWidth:35};
+
+    });
+
+    // =====================================
+    // TABELA
+    // =====================================
+
+    pdf.autoTable({
+
+        head:[
+
+            [
+
+                "Horário",
+
+                "Dia",
+
+                ...labs
+
+            ]
+
+        ],
+
+        body,
+
+        startY:62,
+
+        theme:"grid",
+
+        styles:{
+
+            fontSize:6,
+
+            cellPadding:1,
+
+            valign:"middle",
+
+            halign:"center",
+
+            overflow:"linebreak"
+
+        },
+
+        headStyles:{
+
+            fillColor:[21,128,61],
+
+            textColor:[255,255,255],
+
+            fontStyle:"bold",
+
+            halign:"center"
+
+        },
+
+        columnStyles,
+
+        didParseCell:(data)=>{
+
+            if(
+
+                data.cell.raw==="INTERVALO" ||
+
+                data.cell.raw==="ALMOÇO" ||
+
+                data.cell.raw==="JANTAR"
+
+            ){
+
+                data.cell.styles.fillColor=[241,245,249];
+
+                data.cell.styles.fontStyle="bold";
+
+                data.cell.styles.halign="center";
+
+            }
+
+        }
+
+    });
+
+    // =====================================
+    // RODAPÉ
+    // =====================================
+
+    pdf.setFontSize(8);
+
+    pdf.text(
+
+        "IFRO - Campus Cacoal | BR 364, Km 228, Lote 2-A | (69) 3443-2445 | dape.cacoal@ifro.edu.br",
+
+        pageWidth/2,
+
+        200,
+
+        {align:"center"}
+
+    );
+
+    // =====================================
+    // SALVAR
+    // =====================================
+
+    pdf.save(
+
+        `Visao_Geral_Laboratorios_Semana_${semana.replace(/\//g,"-")}.pdf`
+
+    );
+
+}
