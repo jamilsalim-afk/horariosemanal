@@ -1308,16 +1308,6 @@ const periodo =
 const chave =
     `${disciplina}__${professor}__${a.turma}__${periodo}`;
 
-      console.log({
-    chave,
-    disciplina,
-    professor,
-    turma: a.turma,
-    modalidade: a.modalidade,
-    periodo,
-    data: a.data
-});
-
         if (!mapa.has(chave)) {
 
             mapa.set(chave, {
