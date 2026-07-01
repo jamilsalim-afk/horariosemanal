@@ -46,7 +46,20 @@ function adicionarRegistroLaboratorio(registro) {
         mapaLaboratorios[laboratorio] = [];
     }
 
-    mapaLaboratorios[laboratorio].push(registro);
+    // Evita duplicidade do mesmo registro
+    const existe = mapaLaboratorios[laboratorio].some(r =>
+
+        r.data === registro.data &&
+        r.horario === registro.horario &&
+        r.turma === registro.turma &&
+        r.valor === registro.valor &&
+        r.modalidade === registro.modalidade
+
+    );
+
+    if (!existe) {
+        mapaLaboratorios[laboratorio].push(registro);
+    }
 
 }
 
@@ -353,30 +366,58 @@ function renderTodosLaboratorios(semanaSelecionada) {
 
     const tabela = document.getElementById("tabelaLaboratorio");
 
-    const labs = Object.keys(mapaLaboratorios);
+    const labs = Object.keys(mapaLaboratorios).sort((a, b) => {
 
-    const dias = ["SEGUNDA","TERÇA","QUARTA","QUINTA","SEXTA","SÁBADO"];
+        const na = parseInt(a.match(/\d+/)?.[0] || 999);
+        const nb = parseInt(b.match(/\d+/)?.[0] || 999);
+
+        return na - nb;
+
+    });
 
     const horarios = [
+
         "07:30 - 08:20",
         "08:20 - 09:10",
+
         "__INTERVALO_1__",
+
         "09:30 - 10:20",
         "10:20 - 11:10",
         "11:10 - 12:00",
+
         "__ALMOCO__",
+
         "13:50 - 14:40",
         "14:40 - 15:30",
+
         "__INTERVALO_2__",
+
         "15:50 - 16:40",
         "16:40 - 17:30",
         "17:30 - 18:20",
+
         "__JANTAR__",
+
         "19:00 - 19:50",
         "19:50 - 20:40",
+
         "__INTERVALO_3__",
+
         "20:50 - 21:40",
         "21:40 - 22:30"
+
+    ];
+
+    const dias = [
+
+        "SEGUNDA",
+        "TERÇA",
+        "QUARTA",
+        "QUINTA",
+        "SEXTA",
+        "SÁBADO"
+
     ];
 
     let html = `
@@ -394,71 +435,108 @@ function renderTodosLaboratorios(semanaSelecionada) {
 
         const ehIntervalo =
             h.includes("__INTERVALO") ||
-            h.includes("__ALMOCO") ||
-            h.includes("__JANTAR");
+            h.includes("__ALMOCO__") ||
+            h.includes("__JANTAR__");
 
-        html += `<tr>`;
-
-        // =========================
-        // 🔥 LINHA DE INTERVALO
-        // =========================
         if (ehIntervalo) {
 
             html += `
+            <tr>
                 <td class="intervalo" colspan="${labs.length + 1}">
                     ${formatarIntervalo(h)}
                 </td>
-            `;
+            </tr>`;
 
-            html += `</tr>`;
             return;
+
         }
 
-        // =========================
-        // HORÁRIO NORMAL
-        // =========================
-        html += `<td><strong>${h}</strong></td>`;
+        dias.forEach((dia, indiceDia) => {
 
-        labs.forEach(lab => {
+            html += `<tr>`;
 
-            const aulas = mapaLaboratorios[lab] || [];
-
-            let achou = null;
-
-            aulas.forEach(r => {
-                if (r.horario === h) {
-                    achou = r;
-                }
-            });
-
-            if (!achou) {
-
-                html += `<td class="livre">🟢 LIVRE</td>`;
-
-            } else {
+            if (indiceDia === 0) {
 
                 html += `
-                <td>
-                    <strong>${normalizarDisciplinaLab(achou.valor)}</strong><br>
-                    ${achou.turma}<br>
-                    <span class="lab-modalidade ${
-                        achou.modalidade === "INTEGRADO"
-                        ? "lab-integrado"
-                        : "lab-superior"
-                    }">
-                        ${achou.modalidade}
-                    </span>
+                <td rowspan="${dias.length}">
+                    <strong>${h}</strong>
                 </td>`;
+
             }
+
+            labs.forEach(lab => {
+
+                const { grade } =
+                    montarGradeLaboratorio(lab, semanaSelecionada);
+
+                const celula = grade[h][dia];
+
+                if (!celula || celula.length === 0) {
+
+                    html += `
+                    <td class="livre">
+                        🟢 LIVRE
+                    </td>`;
+
+                }
+
+                else if (celula.length === 1) {
+
+                    const aula = celula[0];
+
+                    html += `
+                    <td>
+                        <strong>${aula.disciplina}</strong><br>
+                        ${aula.turma}<br>
+
+                        <small style="
+                            color:${
+                                aula.modalidade === "INTEGRADO"
+                                ? "#16a34a"
+                                : "#2563eb"
+                            }">
+
+                            ${aula.modalidade}
+
+                        </small>
+                    </td>`;
+
+                }
+
+                else {
+
+                    html += `
+                    <td style="
+                        background:#fee2e2;
+                        color:#991b1b;
+                    ">
+
+                        ⚠ CONFLITO<br><br>
+
+                        ${celula.map(c => `
+                            ${c.disciplina}<br>
+                            ${c.turma}
+                            <hr style="margin:4px 0;">
+                        `).join("")}
+
+                    </td>`;
+
+                }
+
+            });
+
+            html += `</tr>`;
 
         });
 
-        html += `</tr>`;
     });
 
-    html += `</tbody></table>`;
+    html += `
+        </tbody>
+    </table>`;
 
     tabela.innerHTML = html;
+
 }
 
 function formatarIntervalo(h) {
