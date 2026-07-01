@@ -77,7 +77,13 @@ function preencherSelectLaboratorios() {
     });
 
     select.innerHTML = `
-        <option value="TODOS">Todos os Laboratórios</option>
+        <option value="" selected>
+            📌 Selecione um laboratório
+        </option>
+
+        <option value="TODOS">
+            🗂 Visão geral (todos os laboratórios)
+        </option>
     `;
 
     labs.forEach(lab => {
