@@ -2,14 +2,6 @@
 // MÓDULO DE LABORATÓRIOS
 // ======================================================
 
-function trocarLaboratorio() {
-
-    preencherSemanasLaboratorios();
-
-    renderLaboratorio();
-
-}
-
 let mapaLaboratorios = {};
 
 function inicializarLaboratorios() {
@@ -206,6 +198,14 @@ function getDadosLaboratorio(labSelecionado, semanaSelecionada) {
     });
 
     return resultado;
+}
+
+function trocarLaboratorio() {
+
+    preencherSemanasLaboratorios();
+
+    renderLaboratorio();
+
 }
 
 function montarGradeLaboratorio(labSelecionado, semanaSelecionada) {
