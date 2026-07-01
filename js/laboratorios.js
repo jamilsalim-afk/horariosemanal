@@ -155,12 +155,29 @@ function preencherSemanasLaboratorios() {
 
     selectSemana.innerHTML = "";
 
+    // Calcula a segunda-feira da semana atual
+    const hoje = new Date();
+    hoje.setHours(0, 0, 0, 0);
+
+    const segundaAtual = new Date(hoje);
+    segundaAtual.setDate(hoje.getDate() - hoje.getDay() + 1);
+
+    const semanaAtual = segundaAtual.toLocaleDateString("pt-BR");
+
+    // Procura a semana atual na lista
+    let indiceSelecionado = ordenadas.indexOf(semanaAtual);
+
+    // Se não existir, seleciona a última disponível
+    if (indiceSelecionado === -1) {
+        indiceSelecionado = Math.max(0, ordenadas.length - 1);
+    }
+
     ordenadas.forEach((semana, indice) => {
 
         selectSemana.innerHTML += `
             <option
                 value="${semana}"
-                ${indice === 0 ? "selected" : ""}>
+                ${indice === indiceSelecionado ? "selected" : ""}>
                 Semana de ${semana}
             </option>
         `;
