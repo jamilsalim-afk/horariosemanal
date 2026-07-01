@@ -2,6 +2,14 @@
 // MÓDULO DE LABORATÓRIOS
 // ======================================================
 
+function trocarLaboratorio() {
+
+    preencherSemanasLaboratorios();
+
+    renderLaboratorio();
+
+}
+
 let mapaLaboratorios = {};
 
 function inicializarLaboratorios() {
@@ -9,8 +17,6 @@ function inicializarLaboratorios() {
     preencherSelectLaboratorios();
 
     preencherSemanasLaboratorios();
-
-    renderLaboratorio();
 
     console.log("Mapa de Laboratórios:", mapaLaboratorios);
 
@@ -104,46 +110,66 @@ function trocarSemanaLaboratorio() {
 
 function preencherSemanasLaboratorios() {
 
-    const select = document.getElementById("selectSemanaLaboratorio");
+    const selectSemana = document.getElementById("selectSemanaLaboratorio");
+    const labSelecionado = document.getElementById("selectLaboratorio").value;
 
-    if (!select) return;
+    if (!selectSemana) return;
 
     const semanas = new Set();
 
-    Object.values(mapaLaboratorios).forEach(lab => {
+    if (labSelecionado === "TODOS") {
 
-        lab.forEach(r => {
+        Object.values(mapaLaboratorios).forEach(lista => {
 
-            const [d, m, a] = r.data.split("/");
-            const dt = new Date(a, m - 1, d);
+            lista.forEach(r => {
 
-            const seg = new Date(dt.setDate(dt.getDate() - dt.getDay() + 1))
-                .toLocaleDateString("pt-BR");
+                const [d, m, a] = r.data.split("/");
 
-            semanas.add(seg);
+                const dt = new Date(a, m - 1, d);
+
+                dt.setDate(dt.getDate() - dt.getDay() + 1);
+
+                semanas.add(dt.toLocaleDateString("pt-BR"));
+
+            });
 
         });
 
-    });
+    } else if (labSelecionado && mapaLaboratorios[labSelecionado]) {
+
+        mapaLaboratorios[labSelecionado].forEach(r => {
+
+            const [d, m, a] = r.data.split("/");
+
+            const dt = new Date(a, m - 1, d);
+
+            dt.setDate(dt.getDate() - dt.getDay() + 1);
+
+            semanas.add(dt.toLocaleDateString("pt-BR"));
+
+        });
+
+    }
 
     const ordenadas = Array.from(semanas).sort((a, b) => {
 
         const [da, ma, aa] = a.split("/");
         const [db, mb, ab] = b.split("/");
 
-        return new Date(aa, ma - 1, da) - new Date(ab, mb - 1, db);
+        return new Date(aa, ma - 1, da) -
+               new Date(ab, mb - 1, db);
 
     });
 
-    select.innerHTML = `
-        <option value="">Todas as semanas</option>
-    `;
+    selectSemana.innerHTML = "";
 
-    ordenadas.forEach(s => {
+    ordenadas.forEach((semana, indice) => {
 
-        select.innerHTML += `
-            <option value="${s}">
-                Semana de ${s}
+        selectSemana.innerHTML += `
+            <option
+                value="${semana}"
+                ${indice === 0 ? "selected" : ""}>
+                Semana de ${semana}
             </option>
         `;
 
@@ -312,8 +338,29 @@ if (!lab) {
 
     horarios.forEach(h => {
 
-        html += `<tr>`;
-        html += `<td><strong>${h}</strong></td>`;
+    const ehIntervalo =
+        h.includes("__INTERVALO") ||
+        h.includes("__ALMOCO__") ||
+        h.includes("__JANTAR__");
+
+    if (ehIntervalo) {
+
+        html += `
+        <tr>
+            <td
+                colspan="${dias.length + 1}"
+                class="intervalo">
+
+                ${formatarIntervalo(h)}
+
+            </td>
+        </tr>`;
+
+        return;
+    }
+
+    html += `<tr>`;
+    html += `<td><strong>${h}</strong></td>`;
 
         dias.forEach(d => {
 
@@ -375,6 +422,17 @@ function renderTodosLaboratorios(semanaSelecionada) {
 
     });
 
+    const dias = [
+
+        "SEGUNDA",
+        "TERÇA",
+        "QUARTA",
+        "QUINTA",
+        "SEXTA",
+        "SÁBADO"
+
+    ];
+
     const horarios = [
 
         "07:30 - 08:20",
@@ -409,25 +467,23 @@ function renderTodosLaboratorios(semanaSelecionada) {
 
     ];
 
-    const dias = [
-
-        "SEGUNDA",
-        "TERÇA",
-        "QUARTA",
-        "QUINTA",
-        "SEXTA",
-        "SÁBADO"
-
-    ];
-
     let html = `
     <table class="tabela-professor">
+
         <thead>
+
             <tr>
+
                 <th>Horário</th>
+
+                <th>Dia</th>
+
                 ${labs.map(l => `<th>${l}</th>`).join("")}
+
             </tr>
+
         </thead>
+
         <tbody>
     `;
 
@@ -442,86 +498,93 @@ function renderTodosLaboratorios(semanaSelecionada) {
 
             html += `
             <tr>
-                <td class="intervalo" colspan="${labs.length + 1}">
+
+                <td colspan="${labs.length + 2}" class="intervalo">
+
                     ${formatarIntervalo(h)}
+
                 </td>
+
             </tr>`;
 
             return;
 
         }
 
-        dias.forEach((dia, indiceDia) => {
+        dias.forEach((dia, indice) => {
 
             html += `<tr>`;
 
-            if (indiceDia === 0) {
+            if (indice === 0) {
 
                 html += `
-                <td rowspan="${dias.length}">
+                <td rowspan="6">
+
                     <strong>${h}</strong>
+
                 </td>`;
 
             }
 
+            html += `<td><strong>${dia}</strong></td>`;
+
             labs.forEach(lab => {
 
-                const { grade } =
-                    montarGradeLaboratorio(lab, semanaSelecionada);
+                const { grade } = montarGradeLaboratorio(lab, semanaSelecionada);
 
                 const celula = grade[h][dia];
 
-                if (!celula || celula.length === 0) {
+                if (!celula.length) {
 
                     html += `
                     <td class="livre">
+
                         🟢 LIVRE
+
                     </td>`;
+
+                    return;
 
                 }
 
-                else if (celula.length === 1) {
+                if (celula.length === 1) {
 
                     const aula = celula[0];
 
                     html += `
                     <td>
+
                         <strong>${aula.disciplina}</strong><br>
+
                         ${aula.turma}<br>
 
-                        <small style="
-                            color:${
-                                aula.modalidade === "INTEGRADO"
+                        <small style="color:${
+                            aula.modalidade === "INTEGRADO"
                                 ? "#16a34a"
                                 : "#2563eb"
-                            }">
+                        }">
 
                             ${aula.modalidade}
 
                         </small>
-                    </td>`;
-
-                }
-
-                else {
-
-                    html += `
-                    <td style="
-                        background:#fee2e2;
-                        color:#991b1b;
-                    ">
-
-                        ⚠ CONFLITO<br><br>
-
-                        ${celula.map(c => `
-                            ${c.disciplina}<br>
-                            ${c.turma}
-                            <hr style="margin:4px 0;">
-                        `).join("")}
 
                     </td>`;
 
+                    return;
+
                 }
+
+                html += `
+                <td style="background:#fee2e2;color:#991b1b;">
+
+                    ⚠ CONFLITO<br><br>
+
+                    ${celula.map(c => `
+                        ${c.disciplina}<br>
+                        ${c.turma}<hr>
+                    `).join("")}
+
+                </td>`;
 
             });
 
