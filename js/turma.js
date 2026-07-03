@@ -296,24 +296,6 @@ grade[horario][diaSemana].push(`
             semana
         );
 
-    console.log("TOTAL REGISTROS:", aulas.length);
-
-const porDia = {};
-
-aulas.forEach(a => {
-    porDia[a.data] = (porDia[a.data] || 0) + 1;
-});
-
-console.table(porDia);
-
-    console.table(
-    aulas.map(a => ({
-        data: a.data,
-        horario: a.horario,
-        valor: a.valor
-    }))
-);
-
     const totalAulas =
         aulas.length;
 
@@ -558,31 +540,30 @@ console.table(porDia);
 
     aulas.forEach(aula => {
 
-        const [d,m,a] =
-            aula.data.split("/");
+    // Não contabiliza intervalos
+    if ((aula.valor || "").trim().toUpperCase() === "INTERVALO") {
+        return;
+    }
 
-        const dt =
-            new Date(a,m-1,d);
+    const [d,m,a] = aula.data.split("/");
 
-        const dia =
-            [
-                "DOMINGO",
-                "SEGUNDA",
-                "TERÇA",
-                "QUARTA",
-                "QUINTA",
-                "SEXTA",
-                "SÁBADO"
-            ][dt.getDay()];
+    const dt = new Date(a,m-1,d);
 
-        if (
-            aulasPorDia[dia]
-            !== undefined
-        ) {
-            aulasPorDia[dia]++;
-        }
+    const dia = [
+        "DOMINGO",
+        "SEGUNDA",
+        "TERÇA",
+        "QUARTA",
+        "QUINTA",
+        "SEXTA",
+        "SÁBADO"
+    ][dt.getDay()];
 
-    });
+    if (aulasPorDia[dia] !== undefined) {
+        aulasPorDia[dia]++;
+    }
+
+});
 
     html += `
     <tr style="
