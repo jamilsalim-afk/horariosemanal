@@ -105,7 +105,9 @@ function gerarDashboard(){
 
     const integrado = calcularIndicadores(dadosIntegrado, "INTEGRADO");
 
-    const superior = calcularIndicadores(dadosSuperior, "SUPERIOR");
+    const superior1 = calcularIndicadores(dadosSuperior, "SUPERIOR");
+
+    const superior2 = calcularIndicadores(dadosSuperior2, "SUPERIOR");
 
     const agora =
         new Date().toLocaleString("pt-BR");
