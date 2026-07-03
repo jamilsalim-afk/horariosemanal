@@ -203,28 +203,13 @@ const regrasDestaque = [
     { match: v => v.includes("ATENDIMENTO INDIVIDUAL"), cor:"#1565c0", fundo:"#e3f2fd" },
 ];
 
-const regra = regrasDestaque.find(r =>
-    r.match(texto.toUpperCase())
-);
+const regra =
+    regrasDestaque.find(r =>
+        r.match(texto.toUpperCase())
+    );
 
 const cor = regra?.cor || "#1565c0";
 const fundo = regra?.fundo || "transparent";
-
-// Se for uma aula (Disciplina - Professor), coloca a disciplina em negrito
-let conteudo = texto;
-
-if (texto.includes(" - ")) {
-
-    const partes = texto.split(" - ");
-
-    const disciplina = partes.shift();
-    const professor = partes.join(" - ");
-
-    conteudo = `
-        <b>${disciplina}</b><br>
-        ${professor}
-    `;
-}
 
 grade[horario][diaSemana].push(`
 
@@ -236,7 +221,7 @@ grade[horario][diaSemana].push(`
     border-radius:4px;
     white-space:pre-line;
 ">
-    ${conteudo}
+    ${texto}
 </div>
 
 `);
