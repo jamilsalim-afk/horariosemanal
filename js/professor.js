@@ -1,72 +1,89 @@
 function montarIndiceProfessores() {
+
     INDEX_PROFESSOR = {};
     INDEX_TURMA = {};
+
     BASE_GERAL.forEach(item => {
-        const valor = item.valor || "";
-        if (!valor.includes(" - "))
-            return;
-        const [
-            disciplina,
-            professor
-        ] =
-            valor
-                .split(" - ")
-                .map(v => v.trim());
 
-        if (!professor)
-            return;
-        const profNorm = normalizarProfessor(
-                professor
-            );
+        const valor = (item.valor || "").trim();
 
-        // ====================================
-        // ÍNDICE DE PROFESSORES
-        // ====================================
+        // =====================================================
+        // ÍNDICE DE TURMAS (ENTRA TUDO)
+        // =====================================================
+
+        const turma = item.turma || "";
+
+        if (turma) {
+
+            if (!INDEX_TURMA[turma]) {
+                INDEX_TURMA[turma] = [];
+            }
+
+            let disciplina = "";
+            let professor = "";
+
+            if (valor.includes(" - ")) {
+
+                const partes = valor.split(" - ");
+
+                disciplina = partes[0].trim();
+                professor = partes.slice(1).join(" - ").trim();
+
+            }
+
+            INDEX_TURMA[turma].push({
+                data: item.data,
+                horario: item.horario,
+                turma: item.turma,
+                valor: item.valor,
+                disciplina,
+                professor,
+                modalidade: item.modalidade
+            });
+
+        }
+
+        // =====================================================
+        // ÍNDICE DE PROFESSORES (APENAS AULAS)
+        // =====================================================
+
+        if (!valor.includes(" - ")) {
+            return;
+        }
+
+        const partes = valor.split(" - ");
+
+        const disciplina = partes[0].trim();
+        const professor = partes.slice(1).join(" - ").trim();
+
+        if (!professor) return;
+
+        const profNorm = normalizarProfessor(professor);
+
         if (!INDEX_PROFESSOR[profNorm]) {
             INDEX_PROFESSOR[profNorm] = [];
         }
-        const registro = {
-    data: item.data,
-    horario: item.horario,
-    turma: item.turma,
-    valor: item.valor,
-    disciplina,
-    professor,
-    modalidade: item.modalidade
-        };
 
-        INDEX_PROFESSOR[profNorm].push(
-            registro
-        );
+        INDEX_PROFESSOR[profNorm].push({
+            data: item.data,
+            horario: item.horario,
+            turma: item.turma,
+            valor: item.valor,
+            disciplina,
+            professor,
+            modalidade: item.modalidade
+        });
 
-        // ====================================
-        // ÍNDICE DE TURMAS
-        // ====================================
-
-        const turma = item.turma || "";
-        if (!turma)
-            return;
-        if (!INDEX_TURMA[turma]) {
-            INDEX_TURMA[turma] = [];
-        }
-
-        INDEX_TURMA[turma].push(
-            registro
-        );
     });
 
     console.log(
         "PROF INDEX OK:",
-        Object.keys(
-            INDEX_PROFESSOR
-        ).length
+        Object.keys(INDEX_PROFESSOR).length
     );
 
     console.log(
         "TURMA INDEX OK:",
-        Object.keys(
-            INDEX_TURMA
-        ).length
+        Object.keys(INDEX_TURMA).length
     );
 }
 
