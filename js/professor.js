@@ -2,7 +2,6 @@ function montarIndiceProfessores() {
 
     INDEX_PROFESSOR = {};
     INDEX_TURMA = {};
-
     BASE_GERAL.forEach(item => {
 
         const valor = (item.valor || "").trim();
