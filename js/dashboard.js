@@ -148,11 +148,6 @@ function gerarDashboard(){
                     <strong>${integrado.aulas}</strong>
                 </div>
 
-                <div class="dashboard-card card-vagas">
-                    Aulas Vagas
-                    <strong>${integrado.vagas}</strong>
-                </div>
-
                 <div class="dashboard-card card-sabados">
                     Sábados Letivos
                     <strong>${integrado.sabados}</strong>
@@ -179,11 +174,6 @@ function gerarDashboard(){
                 <div class="dashboard-card card-aulas">
                     Quantidade de Aulas
                     <strong>${superior.aulas}</strong>
-                </div>
-
-                <div class="dashboard-card card-vagas">
-                    Aulas Vagas
-                    <strong>${superior.vagas}</strong>
                 </div>
 
                 <div class="dashboard-card card-sabados">
@@ -274,11 +264,6 @@ return `
 <div class="dash-item">
   <span>Quantidade de Aulas</span>
   <strong>${d.aulas}</strong>
-</div>
-
-<div class="dash-item">
-  <span>Aulas Vagas</span>
-  <strong>${d.vagas}</strong>
 </div>
 
 <div class="dash-item">
