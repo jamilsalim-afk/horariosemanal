@@ -281,22 +281,22 @@ grade[horario][diaSemana].push(`
             semana
         );
 
-    const totalAulas =
-        aulas.length;
+    const totalAulas = aulas.filter(a =>
+    a.professor &&
+    a.professor.trim() !== ""
+).length;
 
-    const totalProfessores =
-        new Set(
-            aulas.map(
-                a => a.professor
-            )
-        ).size;
+const totalProfessores = new Set(
+    aulas
+        .filter(a => a.professor && a.professor.trim() !== "")
+        .map(a => a.professor)
+).size;
 
-    const totalDias =
-        new Set(
-            aulas.map(
-                a => a.data
-            )
-        ).size;
+const totalDias = new Set(
+    aulas
+        .filter(a => a.professor && a.professor.trim() !== "")
+        .map(a => a.data)
+).size;
 
     let html = `
 
