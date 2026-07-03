@@ -191,7 +191,8 @@ function carregarListaTurmas() {
 
         if (!horario) return;
 
-        const texto = aula.valor || "";
+        const texto = (aula.valor || "").trim();
+        if (!texto) return;
 
 const regrasDestaque = [
     { match: v => v.includes("RESERVA ENSINO"), classe: "reserva-ensino" },
@@ -207,7 +208,7 @@ const regra = regrasDestaque.find(r =>
     r.match(texto.toUpperCase())
 );
 
-const classe = regra?.classe || "";
+const classe = regra?.classe || "sem-estilo";
 
 grade[horario][diaSemana].push(`
 
