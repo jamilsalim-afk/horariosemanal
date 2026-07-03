@@ -248,6 +248,9 @@ const superior2 =
         </div>
 
     </div>
+    </div>
+
+    <div class="dashboard-column">
 
     <div class="dashboard-panel">
 
@@ -262,6 +265,9 @@ const superior2 =
         </div>
 
     </div>
+    </div>
+  
+  <div class="dashboard-column">
 
     <div class="dashboard-panel">
 
