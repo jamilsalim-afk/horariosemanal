@@ -202,12 +202,16 @@ const regrasDestaque = [
     { match: v => v.includes("_REP -"), cor:"#c62828", fundo:"#ffebee" }
 ];
 
-const regra = regrasDestaque.find(r => r.match(texto.toUpperCase()));
+const regra =
+    regrasDestaque.find(r =>
+        r.match(texto.toUpperCase())
+    );
 
 const cor = regra?.cor || "#1565c0";
 const fundo = regra?.fundo || "transparent";
 
 grade[horario][diaSemana].push(`
+
 <div style="
     margin-bottom:4px;
     padding:4px;
@@ -218,6 +222,7 @@ grade[horario][diaSemana].push(`
 ">
     ${texto}
 </div>
+
 `);
       
     });
