@@ -875,7 +875,7 @@ function gerarRelatorioTurma() {
     const periodoTexto =
       l.periodo === "ANUAL"
         ? "Anual"
-        : `${l.periodo}º Sem.`;
+        : `${l.periodo}º Semestre`;
 
     const tr =
       document.createElement("tr");
