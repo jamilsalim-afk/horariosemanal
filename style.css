@@ -1260,3 +1260,49 @@ body {
     text-align: center;
     font-size: 10px;
 }
+
+/* ===================================== */
+/* FICHA DA TURMA */
+/* ===================================== */
+
+.registro-turma{
+  margin-bottom:2px;
+  padding:2px 4px;
+  border-left:3px solid #1565c0;
+  border-radius:3px;
+  line-height:1.15;
+}
+
+.registro-turma.reserva-ensino{
+  color:#fbc02d;
+  font-weight:bold;
+}
+
+.registro-turma.pps{
+  color:#0b3d91;
+  font-weight:bold;
+}
+
+.registro-turma.estudos{
+  color:#1e7e34;
+  font-weight:bold;
+}
+
+.registro-turma.reuniao{
+  color:#fb8c00;
+  font-weight:bold;
+}
+
+.registro-turma.caed{
+  background:var(--caed);
+}
+
+.registro-turma.reposicao{
+  color:#0b3d91;
+  font-weight:bold;
+}
+
+.registro-turma.atendimento-individual{
+  color:#0b3d91;
+  font-weight:bold;
+}
