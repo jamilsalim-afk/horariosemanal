@@ -26,12 +26,13 @@ function montarIndiceProfessores() {
             INDEX_PROFESSOR[profNorm] = [];
         }
         const registro = {
-            data: item.data,
-            horario: item.horario,
-            turma: item.turma,
-            disciplina,
-            professor,
-            modalidade: item.modalidade
+    data: item.data,
+    horario: item.horario,
+    turma: item.turma,
+    valor: item.valor,
+    disciplina,
+    professor,
+    modalidade: item.modalidade
         };
 
         INDEX_PROFESSOR[profNorm].push(
