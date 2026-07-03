@@ -856,6 +856,15 @@ function montarBaseGeral(integrado, superior) {
     modalidade: tipo
 };
 
+              if (
+    valor.includes("RESERVA") ||
+    valor.includes("ESTUDOS") ||
+    valor.includes("PPS") ||
+    valor.includes("CAED")
+) {
+    console.log("ENCONTROU:", valor);
+}
+
 base.push(registro);
 
 // Alimenta o módulo de laboratórios
