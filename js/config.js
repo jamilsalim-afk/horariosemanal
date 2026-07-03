@@ -8,7 +8,7 @@ let dadosGlobais = [];
 
 let dadosIntegrado = [];
 let dadosSuperior = [];
-let dadosSuperior2 = [];
+
 let dadosProfessores = [];
 let listaProfessores = [];
 
