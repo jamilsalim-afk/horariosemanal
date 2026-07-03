@@ -197,9 +197,10 @@ const regrasDestaque = [
     { match: v => v.includes("RESERVA ENSINO"), cor:"#ef6c00", fundo:"#fff3e0" },
     { match: v => v.includes("PPS/ATENDIMENTO"), cor:"#7b1fa2", fundo:"#f3e5f5" },
     { match: v => v.includes("ESTUDOS INDIVIDUAIS"), cor:"#1565c0", fundo:"#e3f2fd" },
-    { match: v => v.includes("REUNIAO DE SERVIDORES"), cor:"#616161", fundo:"#eeeeee" },
+    { match: v => v.includes("REUNIÃO DE SERVIDORES"), cor:"#616161", fundo:"#eeeeee" },
     { match: v => v.includes("CAED") || v.includes("PRE-CONSELHO"), cor:"#00897b", fundo:"#e0f2f1" },
-    { match: v => v.includes("_REP -"), cor:"#c62828", fundo:"#ffebee" }
+    { match: v => v.includes("_REP -"), cor:"#c62828", fundo:"#ffebee" },
+    { match: v => v.includes("ATENDIMENTO INDIVIDUAL"), cor:"#1565c0", fundo:"#e3f2fd" },
 ];
 
 const regra =
