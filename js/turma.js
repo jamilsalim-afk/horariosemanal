@@ -196,6 +196,7 @@ function carregarListaTurmas() {
 const regrasDestaque = [
     { match: v => v.includes("RESERVA ENSINO"), classe: "reserva-ensino" },
     { match: v => v.includes("PPS/ATENDIMENTO"), classe: "pps" },
+    { match: v => v.includes("ATENDIMENTO INDIVIDUAL"), classe: "atendimento-individual" },
     { match: v => v.includes("ESTUDOS INDIVIDUAIS"), classe: "estudos" },
     { match: v => v.includes("REUNIAO DE SERVIDORES"), classe: "reuniao" },
     { match: v => v.includes("CAED") || v.includes("PRE-CONSELHO"), classe: "caed" },
@@ -210,15 +211,7 @@ const classe = regra?.classe || "";
 
 grade[horario][diaSemana].push(`
 
-<div class="${classe}" style="
-    margin-bottom:4px;
-    padding:4px;
-    border-left:4px solid #1565c0;
-    border-radius:4px;
-    white-space:pre-line;
-">
-    ${texto}
-</div>
+<div class="registro-turma ${classe}">
 
 `);
       
