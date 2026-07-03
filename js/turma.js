@@ -191,40 +191,33 @@ function carregarListaTurmas() {
 
         if (!horario) return;
 
-        const texto = (aula.valor || "").trim().toUpperCase();
+        const texto = aula.valor || "";
 
 const regrasDestaque = [
-    { match: v => v.includes("RESERVA ENSINO"), classe: "reserva-ensino" },
-    { match: v => v.includes("PPS/ATENDIMENTO"), classe: "pps" },
-    { match: v => v.includes("ESTUDOS INDIVIDUAIS"), classe: "estudos" },
-    { match: v => v.includes("REUNIAO DE SERVIDORES"), classe: "reuniao" },
-    { match: v => v.includes("CAED") || v.includes("PRE-CONSELHO"), classe: "caed" },
-    { match: v => v.includes("_REP -"), classe: "reposicao" }
+    { match: v => v.includes("RESERVA ENSINO"), cor:"#ef6c00", fundo:"#fff3e0" },
+    { match: v => v.includes("PPS/ATENDIMENTO"), cor:"#7b1fa2", fundo:"#f3e5f5" },
+    { match: v => v.includes("ESTUDOS INDIVIDUAIS"), cor:"#1565c0", fundo:"#e3f2fd" },
+    { match: v => v.includes("REUNIAO DE SERVIDORES"), cor:"#616161", fundo:"#eeeeee" },
+    { match: v => v.includes("CAED") || v.includes("PRE-CONSELHO"), cor:"#00897b", fundo:"#e0f2f1" },
+    { match: v => v.includes("_REP -"), cor:"#c62828", fundo:"#ffebee" }
 ];
 
-const destaque =
-    regrasDestaque.find(r => r.match(texto));
+const regra = regrasDestaque.find(r => r.match(texto.toUpperCase()));
 
-const corBorda = {
-    "reserva-ensino": "#ef6c00",
-    "pps": "#7b1fa2",
-    "estudos": "#1565c0",
-    "reuniao": "#616161",
-    "caed": "#00897b",
-    "reposicao": "#c62828"
-}[destaque?.classe] || "#1565c0";
+const cor = regra?.cor || "#1565c0";
+const fundo = regra?.fundo || "transparent";
 
 grade[horario][diaSemana].push(`
-
 <div style="
     margin-bottom:4px;
     padding:4px;
-    border-left:4px solid ${corBorda};
+    border-left:4px solid ${cor};
+    background:${fundo};
+    border-radius:4px;
     white-space:pre-line;
 ">
-    ${aula.valor || ""}
+    ${texto}
 </div>
-
 `);
       
     });
