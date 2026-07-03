@@ -6,6 +6,7 @@ const CALENDARIO_LETIVO = {
     ]
   },
 
+  
   SUPERIOR: {
     semestres: [
       { inicio: "09/02/2026", fim: "26/06/2026" },
