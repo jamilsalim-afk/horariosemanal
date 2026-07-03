@@ -296,6 +296,16 @@ grade[horario][diaSemana].push(`
             semana
         );
 
+    console.log("TOTAL REGISTROS:", aulas.length);
+
+const porDia = {};
+
+aulas.forEach(a => {
+    porDia[a.data] = (porDia[a.data] || 0) + 1;
+});
+
+console.table(porDia);
+
     const totalAulas =
         aulas.length;
 
