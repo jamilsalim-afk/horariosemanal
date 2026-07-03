@@ -1306,3 +1306,8 @@ body {
   color:#0b3d91;
   font-weight:bold;
 }
+
+.sem-estilo{
+  color:var(--text);
+  background:transparent;
+}
