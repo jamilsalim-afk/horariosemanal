@@ -343,7 +343,7 @@ tr.linha-vazia td{
   font-weight:bold;
 }
 
-.reuniao{
+.reunião{
   color:#fb8c00;
   font-weight:bold;
 }
@@ -354,6 +354,11 @@ tr.linha-vazia td{
 
 .reposicao{
   color:#0b3d91;
+  font-weight:bold;
+}
+
+.atendimento{
+  color:#1e7e34;
   font-weight:bold;
 }
 
