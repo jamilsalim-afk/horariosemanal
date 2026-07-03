@@ -280,13 +280,6 @@ grade[horario][diaSemana].push(`
             semana
         );
 
-    console.table(
-    aulas.map(a => ({
-        horario: a.horario,
-        valor: a.valor
-    }))
-);
-
     const totalAulas =
         aulas.length;
 
