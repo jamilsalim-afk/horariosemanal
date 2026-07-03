@@ -306,6 +306,14 @@ aulas.forEach(a => {
 
 console.table(porDia);
 
+    console.table(
+    aulas.map(a => ({
+        data: a.data,
+        horario: a.horario,
+        valor: a.valor
+    }))
+);
+
     const totalAulas =
         aulas.length;
 
