@@ -212,7 +212,15 @@ const classe = regra?.classe || "sem-estilo";
 
 grade[horario][diaSemana].push(`
 
-<div class="registro-turma ${classe}">
+<div class="${classe}" style="
+    margin-bottom:4px;
+    padding:4px;
+    border-left:4px solid #1565c0;
+    border-radius:4px;
+    white-space:pre-line;
+">
+    ${texto}
+</div>
 
 `);
       
