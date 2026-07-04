@@ -376,7 +376,7 @@ function renderProfessor(){
                 TOTAL DE AULAS
             </div>
             <div style="
-                font-size:30px;
+                font-size:20px;
                 font-weight:bold;
                 color:#2e7d32;
             ">
@@ -397,7 +397,7 @@ function renderProfessor(){
                 TURMAS
             </div>
             <div style="
-                font-size:30px;
+                font-size:20px;
                 font-weight:bold;
                 color:#1565c0;
             ">
@@ -418,7 +418,7 @@ function renderProfessor(){
                 DIAS COM AULA
             </div>
             <div style="
-                font-size:30px;
+                font-size:20px;
                 font-weight:bold;
                 color:#ef6c00;
             ">
@@ -432,7 +432,7 @@ function renderProfessor(){
     border-collapse:collapse;
     background:var(--surface);
     color:var(--text);
-    font-size:12px;
+    font-size:10px;
 ">
 
     <thead>
