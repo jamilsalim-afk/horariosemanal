@@ -1476,3 +1476,70 @@ body {
   }
 
 }
+
+/* =====================================================
+   ATUALIZAÇÃO — TABELAS NO MOBILE
+   O usuário pediu que as tabelas TAMBÉM encolham ~50%
+   no mobile (isso substitui a decisão anterior de
+   mantê-las idênticas ao PC).
+
+   Causa raiz do "desconfigurado": o CSS global usa
+   table-layout:fixed + width:100% em TODAS as tabelas
+   do site. Isso faz o navegador espremer as colunas para
+   caber na tela do celular, ignorando as larguras
+   desejadas (180px nos cabeçalhos de turma, etc.) e
+   quebrando o alinhamento.
+
+   A correção usa !important porque várias tabelas são
+   geradas via JS com estilo INLINE (width:100%,
+   font-size:12px, padding:8px direto no <table>/<th>),
+   que tem prioridade sobre CSS normal — só !important
+   consegue sobrescrever isso sem tocar nos arquivos .js.
+===================================================== */
+@media (max-width: 768px){
+
+  table{
+    width: auto !important;
+    min-width: 100% !important;
+    table-layout: auto !important;
+    font-size: 6px !important;
+  }
+
+  table.tabela-busca{
+    min-width: auto !important;
+    width: auto !important;
+  }
+
+  th,
+  td{
+    padding: 3px !important;
+    font-size: 6px !important;
+  }
+
+  /* coluna de horário (mais estreita) */
+  .time-col{
+    width: 40px !important;
+  }
+
+  /* cabeçalhos de turma com width:180px inline (horario.js) */
+  th[style*="width"]{
+    width: 90px !important;
+  }
+
+  /* linhas vazias / feriado, proporcionalmente menores */
+  tr.linha-vazia td{
+    font-size: 5px !important;
+    height: 5px !important;
+  }
+
+  .feriado{
+    font-size: 60px !important;
+    height: 100px !important;
+  }
+
+  /* cards de resumo (professor/turma) que usam min-width:160px inline */
+  [style*="min-width:160px"]{
+    min-width: 80px !important;
+  }
+
+}
