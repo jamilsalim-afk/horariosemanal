@@ -1316,3 +1316,163 @@ body {
   color:var(--text);
   background:transparent;
 }
+
+/* =====================================================
+   MOBILE — REDUÇÃO GERAL DE ESCALA (~50%)
+   IMPORTANTE: as TABELAS (table, th, td, .table-responsive
+   e seletores específicos de tabelas como #tabelaEstatistica,
+   #tabelaLaboratorio, #tabelaRelatorioEstatistica, etc.)
+   NÃO são tocadas neste bloco — permanecem IDÊNTICAS ao
+   modo Desktop/PC, por pedido explícito.
+   Textos de botões/campos foram reduzidos de forma um
+   pouco mais moderada que 50% para não ficarem ilegíveis
+   (piso mínimo de ~11-12px).
+===================================================== */
+@media (max-width: 768px){
+
+  /* CABEÇALHO */
+  .header{
+    padding: 8px 12px;
+  }
+  .brand-title{
+    font-size: 13px;
+  }
+  .brand-subtitle{
+    font-size: 10px;
+  }
+  #btnTema{
+    width: 30px;
+    height: 30px;
+    font-size: 14px;
+  }
+
+  /* ABAS */
+  .tabs{
+    gap: 4px;
+    padding: 5px;
+  }
+  .tab{
+    padding: 6px 8px;
+    font-size: 11px;
+    border-radius: 6px;
+  }
+
+  /* CONTROLES (selects, busca, botão pdf) */
+  .header-sticky{
+    padding: 5px 0;
+  }
+  .controls-card{
+    padding: 8px;
+    gap: 6px;
+    border-radius: 8px;
+  }
+  select,
+  .search-box,
+  .btn-pdf{
+    padding: 7px;
+    font-size: 12px;
+    border-radius: 5px;
+  }
+
+  /* CONTAINER GERAL */
+  .week-container{
+    padding: 7px;
+  }
+
+  /* DASHBOARD */
+  .dashboard-header{
+    padding: 10px;
+  }
+  .dashboard-header h1{
+    font-size: 15px;
+  }
+  .dashboard-header p{
+    font-size: 11px;
+  }
+  .dashboard-grid{
+    gap: 10px;
+    padding: 10px;
+  }
+  .dashboard-panel{
+    padding: 8px;
+    border-radius: 8px;
+  }
+  .dashboard-panel h2{
+    font-size: 13px;
+  }
+  .dashboard-card{
+    padding: 9px;
+    border-radius: 8px;
+    min-height: 55px;
+  }
+  .dashboard-card strong{
+    font-size: 14px;
+  }
+  .progress-label{
+    font-size: 9px;
+  }
+
+  .info-card,
+  .recuperacao-card,
+  .exame-card,
+  .feriado-card{
+    padding: 7px;
+    border-radius: 6px;
+    font-size: 12px;
+  }
+
+  summary{
+    font-size: 12px;
+  }
+
+  /* ESTATÍSTICAS (cards e cabeçalho — a TABELA em si não é tocada) */
+  .estatistica-header{
+    padding: 10px;
+  }
+  .estatistica-header h1{
+    font-size: 17px;
+  }
+  .estatistica-header p{
+    font-size: 11px;
+  }
+  .estatistica-cards{
+    gap: 8px;
+    margin: 10px;
+  }
+  .estat-card{
+    padding: 10px;
+    border-radius: 6px;
+  }
+  .estat-card span{
+    font-size: 17px;
+  }
+  .estat-card small{
+    font-size: 11px;
+  }
+
+  /* PAINEL DE ALTERAÇÕES */
+  #painelAlteracoes .painel-header{
+    padding: 6px 8px;
+    font-size: 12px;
+  }
+  #conteudoAlteracoes{
+    padding: 6px 8px;
+    font-size: 11px;
+  }
+  #painelAlteracoes > button{
+    padding: 6px;
+    font-size: 12px;
+  }
+
+  /* RODAPÉ */
+  .ifro-footer{
+    padding: 10px;
+    font-size: 11px;
+  }
+
+  /* LOADER DE ABAS */
+  .aba-loader-text{
+    font-size: 12px;
+  }
+
+}
