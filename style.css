@@ -957,9 +957,9 @@ body {
 }
 
 #tabelaEstatistica th {
-    font-size: 16px;
+    font-size: 14px;
     font-weight: 700;
-    padding: 12px;
+    padding: 10px;
     background: #1f2937;
     color: white;
     text-align: left;
@@ -967,8 +967,8 @@ body {
 }
 
 #tabelaEstatistica td {
-    font-size: 15px;
-    padding: 10px;
+    font-size: 13px;
+    padding: 8px;
     color: var(--text);
     white-space: nowrap;
 }
@@ -983,11 +983,11 @@ body {
 
 .estatistica-header{
     text-align:center;
-    padding:20px;
+    padding:16px;
 }
 
 .estatistica-header h1{
-    font-size:32px;
+    font-size:28px;
     color:#2e7d32;
     margin-bottom:5px;
 
@@ -995,7 +995,7 @@ body {
 
 .estatistica-header p{
     color:#666;
-    font-size:15px;
+    font-size:13px;
 }
 
 .estatistica-cards{
@@ -1018,7 +1018,7 @@ body {
 
 .estat-card span{
     display:block;
-    font-size:34px;
+    font-size:30px;
     font-weight:bold;
     color:#2e7d32;
 }
@@ -1029,7 +1029,7 @@ body {
 }
 
 #tabelaRelatorioEstatistica{
-    width:100%;
+    width:90%;
     border-collapse:collapse;
 }
 
