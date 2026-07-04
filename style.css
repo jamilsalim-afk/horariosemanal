@@ -656,7 +656,7 @@ border-radius:14px;
 .dashboard-panel{
     background:var(--surface);
     border-radius:16px;
-    padding:18px;
+    padding:15px;
     box-shadow:var(--shadow);
 }
 
@@ -666,12 +666,12 @@ border-radius:14px;
 }
 
 .dashboard-card{
-    padding:18px;
-    border-radius:14px;
+    padding:12px;
+    border-radius:12px;
     position:relative;
     overflow:hidden;
     box-shadow:0 4px 12px rgba(0,0,0,.12);
-    min-height:110px;
+    min-height:82px;
 }
 
 .card-dias,
@@ -690,7 +690,7 @@ color:white !important;
 
 .dashboard-card strong{
     display:block;
-    font-size:30px;
+    font-size:22px;
     margin-top:10px;
     font-weight:700;
 }
@@ -744,27 +744,27 @@ color:white !important;
 .info-card{
     background:var(--bg);
     border-left:4px solid var(--primary);
-    padding:10px;
-    border-radius:8px;
-    margin-bottom:8px;
+    padding:8px;
+    border-radius:6px;
+    margin-bottom:6px;
 }
 
 .recuperacao-card{
     background:#fff3cd;
     color:#7a4f00;
     border-left:5px solid #ff9800;
-    padding:10px;
-    border-radius:8px;
-    margin-bottom:8px;
+    padding:8px;
+    border-radius:6px;
+    margin-bottom:6px;
 }
 
 .exame-card{
     background:#ffebee;
     color:#b71c1c;
     border-left:5px solid #d32f2f;
-    padding:10px;
-    border-radius:8px;
-    margin-bottom:8px;
+    padding:8px;
+    border-radius:6px;
+    margin-bottom:6px;
 }
 
 @media(max-width:1100px){
