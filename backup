@@ -1,206 +1,443 @@
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
 <meta charset="UTF-8">
 <title>Consulta de Horários Semanais - IFRO</title>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
-<script>
-if(localStorage.getItem("tema")==="dark"){
-   document.documentElement.setAttribute("data-theme","dark");
-}
-</script>
+
 <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-<div class="ifro-header">
-<div class="ifro-header-content">
-<div class="ifro-linha1">INSTITUTO FEDERAL DE EDUCAÇÃO, CIÊNCIA E TECNOLOGIA DE RONDÔNIA - IFRO</div>
-<div class="ifro-linha2">CAMPUS CACOAL</div>
-<div class="ifro-linha3">DEPARTAMENTO DE APOIO AO ENSINO</div>
-<div class="ifro-linha4">HORÁRIOS SEMANAIS - 2026</div>
-</div>
-</div>
+<div class="app-container">
 
-<div class="tabs-container">
+<!-- ================= HEADER ================= -->
+<header class="header">
+  <div class="header-inner">
 
-  <button class="tab-btn active"
-          onclick="abrirAba('dashboard',this)">
-          📊 Dashboard
-  </button>
+    <div class="brand">
+      <div class="brand-title">
+        IFRO - Campus Cacoal
+      </div>
+      <div class="brand-subtitle">
+        Sistema de Horários Acadêmicos • 2026
+      </div>
+    </div>
 
-  <button class="tab-btn"
-          onclick="abrirAba('horarios',this)">
-          📅 Horários
-  </button>
+    <button id="btnTema" class="theme-btn">🌙</button>
 
-<button class="tab-btn"
-          onclick="abrirAba('sabados',this)">
-          📚 Sábados Letivos
-  </button>
-   
-<button class="tab-btn"
-          onclick="abrirAba('professores',this)">
-          👨‍🏫 Professores
-  </button>
-
-  <button class="tab-btn"
-          onclick="abrirAba('turmas',this)">
-          🏫 Turmas
-  </button>
-
-  <button class="tab-btn"
-          onclick="abrirAba('estatisticas',this)">
-          📈 Estatísticas
-  </button>
-
-<button id="btnTema">🌙</button>
-   
-</div>
-
-<div id="dashboard"
-     class="tab-content active">
-
-  <div id="dashboardContent"></div>
-
-</div>
-
-<div id="horarios"
-     class="tab-content">
-
-<div class="header-sticky">
-<div class="controls-card">
-<select id="selectModalidade" onchange="trocarModalidade()">
-<option value="INTEGRADO">CURSOS TÉCNICOS INTEGRADOS</option>
-<option value="SUPERIOR">CURSOS SUPERIORES</option>
-</select>
-
-<select id="selectSemana" onchange="trocarSemana()"></select>
-
-<input type="text" id="searchProf" class="search-box"
-placeholder="🔍 Buscar Professor..." onkeyup="filtrarProfessor()">
-
-<button class="btn-pdf" onclick="exportarPDF()">📄 Baixe o PDF da Semana</button>
-
-</div>
-</div>
-
-  <div class="week-container">
-
-<!-- 🔥 BOTÕES NOVOS -->
-<div id="botoesRelatorio"></div>
-
-<div id="painelAlteracoes" style="
-  display:none;
-  background:white;
-  border-left:6px solid #d32f2f;
-  padding:15px;
-  margin:10px;
-  border-radius:8px;
-  max-height:300px;
-  overflow-y:auto;
-  box-shadow:0 2px 10px rgba(0,0,0,0.2);
-">
-  <div style="display:flex;justify-content:space-between;align-items:center;">
-    <strong>⚠️ Alterações Detectadas</strong>
-    <button onclick="fecharPainel()" style="
-      background:#d32f2f;color:white;border:none;
-      padding:5px 10px;border-radius:5px;cursor:pointer;">
-      ✖
-    </button>
   </div>
+</header>
 
-  <pre id="conteudoAlteracoes" style="
-    white-space:pre-wrap;
-    font-size:12px;
-    margin-top:10px;
-  "></pre>
+<!-- ================= NAV ================= -->
+<nav class="tabs">
+  <button class="tab active" onclick="abrirAba('dashboard',this)">📊 Dashboard</button>
+  <button class="tab" onclick="abrirAba('horarios',this)">📅 Horários</button>
+  <button class="tab" onclick="abrirAba('sabados',this)">📚 Sábados</button>
+  <button class="tab" onclick="abrirAba('professores',this)">👨‍🏫 Professores</button>
+  <button class="tab" onclick="abrirAba('turmas',this)">🏫 Turmas</button>
+  <button class="tab" onclick="abrirAba('laboratorios',this)">💻 Laboratórios</button>
+  <button class="tab" onclick="abrirAba('estatisticas',this)">📈 Estatísticas</button>
+  <button class="tab" onclick="abrirAba('relatorios',this)">📑 Relatórios</button>
+</nav>
 
-  <button onclick="copiarAlteracoes()" style="
-    margin-top:10px;
-    padding:8px;
-    background:#2e7d32;
-    color:white;
-    border:none;
-    border-radius:5px;
-    cursor:pointer;">
-    📋 Copiar
-  </button>
-</div>
-  
-<div class="table-responsive" id="tabelaHorario"></div>
-</div>
+<!-- ================= CONTENT ================= -->
+<main class="content">
 
-<div id="sabados" class="tab-content">
+<!-- DASHBOARD -->
+<section id="dashboard" class="tab-content active">
+  <div id="dashboardContent"></div>
+</section>
+
+<!-- HORÁRIOS -->
+<section id="horarios" class="tab-content">
 
   <div class="header-sticky">
     <div class="controls-card">
 
-    <label>Modalidade</label>
-    <select id="selectModalidadeSabado"
-            onchange="carregarSabados()">
-        <option value="INTEGRADO">
-            CURSOS TÉCNICOS INTEGRADOS
-        </option>
-        <option value="SUPERIOR">
-            CURSOS SUPERIORES
-        </option>
-    </select>
+      <select id="selectModalidade" onchange="trocarModalidade()">
+        <option value="INTEGRADO">CURSOS INTEGRADOS</option>
+        <option value="SUPERIOR">CURSOS SUPERIORES</option>
+      </select>
 
-    <label>Sábado Letivo</label>
-    <select id="selectSabado"
-            onchange="renderizarSabadoSelecionado()">
-    </select>
+      <select id="selectSemana" onchange="trocarSemana()"></select>
 
-</div>
+      <input type="text" id="searchProf"
+        class="search-box"
+        placeholder="🔍 Buscar Professor..."
+        onkeyup="filtrarProfessor()">
+
+      <button class="btn-pdf" onclick="exportarPDF()">
+        📄 Baixar PDF
+      </button>
+
+    </div>
   </div>
 
   <div class="week-container">
 
-      <div class="table-responsive">
-          <div id="tabelaSabados"></div>
+    <div id="alertaSemanaEspecial"></div>
+    <div id="botoesRelatorio"></div>
+
+    <div id="painelAlteracoes" class="painel-alerta">
+      <div class="painel-header">
+        <strong>⚠️ Alterações Detectadas</strong>
+        <button onclick="fecharPainel()">✖</button>
       </div>
+
+      <pre id="conteudoAlteracoes"></pre>
+
+      <button onclick="copiarAlteracoes()">📋 Copiar</button>
+    </div>
+
+    <div class="table-responsive" id="tabelaHorario"></div>
+
+  </div>
+
+</section>
+
+<!-- SÁBADOS -->
+<section id="sabados" class="tab-content">
+
+  <div class="header-sticky">
+    <div class="controls-card">
+
+      <select id="selectModalidadeSabados" onchange="trocarModalidadeSabados()">
+        <option value="INTEGRADO">CURSOS INTEGRADOS</option>
+        <option value="SUPERIOR">CURSOS SUPERIORES</option>
+      </select>
+
+      <!-- 🔥 NOVO -->
+      <select
+        id="selectSemestreSabados"
+        style="display:none;"
+        onchange="renderSabados()">
+
+        <option value="0">1º SEMESTRE</option>
+        <option value="1">2º SEMESTRE</option>
+
+      </select>
+
+      <input type="text" id="searchSabados"
+        class="search-box"
+        placeholder="🔍 Buscar..."
+        onkeyup="renderSabados()">
+
+      <button class="btn-pdf" onclick="exportarPDFSabados()">
+        📄 Baixar PDF
+      </button>
+
+    </div>
+  </div>
+
+  <div class="week-container">
+    <div class="table-responsive" id="containerSabados"></div>
+  </div>
+
+</section>
+
+<!-- PROFESSORES -->
+<section id="professores" class="tab-content">
+
+  <div class="header-sticky">
+    <div class="controls-card">
+
+      <select id="selectProfessor" onchange="renderProfessor()"></select>
+
+      <select id="selectSemanaProfessor" onchange="renderProfessor()"></select>
+
+      <button class="btn-pdf" onclick="exportarFichaProfessorPDF()">
+        📄 Baixar PDF
+      </button>
+
+    </div>
+  </div>
+
+  <div class="week-container">
+    <div class="table-responsive" id="tabelaProfessor"></div>
+  </div>
+
+</section>
+
+<!-- TURMAS -->
+<section id="turmas" class="tab-content">
+
+  <div class="header-sticky">
+    <div class="controls-card">
+      <select id="selectTurma" onchange="renderTurma()"></select>
+      <select id="selectSemanaTurma" onchange="renderTurma()"></select>
+      <button class="btn-pdf" onclick="exportarFichaTurmaPDF()">
+        📄 Baixar PDF
+      </button>
+
+    </div>
+  </div>
+
+  <div class="week-container">
+    <div class="table-responsive" id="tabelaTurma"></div>
+  </div>
+
+</section>
+
+<!-- LABORATÓRIOS -->
+<section id="laboratorios" class="tab-content">
+
+    <div class="header-sticky">
+
+        <div class="controls-card">
+
+            <select
+                id="selectLaboratorio"
+                onchange="trocarLaboratorio()">
+
+                <option value="">
+                    📌 Selecione um laboratório
+                </option>
+
+                <option value="TODOS">
+                    🗂 Visão geral (todos os laboratórios)
+                </option>
+
+            </select>
+
+            <select
+                id="selectSemanaLaboratorio"
+                onchange="renderLaboratorio()">
+            </select>
+
+            <button
+    class="btn-pdf"
+    onclick="exportarLaboratorioPDF()">
+
+    📄 Baixar PDF
+
+</button>
+
+        </div>
+
+    </div>
+
+    <div class="week-container">
+
+        <div
+            class="table-responsive"
+            id="tabelaLaboratorio">
+
+            <div style="
+                text-align:center;
+                padding:60px;
+                font-size:22px;
+                color:#777;">
+
+                💻 Selecione um laboratório para visualizar a ocupação.
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+<!-- ESTATISTICAS -->
+<section id="estatisticas" class="tab-content">
+<div class="estatistica-header">
+    <h1>📈 Relatório de Disciplinas</h1>
+    <p>
+        Visão consolidada das disciplinas,
+        professores e turmas do IFRO Campus Cacoal
+    </p>
+</div>
+<div class="estatistica-cards">
+    <div class="estat-card">
+        <span id="estatTotalDisciplinas">0</span>
+        <small>Disciplinas</small>
+    </div>
+    <div class="estat-card">
+        <span id="estatTotalProfessores">0</span>
+        <small>Professores</small>
+    </div>
+
+    <div class="estat-card">
+        <span id="estatTotalTurmas">0</span>
+        <small>Turmas</small>
+    </div>
+
+    <div class="estat-card">
+        <span id="estatTotalRegistros">0</span>
+        <small>Registros</small>
+    </div>
+
+</div>
+
+<div class="header-sticky">
+    <div class="controls-card">
+        <select
+            id="selectModalidadeEstatistica"
+            onchange="atualizarRelatorio()">
+            <option value=>
+                Selecione a modalidade desejada
+            </option>
+            <option value="TODOS">
+                INTEGRADO + SUPERIOR
+            </option>
+            <option value="INTEGRADO">
+                SOMENTE INTEGRADO
+            </option>
+            <option value="SUPERIOR">
+                SOMENTE SUPERIOR
+            </option>
+
+        </select>
+
+        <input
+            type="text"
+            id="inputBuscaEstatistica"
+            class="search-box"
+            placeholder="🔍 Disciplina, professor ou turma"
+            oninput="atualizarRelatorio()">
+
+        <button
+            onclick="exportarRelatorioPDF()"
+            class="btn-pdf">
+            📄 Baixar PDF
+        </button>
+    </div>
+</div>
+
+<div class="week-container">
+    <div class="table-responsive">
+        <table id="tabelaRelatorioEstatistica">
+<thead>
+    <tr>
+        <th>Disciplina</th>
+        <th>Professor</th>
+        <th>Turma</th>
+        <th>Semestre</th>
+        <th>Período</th>
+    </tr>
+</thead>
+
+</thead>
+<tbody id="tabelaEstatistica"></tbody>
+</table>
+      </div>
+</div>
+</section>
+
+<!-- RELATÓRIOS -->
+<section id="relatorios" class="tab-content">
+
+<div class="estatistica-header">
+  <h1>📑 Relatórios Acadêmicos</h1>
+  <p>
+    Relatórios por Disciplina, Turma e Professor
+  </p>
+</div>
+
+<div class="header-sticky">
+
+  <div class="controls-card">
+
+    <select id="selectTipoRelatorio"
+        onchange="inicializarRelatorio()">
+  <option value="">📌 Selecione o tipo de relatório</option>
+  <option value="disciplina">Disciplina</option>
+  <option value="turma">Turma</option>
+  <option value="professor">Professor</option>
+</select>
+
+<select id="selectTurmaRelatorio"
+        onchange="carregarDisciplinas()"
+        style="display:none">
+</select>
+
+<select id="selectDisciplinaRelatorio"
+        onchange="gerarRelatorio()"
+        style="display:none">
+</select>
+
+<select id="selectProfessorRelatorio"
+        onchange="gerarRelatorio()"
+        style="display:none">
+</select>
+
+<button
+      class="btn-pdf"
+      onclick="exportarRelatorioAcademicoPDF()">
+
+      📄 Baixar PDF
+
+    </button>
 
   </div>
 
 </div>
-   
-<div id="professores" class="tab-content">
-    Em construção...
+
+<div class="week-container">
+
+  <div id="relatorioPlaceholder"
+       class="relatorio-placeholder">
+  </div>
+
+  <div
+    id="relatorioContainer"
+    style="display:none">
+
+    <div class="table-responsive">
+
+      <table id="tabelaResumoRelatorio">
+        <thead></thead>
+        <tbody></tbody>
+      </table>
+
+    </div>
+
+    <br>
+
+    <div class="table-responsive">
+
+      <table id="tabelaDetalhadaRelatorio">
+        <thead></thead>
+        <tbody></tbody>
+      </table>
+
+    </div>
+
+    <div id="referenciasRelatorio"></div>
+
+  </div>
+
 </div>
 
-<div id="turmas" class="tab-content">
-    Em construção...
-</div>
+</section>
 
-<div id="estatisticas" class="tab-content">
-    Em construção...
-</div>
+</main>
 
+<div id="abaLoader" class="aba-loader hidden">
+
+  <div class="aba-loader-text">
+    Carregando<span id="dots">.</span>
+  </div>
+
+</div>
+  
+<!-- ================= FOOTER ================= -->
 <footer class="ifro-footer">
-IFRO - Campus Cacoal<br>
-BR 364, Km 228, Lote 2-A - Zona Rural<br>
-☎ (69) 3443-2445 | ✉ dape.cacoal@ifro.edu.br
+  IFRO - Campus Cacoal<br>
+  BR 364, Km 228, Lote 2-A - Zona Rural<br>
+  ☎ (69) 3443-2445 | ✉ dape.cacoal@ifro.edu.br
 </footer>
 
+</div>
+
 <script>
-const SHEETS={
-INTEGRADO:{id:'1j33kiPqwtzZNuvkBgYDaIiXZvVMY_J0qWAtRfYGdnD8',gid:'1357770092'},
-SUPERIOR:{id:'14ALXZgFIT68ee9ajuIdG63SpGVm0HyTjwp63-J6vRyg',gid:'669887707'}
-};
 
-let dadosGlobais = [];
-
-let dadosIntegrado = [];
-let dadosSuperior = [];
-
-let turmasDaPlanilha = [];
-let semanasAgrupadas = {};
-
-  function deveCompararDia(dataStr){
+function deveCompararDia(dataStr){
 
   const [d,m,a] = dataStr.split('/');
   const data = new Date(a, m-1, d);
@@ -261,25 +498,11 @@ function limparPainelAlteracoes(){
 }
   
 function trocarModalidade(){
+  window.trocouModalidade = true;
 
-  limparPainelAlteracoes();
+  limparPainelAlteracoes(); // 🔥 ESSENCIAL
 
-  const mod =
-    document.getElementById(
-      "selectModalidade"
-    ).value;
-
-  if(mod==="INTEGRADO"){
-    dadosGlobais = dadosIntegrado;
-  }else{
-    dadosGlobais = dadosSuperior;
-  }
-
-  processarDados();
-
-  setTimeout(()=>{
-    verificarMudancaAoAbrir();
-  },200);
+  init();
 }
 
   function trocarSemana(){
@@ -289,16 +512,22 @@ function trocarModalidade(){
 
 function salvarSnapshotAtual() {
 
-  if(!semanaSelecionadaEhAtual()){
-    return;
-  }
-
   const sem = document.getElementById('selectSemana').value;
   const mod = document.getElementById('selectModalidade').value;
 
+  if (!sem || !mod) {
+    console.warn("Snapshot não salvo: semana ou modalidade vazia.");
+    return;
+  }
+
+  if (!dadosGlobais || !dadosGlobais.length) {
+    console.warn("Snapshot não salvo: dados vazios.");
+    return;
+  }
+
   const snapshot = {
-    tempo:new Date().toISOString(),
-    dados:dadosGlobais
+    tempo: new Date().toISOString(),
+    dados: JSON.parse(JSON.stringify(dadosGlobais))
   };
 
   localStorage.setItem(
@@ -307,6 +536,35 @@ function salvarSnapshotAtual() {
   );
 }
 
+function limparSnapshotsInvalidos() {
+
+  const semanaAtual = getSemanaAtual();
+
+  Object.keys(localStorage)
+    .filter(k => k.startsWith("snapshot_"))
+    .forEach(k => {
+
+      // remove snapshots sem semana
+      if (/^snapshot_[^_]+_$/.test(k)) {
+        localStorage.removeItem(k);
+        return;
+      }
+
+      // mantém apenas semana atual
+      if (
+        k.startsWith("snapshot_INTEGRADO_") ||
+        k.startsWith("snapshot_SUPERIOR_")
+      ) {
+
+        if (!k.endsWith(semanaAtual)) {
+          localStorage.removeItem(k);
+        }
+      }
+
+    });
+
+}
+  
 function obterSnapshotAntigo() {
   const sem = document.getElementById('selectSemana').value;
   const mod = document.getElementById('selectModalidade').value;
@@ -329,19 +587,28 @@ function valorMudou(v1, v2){
   
 function verificarMudancaAoAbrir() {
 
-  if(!semanaSelecionadaEhAtual()){
+  if (!semanaSelecionadaEhAtual()) {
     return;
   }
+
   const sem = document.getElementById('selectSemana').value;
   const mod = document.getElementById('selectModalidade').value;
+
+  if (!sem || !mod) {
+    return;
+  }
 
   const chave = `snapshot_${mod}_${sem}`;
 
   const antigoRaw = localStorage.getItem(chave);
 
-  // 🔥 Se não existe snapshot → salva e sai
+  // PRIMEIRO ACESSO DA SEMANA
   if (!antigoRaw) {
+
     salvarSnapshotAtual();
+
+    document.getElementById("painelAlteracoes").style.display = "none";
+
     return;
   }
 
@@ -354,6 +621,7 @@ function verificarMudancaAoAbrir() {
   for (let i = 1; i < novo.length; i++) {
 
     if (novo[i][0]) ultimoDia = novo[i][0];
+
     const diaAtual = ultimoDia;
 
     if (!diaAtual) continue;
@@ -362,7 +630,6 @@ function verificarMudancaAoAbrir() {
     const horario = (novo[i][1] || "").trim();
     const horarioNorm = normalizarTexto(horario);
 
-    // 🔥 IGNORA INTERVALO
     if (
       !horario ||
       horarioNorm.includes("INTERVALO") ||
@@ -379,35 +646,45 @@ function verificarMudancaAoAbrir() {
       if (!valorMudou(vNovo, vAntigo)) continue;
 
       const turma = (dadosGlobais[0][j] || "").trim();
+
       if (!turma) continue;
 
       const chaveItem = `${diaAtual}__${turma}__${horario}`;
 
       if (!agrupado[chaveItem]) {
+
         agrupado[chaveItem] = {
           dia: diaAtual,
           turma,
           horario,
           alteracoes: []
         };
+
       }
 
       agrupado[chaveItem].alteracoes.push({
         antes: vAntigo || "(vazio)",
         depois: vNovo || "(vazio)"
       });
+
     }
+
   }
 
   const listaFinal = Object.values(agrupado);
 
   if (listaFinal.length > 0) {
+
     mostrarAvisoAlteracoes(listaFinal);
+
   } else {
+
     document.getElementById("painelAlteracoes").style.display = "none";
+
   }
 
   salvarSnapshotAtual();
+
 }
 
 function mostrarMensagemPainel(titulo, texto){
@@ -455,164 +732,9 @@ function copiarAlteracoes(){
   });
 }
   
-const FERIADOS=[
-"01/01/2026","16/02/2026","17/02/2026","18/02/2026","03/04/2026","20/04/2026","21/04/2026","01/05/2026",
-"04/06/2026","05/06/2026","07/09/2026","12/10/2026","02/11/2026",
-"15/11/2026","25/12/2026"
-];
-
-function normalizarTexto(txt){
-    return (txt || "")
-        .toString()
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "") // remove acentos
-        .replace(/\s+/g, " ") // espaços duplos
-        .trim()
-        .toUpperCase();
-}
-  
-function isFeriado(d){return FERIADOS.includes(d);}
-
 /* 🔥 NOVA FUNÇÃO (BUSCA COM HIGHLIGHT) */
 function filtrarProfessor(){
-  const termo = document.getElementById('searchProf').value.toUpperCase();
-  const tabela = document.getElementById('tabelaHorario');
-  const celulas = tabela.getElementsByTagName('td');
-
-  for(let i=0;i<celulas.length;i++){
-    const td = celulas[i];
-    const txt = td.innerText.toUpperCase();
-
-    /* 🔥 IGNORA COLUNA DE HORÁRIO E CABEÇALHO DO DIA */
-    if(
-      td.classList.contains('time-col') ||
-      td.parentElement.classList.contains('day-divider')
-    ){
-      td.classList.remove('opaco');
-      td.classList.remove('highlight');
-      continue;
-    }
-
-    if(termo && txt.includes(termo)){
-      td.classList.add('highlight');
-      td.classList.remove('opaco');
-    } else if(termo){
-      td.classList.remove('highlight');
-      td.classList.add('opaco');
-    } else {
-      td.classList.remove('highlight');
-      td.classList.remove('opaco');
-    }
-  }
-}
-
-function parseCSV(text){
-return text.split(/\r?\n/).map(l=>{
-let r=[],c='',q=false;
-for(let i=0;i<l.length;i++){
-let ch=l[i];
-if(ch=='"') q=!q;
-else if(ch==','&&!q){r.push(c.trim());c='';}
-else c+=ch;
-}
-r.push(c.trim());
-return r;
-});
-}
-
-async function init(){
-
-  document.getElementById('searchProf').value = "";
-
-  document.getElementById("painelAlteracoes").style.display = "none";
-
-  try{
-
-    // ==========================
-    // CARREGA INTEGRADO
-    // ==========================
-
-    const urlIntegrado =
-      `https://docs.google.com/spreadsheets/d/${SHEETS.INTEGRADO.id}/export?format=csv&gid=${SHEETS.INTEGRADO.gid}`;
-
-    // ==========================
-    // CARREGA SUPERIOR
-    // ==========================
-
-    const urlSuperior =
-      `https://docs.google.com/spreadsheets/d/${SHEETS.SUPERIOR.id}/export?format=csv&gid=${SHEETS.SUPERIOR.gid}`;
-
-    // ==========================
-    // DOWNLOAD EM PARALELO
-    // ==========================
-
-    const [resIntegrado,resSuperior] =
-      await Promise.all([
-        fetch(urlIntegrado),
-        fetch(urlSuperior)
-      ]);
-
-    // ==========================
-    // CONVERTE CSV
-    // ==========================
-
-    dadosIntegrado =
-      parseCSV(await resIntegrado.text());
-
-    dadosSuperior =
-      parseCSV(await resSuperior.text());
-
-    // ==========================
-    // DEFINE MODALIDADE ATIVA
-    // ==========================
-
-    const modalidadeAtual =
-      document.getElementById(
-        'selectModalidade'
-      ).value;
-
-    if(modalidadeAtual === "INTEGRADO"){
-      dadosGlobais = dadosIntegrado;
-    }else{
-      dadosGlobais = dadosSuperior;
-    }
-
-    // ==========================
-    // PROCESSA HORÁRIOS
-    // ==========================
-
-    processarDados();
-
-    // ==========================
-    // GERA DASHBOARD
-    // ==========================
-
-    gerarDashboard();
-
-    // ==========================
-    // VERIFICA ALTERAÇÕES
-    // ==========================
-
-    setTimeout(() => {
-
-      if(
-        document.getElementById(
-          'selectModalidade'
-        ).value
-      ){
-        verificarMudancaAoAbrir();
-      }
-
-    },200);
-
-  }catch(erro){
-
-    console.error(erro);
-
-    alert(
-      "Erro ao carregar planilhas."
-    );
-  }
+    renderizarTabela();
 }
 
 function getCursoInfo(t){
@@ -628,64 +750,52 @@ if(t.includes("AGRON")) return {cl:"c-agron",rgb:[241,248,233]};
 return {cl:"",rgb:[255,255,255]};
 }
 
-function ordenarDatasBR(arr){
-return arr.sort((a,b)=>{
-const pa=a.split('/'),pb=b.split('/');
-return new Date(pa[2],pa[1]-1,pa[0]) - new Date(pb[2],pb[1]-1,pb[0]);
-});
-}
+function processarBaseModalidade(dados) {
 
-function getSemanaAtual(){
-  const hoje = new Date();
+    const semanas = {};
 
-  // calcula segunda-feira da semana atual
-  const dia = hoje.getDay(); // 0 = domingo
-  const diff = hoje.getDate() - dia + (dia === 0 ? -6 : 1);
+    const turmas =
+        dados[0]
+        .slice(2)
+        .filter(t => t);
 
-  const segunda = new Date(hoje.setDate(diff));
+    let ultima = "";
 
-  const d = String(segunda.getDate()).padStart(2,'0');
-  const m = String(segunda.getMonth()+1).padStart(2,'0');
-  const a = segunda.getFullYear();
+    for(let i = 1; i < dados.length; i++) {
 
-  return `${d}/${m}/${a}`;
+        let r = [...dados[i]];
+
+        if(r[0]) ultima = r[0];
+
+        r[0] = ultima;
+
+        if(!r[0]) continue;
+
+        const [d,m,a] = r[0].split('/');
+
+        const dt = new Date(a,m-1,d);
+
+        const seg = new Date(
+            dt.setDate(
+                dt.getDate() - dt.getDay() + 1
+            )
+        ).toLocaleDateString('pt-BR');
+
+        if(!semanas[seg])
+            semanas[seg] = { dias:{} };
+
+        if(!semanas[seg].dias[r[0]])
+            semanas[seg].dias[r[0]] = [];
+
+        semanas[seg].dias[r[0]].push(r);
+    }
+
+    return {
+        semanas,
+        turmas
+    };
 }
   
-function processarDados(){
-semanasAgrupadas={};
-turmasDaPlanilha=dadosGlobais[0].slice(2).filter(t=>t);
-let ultima="";
-for(let i=1;i<dadosGlobais.length;i++){
-let r=[...dadosGlobais[i]];
-if(r[0]) ultima=r[0];
-r[0]=ultima;
-if(!r[0]) continue;
-
-const [d,m,a]=r[0].split('/');
-const dt=new Date(a,m-1,d);
-const seg=new Date(dt.setDate(dt.getDate()-dt.getDay()+1)).toLocaleDateString('pt-BR');
-
-if(!semanasAgrupadas[seg]) semanasAgrupadas[seg]={dias:{}};
-if(!semanasAgrupadas[seg].dias[r[0]]) semanasAgrupadas[seg].dias[r[0]]=[];
-semanasAgrupadas[seg].dias[r[0]].push(r);
-}
-
-const sel=document.getElementById('selectSemana');
-sel.innerHTML="";
-const semanaAtual = getSemanaAtual();
-
-ordenarDatasBR(Object.keys(semanasAgrupadas)).forEach(s=>{
-  sel.innerHTML+=`<option value="${s}">Semana de ${s}</option>`;
-});
-
-/* 🔥 SELECIONA SEMANA ATUAL SE EXISTIR */
-if(semanasAgrupadas[semanaAtual]){
-  sel.value = semanaAtual;
-}
-
-renderizarTabela();
-}
-
 function getTurmasAtivasNaSemana(dias){
 return turmasDaPlanilha.filter(t=>{
 const idx=dadosGlobais[0].indexOf(t);
@@ -696,112 +806,98 @@ return v && v!=="-" && !r[1].toUpperCase().includes("INTERVALO");
 });
 }
 
-function renderizarTabela(){
-    const sem = document.getElementById('selectSemana').value;
-    const dias = semanasAgrupadas[sem].dias;
-    const container = document.getElementById('tabelaHorario');
+function normalizarDia(texto) {
+    if (!texto) return "";
 
-    const turmasAtivas = document.getElementById('selectModalidade').value === "SUPERIOR"
-        ? getTurmasAtivasNaSemana(dias)
-        : turmasDaPlanilha;
+    const t = texto.toString().toUpperCase();
 
-    const nomes = ["DOMINGO","SEGUNDA-FEIRA","TERÇA-FEIRA","QUARTA-FEIRA","QUINTA-FEIRA","SEXTA-FEIRA","SÁBADO"];
+    if (t.includes("SEG")) return "SEGUNDA";
+    if (t.includes("TER")) return "TERÇA";
+    if (t.includes("QUA")) return "QUARTA";
+    if (t.includes("QUI")) return "QUINTA";
+    if (t.includes("SEX")) return "SEXTA";
+    if (t.includes("SÁB") || t.includes("SAB")) return "SÁBADO";
 
-    let html = "";
+    return "";
+}
 
-    // 🔥 Regras de destaque
-    const regrasDestaque = [
-    { match: v => v.includes("RESERVA ENSINO"), classe: "reserva-ensino" },
-    { match: v => v.includes("PPS/ATENDIMENTO"), classe: "pps" },
-    { match: v => v.includes("ESTUDOS INDIVIDUAIS"), classe: "estudos" },
-    { match: v => v.includes("REUNIAO DE SERVIDORES"), classe: "reuniao" },
-    { match: v => v.includes("CAED") || v.includes("PRE-CONSELHO"), classe: "caed" },
-    { match: v => v.includes("_REP -"), classe: "reposicao" }
-];
+function montarBaseGeral(integrado, superior) {
 
-    Object.keys(dias).forEach(dia => {
-        const p = dia.split('/');
-        const dObj = new Date(p[2], p[1]-1, p[0]);
+    const base = [];
 
-        if (isFeriado(dia)){
-            html += `<table>
-                <tr class="day-divider">
-                    <td colspan="${turmasAtivas.length+1}">
-                        ${nomes[dObj.getDay()]} - ${dia}
-                    </td>
-                </tr>
-                <tr>
-                    <td colspan="${turmasAtivas.length+1}" class="feriado">
-                        FERIADO
-                    </td>
-                </tr>
-            </table><br>`;
-            return;
+    function normalizarPlanilha(dados, tipo) {
+
+        const header = dados[0];
+
+        for (let i = 1; i < dados.length; i++) {
+
+            const linha = dados[i];
+
+            if (!linha || !linha.length) continue;
+
+            const data = linha[0];
+            const horario = linha[1];
+
+            if (!data || !horario) continue;
+
+            for (let c = 2; c < linha.length; c++) {
+
+                const valor = linha[c];
+
+                if (!valor || valor.trim() === "") continue;
+
+                const turma = header[c];
+
+                const registro = {
+    data,
+    horario,
+    turma,
+    valor,
+    modalidade: tipo
+};
+
+           base.push(registro);
+
+// Alimenta o módulo de laboratórios
+adicionarRegistroLaboratorio(registro);
+            }
         }
-
-        html += `<table>`;
-        html += `<tr class="day-divider">
-                    <td colspan="${turmasAtivas.length+1}">
-                        ${nomes[dObj.getDay()]} - ${dia}
-                    </td>
-                 </tr>`;
-
-        html += `<tr>
-                    <th class="time-col">Horário</th>`;
-
-        turmasAtivas.forEach(t => {
-            html += `<th class="${getCursoInfo(t).cl}">${t}</th>`;
-        });
-
-        html += `</tr>`;
-
-        dias[dia].forEach(r => {
-            const isInt = r[1].toUpperCase().includes("INTERVALO");
-            const linhaVazia = r.slice(2).every(v => !v || v.trim() === "");
-
-            html += `<tr class="${isInt ? 'intervalo' : ''} ${linhaVazia ? 'linha-vazia' : ''}">
-                        <td class="time-col">${r[1]}</td>`;
-
-            turmasAtivas.forEach(t => {
-                const idx = dadosGlobais[0].indexOf(t);
-                let val = (r[idx] || "").trim();
-
-                let classesExtras = [];
-
-const valNorm = normalizarTexto(val);
-
-regrasDestaque.forEach(regra => {
-    if (regra.match(valNorm)) {
-        classesExtras.push(regra.classe);
     }
-});
-              
-                // 🔥 manter regras antigas
-               if (
-    val.includes("[+]") ||
-    val.includes("*") ||
-    val.includes("[R]") ||
-    valNorm.includes("INTERVALO")
-) {
-    classesExtras.push("marcacao-extra");
+
+    normalizarPlanilha(integrado, "INTEGRADO");
+    normalizarPlanilha(superior, "SUPERIOR");
+
+    BASE_GERAL = base;
+
+    montarIndiceProfessores();
+
+    console.log("BASE FINAL:", BASE_GERAL.length);
+}
+ 
+function obterInicioSemana(dataBR) {
+
+    const [d,m,a] =
+        dataBR.split("/");
+
+    const dt =
+        new Date(a,m-1,d);
+
+    const diaSemana =
+        dt.getDay();
+
+    const ajuste =
+        diaSemana === 0
+            ? -6
+            : 1 - diaSemana;
+
+    dt.setDate(
+        dt.getDate() + ajuste
+    );
+
+    return dt.toLocaleDateString("pt-BR");
 }
 
-                html += `<td class="aula-cell ${getCursoInfo(t).cl} ${classesExtras.join(" ")}">
-                            ${val}
-                         </td>`;
-            });
-
-            html += `</tr>`;
-        });
-
-        html += `</table><br>`;
-    });
-
-    container.innerHTML = html;
-  criarBotoesDias();
-}
-
-  const coresPDF = {
+const coresPDF = {
     "reserva-ensino": [212, 237, 218], // verde claro
     "pps": [11, 61, 145], // azul escuro (texto)
     "estudos": [255, 229, 180], // laranja claro
@@ -810,283 +906,6 @@ regrasDestaque.forEach(regra => {
     "reposicao": [30, 126, 52], // verde escuro
     "marcacao-extra": [224, 224, 224]
 };
-   
-function carregarSabados(){
-
-  const modalidade =
-    document.getElementById(
-      "selectModalidadeSabado"
-    ).value;
-
-  const dados =
-    modalidade === "INTEGRADO"
-      ? dadosIntegrado
-      : dadosSuperior;
-
-  const sabados = [];
-
-  let ultimaData = "";
-
-  for(let i=1;i<dados.length;i++){
-
-      if(dados[i][0])
-         ultimaData = dados[i][0];
-
-      if(!ultimaData)
-         continue;
-
-      const [d,m,a] =
-        ultimaData.split('/');
-
-      const data =
-        new Date(a,m-1,d);
-
-      if(data.getDay() !== 6)
-         continue;
-
-      if(!sabados.includes(ultimaData))
-         sabados.push(ultimaData);
-  }
-
-  sabados.sort((a,b)=>{
-
-      const pa = a.split('/');
-      const pb = b.split('/');
-
-      return new Date(
-          pa[2],
-          pa[1]-1,
-          pa[0]
-      ) - new Date(
-          pb[2],
-          pb[1]-1,
-          pb[0]
-      );
-
-  });
-
-  const select =
-    document.getElementById(
-      "selectSabado"
-    );
-
-  select.innerHTML = "";
-
-  sabados.forEach(data=>{
-
-      select.innerHTML += `
-      <option value="${data}">
-        ${data}
-      </option>
-      `;
-  });
-
-  renderizarSabadoSelecionado();
-}
-   
-   function renderizarSabados(){
-
-  const modalidade =
-    document.getElementById(
-      "selectModalidadeSabado"
-    ).value;
-
-  const dados =
-    modalidade === "INTEGRADO"
-      ? dadosIntegrado
-      : dadosSuperior;
-
-  let html = "";
-
-  let ultimaData = "";
-
-  let diasSabado = {};
-
-  for(let i=1;i<dados.length;i++){
-
-      const row = dados[i];
-
-      if(row[0])
-         ultimaData = row[0];
-
-      const dataStr = ultimaData;
-
-      if(!dataStr) continue;
-
-      const [d,m,a] =
-        dataStr.split('/');
-
-      const data =
-        new Date(a,m-1,d);
-
-      if(data.getDay() !== 6)
-         continue;
-
-      if(!diasSabado[dataStr])
-         diasSabado[dataStr] = [];
-
-      diasSabado[dataStr].push(row);
-  }
-
-  const turmas =
-    dados[0].slice(2).filter(Boolean);
-
-  Object.keys(diasSabado).forEach(dia=>{
-
-      html += `
-      <table>
-
-      <tr class="day-divider">
-        <td colspan="${turmas.length+1}">
-          SÁBADO LETIVO - ${dia}
-        </td>
-      </tr>
-
-      <tr>
-        <th class="time-col">Horário</th>
-      `;
-
-      turmas.forEach(t=>{
-
-          html += `
-          <th class="${getCursoInfo(t).cl}">
-            ${t}
-          </th>`;
-      });
-
-      html += "</tr>";
-
-      diasSabado[dia].forEach(r=>{
-
-          html += `
-          <tr>
-
-            <td class="time-col">
-              ${r[1]}
-            </td>
-          `;
-
-          turmas.forEach(t=>{
-
-              const idx =
-                dados[0].indexOf(t);
-
-              const val =
-                (r[idx] || "").trim();
-
-              html += `
-              <td class="aula-cell ${getCursoInfo(t).cl}">
-                ${val}
-              </td>`;
-          });
-
-          html += "</tr>";
-      });
-
-      html += "</table><br>";
-  });
-
-  document.getElementById(
-    "tabelaSabados"
-  ).innerHTML = html;
-}
-
-   function renderizarSabadoSelecionado(){
-
-  const modalidade =
-    document.getElementById(
-      "selectModalidadeSabado"
-    ).value;
-
-  const sabado =
-    document.getElementById(
-      "selectSabado"
-    ).value;
-
-  const dados =
-    modalidade === "INTEGRADO"
-      ? dadosIntegrado
-      : dadosSuperior;
-
-  let ultimaData = "";
-
-  const linhas = [];
-
-  for(let i=1;i<dados.length;i++){
-
-      if(dados[i][0])
-         ultimaData = dados[i][0];
-
-      if(ultimaData === sabado){
-         linhas.push(dados[i]);
-      }
-  }
-
-  const turmas =
-    dados[0]
-      .slice(2)
-      .filter(Boolean);
-
-  let html = `
-  <table>
-
-    <tr class="day-divider">
-      <td colspan="${turmas.length+1}">
-        SÁBADO LETIVO - ${sabado}
-      </td>
-    </tr>
-
-    <tr>
-      <th class="time-col">
-        Horário
-      </th>
-  `;
-
-  turmas.forEach(t=>{
-
-      html += `
-      <th class="${getCursoInfo(t).cl}">
-        ${t}
-      </th>
-      `;
-  });
-
-  html += "</tr>";
-
-  linhas.forEach(r=>{
-
-      html += `
-      <tr>
-
-        <td class="time-col">
-          ${r[1]}
-        </td>
-      `;
-
-      turmas.forEach(t=>{
-
-          const idx =
-            dados[0].indexOf(t);
-
-          const valor =
-            (r[idx] || "").trim();
-
-          html += `
-          <td class="aula-cell ${getCursoInfo(t).cl}">
-            ${valor}
-          </td>
-          `;
-      });
-
-      html += "</tr>";
-  });
-
-  html += "</table>";
-
-  document.getElementById(
-    "tabelaSabados"
-  ).innerHTML = html;
-}
 
 function coletarVagasDoDia(dia) {
   const sem = document.getElementById('selectSemana').value;
@@ -1232,352 +1051,6 @@ function gerarRelatorioSemana() {
 );
 }
   
-function exportarPDF(){
-const { jsPDF } = window.jspdf;
-const pdf = new jsPDF('l','mm','a4');
-
-const sem = document.getElementById('selectSemana').value;
-const diasObj = semanasAgrupadas[sem].dias;
-
-const turmasAtivas = document.getElementById('selectModalidade').value === "SUPERIOR"
-? getTurmasAtivasNaSemana(diasObj)
-: turmasDaPlanilha;
-
-const nomes = ["DOMINGO","SEGUNDA-FEIRA","TERÇA-FEIRA","QUARTA-FEIRA","QUINTA-FEIRA","SEXTA-FEIRA","SÁBADO"];
-
-/* 🔥 CORES PDF */
-const coresPDF = {
-    "reserva-ensino": [212,237,218],
-    "pps": [11,61,145],
-    "estudos": [255,229,180],
-    "reuniao": [208,235,255],
-    "caed": [255,243,205],
-    "reposicao": [30,126,52],
-    "marcacao-extra": [224,224,224]
-};
-
-/* 🔥 DETECÇÃO DE CLASSE */
-function detectarClasse(valor){
-    let valNorm = normalizarTexto(valor);
-
-    if(valNorm.includes("RESERVA ENSINO")) return "reserva-ensino";
-    if(valNorm.includes("PPS/ATENDIMENTO")) return "pps";
-    if(valNorm.includes("ESTUDOS INDIVIDUAIS")) return "estudos";
-    if(valNorm.includes("REUNIAO DE SERVIDORES")) return "reuniao";
-    if(valNorm.includes("CAED") || valNorm.includes("PRE-CONSELHO")) return "caed";
-    if(valNorm.includes("_REP -")) return "reposicao";
-
-    if(
-        valNorm.includes("[+]") ||
-        valNorm.includes("*") ||
-        valNorm.includes("[R]") ||
-        valNorm.includes("INTERVALO")
-    ){
-        return "marcacao-extra";
-    }
-
-    return null;
-}
-
-Object.keys(diasObj).forEach((dia,i)=>{
-
-if(i>0) pdf.addPage();
-
-const pageWidth = pdf.internal.pageSize.getWidth();
-
-/* =========================
-   🔥 SEU CABEÇALHO ORIGINAL
-========================= */
-pdf.setFontSize(9);
-pdf.text("INSTITUTO FEDERAL DE EDUCAÇÃO, CIÊNCIA E TECNOLOGIA DE RONDÔNIA - IFRO",pageWidth/2,8,{align:'center'});
-pdf.text("CAMPUS CACOAL - Departamento de Apoio ao Ensino - DAPE",pageWidth/2,12,{align:'center'});
-pdf.text(`SEMANA: ${sem}`,pageWidth/2,16,{align:'center'});
-
-/* DIA */
-const p = dia.split('/');
-const dObj = new Date(p[2],p[1]-1,p[0]);
-
-pdf.setFontSize(14);
-pdf.setTextColor(46,125,50);
-pdf.setFont(undefined,'bold');
-pdf.text(`${nomes[dObj.getDay()]} - ${dia}`, pageWidth/2, 24, {align:'center'});
-pdf.setTextColor(0,0,0);
-pdf.setFont(undefined,'normal');
-
-/* FERIADO */
-if(isFeriado(dia)){
-pdf.setFontSize(60);
-pdf.text("FERIADO", pageWidth/2, 100, {align:'center'});
-return;
-}
-
-/* DADOS */
-const body = diasObj[dia].map(r=>{
-let line=[r[1]];
-turmasAtivas.forEach(t=>{
-const idx = dadosGlobais[0].indexOf(t);
-line.push((r[idx]||"").trim());
-});
-return line;
-});
-
-/* =========================
-   🔥 TABELA OTIMIZADA
-========================= */
-pdf.autoTable({
-head:[['Horário',...turmasAtivas]],
-body:body,
-startY:28,
-
-theme:'grid',
-
-/* 🔥 MARGENS 0,2cm (2mm) */
-margin:{ top: 28, left: 2, right: 2, bottom: 2 },
-
-/* 🔥 GRADE MAIS LEVE */
-tableLineColor:[200,200,200],
-tableLineWidth:0.1,
-
-styles:{
-fontSize:4.5,
-halign:'center',
-valign:'middle',
-cellPadding:1
-},
-
-/* 🔥 CABEÇALHO LIMPO */
-headStyles:{
-fillColor:[46,125,50],
-textColor:[0,0,0],
-fontStyle:'bold',
-lineColor:[200,200,200],
-lineWidth:0.1
-},
-
-/* 🔥 COLUNA HORÁRIO MENOR */
-columnStyles:{
-0:{ cellWidth:16 }
-},
-
-didParseCell:(data)=>{
-
-const col = data.column.index;
-
-/* cores por curso */
-if(col>0){
-const curso = getCursoInfo(turmasAtivas[col-1]);
-data.cell.styles.fillColor = curso.rgb;
-}
-
-/* regras de destaque */
-const txt = (data.cell.raw||"").toString();
-const classe = detectarClasse(txt);
-
-if(classe && coresPDF[classe]){
-data.cell.styles.fillColor = coresPDF[classe];
-
-if(classe==="pps" || classe==="reposicao"){
-data.cell.styles.textColor=[255,255,255];
-data.cell.styles.fontStyle="bold";
-}
-}
-
-/* 🔥 LINHAS VAZIAS MENOR POSSÍVEL */
-const vazio = data.row.raw.slice(1).every(v=>!v||v.trim()==="");
-
-if(vazio){
-data.cell.styles.minCellHeight = 1.5;
-data.cell.styles.fontSize = 3.5;
-}
-
-/* intervalo leve */
-const t = txt.toUpperCase();
-if(t.includes("INTERVALO")||t.includes("[+]")||t.includes("*")||t.includes("[R]")){
-data.cell.styles.fillColor=[235,235,235];
-}
-}
-});
-
-/* =========================
-   🔥 SEU RODAPÉ ORIGINAL
-========================= */
-pdf.setFontSize(8);
-pdf.text(
-"IFRO - Campus Cacoal | BR 364, Km 228, Lote 2-A | (69) 3443-2445 | dape.cacoal@ifro.edu.br",
-pageWidth/2,
-205,
-{align:'center'}
-);
-
-});
-
-const mod = document.getElementById('selectModalidade').value;
-const nomeArquivo = `HORÁRIO ${mod} - SEMANA DE ${sem}`;
-pdf.save(nomeArquivo);
-}
-
-function abrirAba(nome,botao){
-
-  document
-    .querySelectorAll(".tab-content")
-    .forEach(el =>
-      el.classList.remove("active")
-    );
-
-  document
-    .querySelectorAll(".tab-btn")
-    .forEach(el =>
-      el.classList.remove("active")
-    );
-
-  document
-    .getElementById(nome)
-    .classList.add("active");
-
-  if(botao)
-     botao.classList.add("active");
-
-  if(nome==="sabados"){
-      carregarSabados();
-  }
-}
-
-function gerarDashboard(){
-
-  const statsIntegrado =
-    calcularIndicadores(dadosIntegrado);
-
-  const statsSuperior =
-    calcularIndicadores(dadosSuperior);
-
-  document.getElementById("dashboardContent").innerHTML = `
-      <div class="dashboard-grid">
-
-          ${cardDashboard(
-            "🎓 Integrado",
-            statsIntegrado
-          )}
-
-          ${cardDashboard(
-            "🎓 Superior",
-            statsSuperior
-          )}
-
-      </div>
-  `;
-}
-
-function cardDashboard(titulo,d){
-
-return `
-<div class="dash-card">
-
-<h2>${titulo}</h2>
-
-<div class="dash-item">
-  <span>Dias Letivos</span>
-  <strong>${d.diasLetivos}</strong>
-</div>
-
-<div class="dash-item">
-  <span>Quantidade de Aulas</span>
-  <strong>${d.aulas}</strong>
-</div>
-
-<div class="dash-item">
-  <span>Aulas Vagas</span>
-  <strong>${d.vagas}</strong>
-</div>
-
-<div class="dash-item">
-  <span>Sábados Letivos</span>
-  <strong>${d.sabados}</strong>
-</div>
-
-</div>
-`;
-}
-
-function calcularIndicadores(dados){
-
-  let dias = new Set();
-
-  let aulas = 0;
-  let vagas = 0;
-  let sabados = 0;
-
-  const hoje = new Date();
-
-  hoje.setHours(23,59,59,999);
-
-  let ultimaData = "";
-
-  for(let i=1;i<dados.length;i++){
-
-      const row = dados[i];
-
-      if(row[0]) ultimaData = row[0];
-
-      const dataStr = ultimaData;
-
-      if(!dataStr) continue;
-
-      const [d,m,a] = dataStr.split('/');
-
-      const data = new Date(a,m-1,d);
-
-      // ignora datas futuras
-      if(data > hoje) continue;
-
-      // ignora feriados
-      if(isFeriado(dataStr)) continue;
-
-      dias.add(dataStr);
-
-      // sábado letivo
-      if(data.getDay() === 6){
-         sabados++;
-      }
-
-      const horario = normalizarTexto(row[1] || "");
-
-      // ignora linhas de intervalo
-      if(
-        horario.includes("INTERVALO") ||
-        horario.includes("[+]") ||
-        horario.includes("[R]") ||
-        horario.includes("*")
-      ){
-        continue;
-      }
-
-      for(let j=2;j<row.length;j++){
-
-         const val = (row[j] || "").trim();
-
-         if(!val) continue;
-
-         const norm = normalizarTexto(val);
-
-         aulas++;
-
-         if(
-            norm.includes("RESERVA ENSINO") ||
-            norm.includes("ESTUDOS INDIVIDUAIS")
-         ){
-            vagas++;
-         }
-      }
-  }
-
-  return {
-      diasLetivos: dias.size,
-      aulas,
-      vagas,
-      sabados
-  };
-}
-
 function criarBotoesDias() {
 
   const sem = document.getElementById('selectSemana').value;
@@ -1643,514 +1116,669 @@ window.addEventListener("beforeunload", () => {
   salvarSnapshotAtual();
 });
 
-  document.getElementById("btnTema").addEventListener("click", () => {
+function abrirAba(id, botao){
 
-  const html = document.documentElement;
+    document.querySelectorAll('.tab-content')
+        .forEach(el => el.classList.remove('active'));
 
-  if (html.getAttribute("data-theme") === "dark") {
+    document.querySelectorAll('.tab')
+        .forEach(el => el.classList.remove('active'));
 
-    html.removeAttribute("data-theme");
+    document.getElementById(id)
+        .classList.add('active');
 
-    localStorage.setItem("tema","light");
+    if(botao){
+        botao.classList.add('active');
+    }
 
-    document.getElementById("btnTema").innerHTML = "🌙";
+    if(id === "sabados"){
+        renderSabados();
+    }
+}
+  
+const CALENDARIO_RELATORIO_SUPERIOR = [
+    {
+        semestre: 1,
+        inicio: "01/01/2026",
+        fim: "15/07/2026"
+    },
+    {
+        semestre: 2,
+        inicio: "16/07/2026",
+        fim: "31/12/2026"
+    }
+];
+  
+function obterPeriodoRelatorio(dataStr, modalidade){
 
-  } else {
+    // Integrado é anual.
+    if(modalidade === "INTEGRADO")
+        return "ANUAL";
 
-    html.setAttribute("data-theme","dark");
+    const [d,m,a] = dataStr.split('/');
 
-    localStorage.setItem("tema","dark");
+    const data = new Date(a, m-1, d);
+    data.setHours(0,0,0,0);
 
-    document.getElementById("btnTema").innerHTML = "☀️";
+    const semestres =
+        CALENDARIO_RELATORIO_SUPERIOR;
 
-  }
+    for(let i=0;i<semestres.length;i++){
+
+        const [di,mi,ai] =
+            semestres[i].inicio.split('/');
+
+        const [df,mf,af] =
+            semestres[i].fim.split('/');
+
+        const inicio =
+            new Date(ai, mi-1, di);
+
+        const fim =
+            new Date(af, mf-1, df);
+
+        inicio.setHours(0,0,0,0);
+        fim.setHours(23,59,59,999);
+
+        if(
+            data >= inicio &&
+            data <= fim
+        ){
+            return `${i + 1}`;
+        }
+
+    }
+
+    return "FORA";
+}
+
+function montarRelatorioBase() {
+
+    const mapa = {};
+
+    BASE_GERAL.forEach(aula => {
+
+        const valor = aula.valor || "";
+
+        if (!valor.includes(" - "))
+            return;
+
+        const partes = valor.split(" - ");
+
+        if (partes.length < 2)
+            return;
+
+        const disciplina =
+            partes[0].trim();
+
+        const professorCompleto =
+    obterNomeCompletoProfessor(
+        partes[1].trim()
+    );
+
+        const turma =
+            aula.turma || "";
+
+        const chave =
+            `${disciplina}|${professorCompleto}|${turma}|${aula.modalidade}`;
+
+        if (!mapa[chave]) {
+
+            mapa[chave] = {
+
+                disciplina,
+                professor: professorCompleto,
+                turma,
+                modalidade: aula.modalidade,
+                datas: []
+
+            };
+        }
+
+        mapa[chave].datas.push(
+            aula.data
+        );
+    });
+
+    RELATORIO_DISCIPLINAS =
+        Object.values(mapa)
+        .map(item => {
+
+            const datas =
+                ordenarDatasBR(
+                    [...new Set(item.datas)]
+                );
+
+            return {
+
+                disciplina:
+                    item.disciplina,
+
+                professor:
+                    item.professor,
+
+                turma:
+                    item.turma,
+
+                modalidade:
+                    item.modalidade,
+
+                periodo:
+                    `${datas[0]} até ${datas[datas.length - 1]}`
+
+            };
+
+        });
+
+    console.log(
+        "RELATÓRIO CACHE:",
+        RELATORIO_DISCIPLINAS.length
+    );
+}
+
+  function montarCacheRelatorioDisciplinas() {
+
+    const mapa = new Map();
+
+    BASE_GERAL.forEach(a => {
+
+        const valor = (a.valor || "").trim();
+
+        if (!valor.includes(" - "))
+            return;
+
+        let [disciplina, professor] =
+            valor.split(" - ");
+
+        if (!disciplina || !professor)
+            return;
+
+        disciplina = disciplina.trim();
+
+        professor = professor
+    .replace(/\[.*?\]/g, "")
+    .replace(/\*/g, "")
+    .trim();
+
+professor =
+    obterNomeCompletoProfessor(
+        professor
+    );
+
+        const data =
+    parseDataBR(a.data);
+
+const periodo =
+    obterPeriodoRelatorio(
+        a.data,
+        a.modalidade
+    );
+
+const chave =
+    `${disciplina}__${professor}__${a.turma}__${periodo}`;
+
+        if (!mapa.has(chave)) {
+
+            mapa.set(chave, {
+
+    disciplina,
+    professor,
+    turma: a.turma || "",
+    modalidade: a.modalidade || "",
+    periodo,
+
+    inicio: data,
+    fim: data
 
 });
+
+        } else {
+
+            const atual =
+                mapa.get(chave);
+
+            if (data) {
+
+                if (!atual.inicio || data < atual.inicio)
+                    atual.inicio = data;
+
+                if (!atual.fim || data > atual.fim)
+                    atual.fim = data;
+
+            }
+
+            if (
+                atual.modalidade !== a.modalidade
+            ) {
+
+                atual.modalidade = "TODOS";
+
+            }
+
+        }
+
+    });
+
+    RELATORIO_DISCIPLINAS =
+        Array.from(mapa.values());
+
+    RELATORIO_DISCIPLINAS.sort(
+        (a, b) =>
+            a.disciplina.localeCompare(
+                b.disciplina,
+                "pt-BR"
+            )
+    );
+
+    console.log(
+        "CACHE RELATÓRIO:",
+        RELATORIO_DISCIPLINAS.length
+    );
+}
+
+function montarRelatorioDisciplinas(
+    filtroModalidade = "TODOS",
+    termoBusca = ""
+) {
+
+    const tabela =
+        document.getElementById(
+            "tabelaEstatistica"
+        );
+
+    let dados =
+        [...RELATORIO_DISCIPLINAS];
+
+    // ==========================
+    // MODALIDADE
+    // ==========================
+
+    if (
+        filtroModalidade &&
+        filtroModalidade !== "TODOS"
+    ) {
+
+        dados = dados.filter(item => {
+
+            if (
+                item.modalidade === "TODOS"
+            )
+                return true;
+
+            return (
+                item.modalidade ===
+                filtroModalidade
+            );
+
+        });
+
+    }
+
+    // ==========================
+    // BUSCA
+    // ==========================
+
+    if (
+        termoBusca &&
+        termoBusca.trim()
+    ) {
+
+        const termo =
+            normalizarTexto(
+                termoBusca
+            );
+
+        dados = dados.filter(item =>
+
+            normalizarTexto(
+                item.disciplina
+            ).includes(termo)
+
+            ||
+
+            normalizarTexto(
+                item.professor
+            ).includes(termo)
+
+            ||
+
+            normalizarTexto(
+                item.turma
+            ).includes(termo)
+
+        );
+
+    }
+
+    // ==========================
+    // RENDER
+    // ==========================
+
+    tabela.innerHTML = "";
+
+    const fragment =
+        document.createDocumentFragment();
+
+    dados.forEach(item => {
+
+        const tr =
+            document.createElement("tr");
+
+        const periodo =
+            item.inicio && item.fim
+                ? `${formatarData(item.inicio)} → ${formatarData(item.fim)}`
+                : "-";
+
+        tr.innerHTML = `
+    <td>${item.disciplina}</td>
+    <td>${item.professor}</td>
+    <td>${item.turma}</td>
+    <td>${item.periodo}</td>
+    <td class="coluna-periodo">${periodo}</td>
+`;
+
+        fragment.appendChild(tr);
+
+    });
+
+    tabela.appendChild(fragment);
+
+    return dados;
+}
+
+function parseDataBR(str) {
+    if (!str) return null;
+    const [d, m, a] = str.split('/');
+    const dt = new Date(a, m - 1, d);
+    dt.setHours(0, 0, 0, 0);
+    return dt;
+}
+
+function formatarData(date) {
+    if (!date) return "-";
+    const d = String(date.getDate()).padStart(2, "0");
+    const m = String(date.getMonth() + 1).padStart(2, "0");
+    const a = date.getFullYear();
+    return `${d}/${m}/${a}`;
+}
   
-window.onload = () => {
+function atualizarRelatorio() {
 
-  const tema = localStorage.getItem("tema");
+    const filtro =
+        document.getElementById(
+            "selectModalidadeEstatistica"
+        ).value;
 
-  if (tema === "dark") {
+    const busca =
+        document.getElementById(
+            "inputBuscaEstatistica"
+        ).value;
 
-    document.documentElement.setAttribute("data-theme","dark");
+    const dados =
+        montarRelatorioDisciplinas(
+            filtro,
+            busca
+        );
 
-    document.getElementById("btnTema").innerHTML = "☀️";
+    document.getElementById(
+        "estatTotalDisciplinas"
+    ).innerText =
+        new Set(
+            dados.map(
+                d => d.disciplina
+            )
+        ).size;
 
+    document.getElementById(
+        "estatTotalProfessores"
+    ).innerText =
+        new Set(
+            dados.map(
+                d => d.professor
+            )
+        ).size;
+
+    document.getElementById(
+        "estatTotalTurmas"
+    ).innerText =
+        new Set(
+            dados.map(
+                d => d.turma
+            )
+        ).size;
+
+    document.getElementById(
+        "estatTotalRegistros"
+    ).innerText =
+        dados.length;
+}
+
+function exportarRelatorioPDF() {
+
+    const { jsPDF } = window.jspdf;
+
+    // =====================================
+    // A4 RETRATO (CORREÇÃO PRINCIPAL)
+    // =====================================
+    const pdf = new jsPDF('p', 'mm', 'a4');
+
+    const filtro = document.getElementById("selectModalidadeEstatistica")?.value || "TODOS";
+    const busca = document.getElementById("inputBuscaEstatistica")?.value || "";
+
+    const dados = montarRelatorioDisciplinas(filtro, busca);
+
+    const linhas = dados.map(item => [
+
+    item.disciplina || "",
+    item.professor || "",
+    item.turma || "",
+    item.periodo || "",
+    item.inicio && item.fim
+        ? `${formatarData(item.inicio)} até ${formatarData(item.fim)}`
+        : "-"
+
+]);
+
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+
+    // =====================================
+    // CABEÇALHO
+    // =====================================
+    function cabecalho() {
+
+        pdf.setFontSize(9);
+
+        pdf.text(
+            "INSTITUTO FEDERAL DE EDUCAÇÃO, CIÊNCIA E TECNOLOGIA DE RONDÔNIA - IFRO",
+            pageWidth / 2, 8,
+            { align: "center" }
+        );
+
+        pdf.text(
+            "CAMPUS CACOAL - Departamento de Apoio ao Ensino - DAPE",
+            pageWidth / 2, 12,
+            { align: "center" }
+        );
+
+        pdf.text(
+            `RELATÓRIO DE DISCIPLINAS - ${filtro}`,
+            pageWidth / 2, 16,
+            { align: "center" }
+        );
+    }
+
+    // =====================================
+    // TABELA
+    // =====================================
+    pdf.autoTable({
+        head: [[
+    "Disciplina",
+    "Professor",
+    "Turma",
+    "Semestre",
+    "Período"
+]],
+        body: linhas,
+        startY: 22,
+        theme: "grid",
+
+        margin: {
+            top: 25,
+            bottom: 20
+        },
+
+        styles: {
+            fontSize: 7,
+            halign: "center",
+            valign: "middle",
+            cellPadding: 1.5,
+            overflow: "linebreak"
+        },
+
+        headStyles: {
+            fillColor: [46, 125, 50],
+            textColor: 0,
+            fontStyle: "bold"
+        },
+
+        columnStyles: {
+
+    0: { cellWidth: 55, halign: "left" },
+    1: { cellWidth: 45, halign: "left" },
+    2: { cellWidth: 35, halign: "left" },
+    3: { cellWidth: 18, halign: "center" },
+    4: { cellWidth: 33, halign: "left" }
+
+},
+
+        didDrawPage: function () {
+            cabecalho();
+        }
+    });
+
+    // =====================================
+    // RODAPÉ (AGORA FUNCIONANDO CORRETAMENTE)
+    // =====================================
+    const pageCount = pdf.getNumberOfPages();
+
+    for (let i = 1; i <= pageCount; i++) {
+
+        pdf.setPage(i);
+
+        pdf.setFontSize(8);
+
+        pdf.text(
+            "IFRO - Campus Cacoal | BR 364, Km 228, Lote 2-A | (69) 3443-2445 | dape.cacoal@ifro.edu.br",
+            pageWidth / 2,
+            pageHeight - 10, // 🔥 CORREÇÃO IMPORTANTE
+            { align: "center" }
+        );
+    }
+
+    pdf.save(`RELATORIO_DISCIPLINAS_${filtro}.pdf`);
+}
+
+let dotsInterval = null;
+let dotsCount = 0;
+
+function mostrarLoaderAbas(texto = "Carregando") {
+
+  const loader = document.getElementById("abaLoader");
+  const dots = document.getElementById("dots");
+
+  if(!loader) return;
+
+  loader.style.display = "flex";
+  loader.style.opacity = "1";
+
+  dotsCount = 0;
+
+  if (dotsInterval) clearInterval(dotsInterval);
+
+  dotsInterval = setInterval(() => {
+
+    dotsCount = (dotsCount + 1) % 4;
+
+    dots.innerText = ".".repeat(dotsCount);
+
+  }, 400);
+}
+
+function esconderLoaderAbas() {
+
+  const loader = document.getElementById("abaLoader");
+
+  if(!loader) return;
+
+  clearInterval(dotsInterval);
+
+  loader.style.opacity = "0";
+  loader.style.pointerEvents = "none";
+
+  setTimeout(() => {
+    loader.style.display = "none";
+  }, 200);
+}
+  
+window.onload = async () => {
+
+  const btnTema = document.getElementById("btnTema");
+
+  const temaSalvo = localStorage.getItem("tema");
+
+  if (temaSalvo === "dark") {
+    document.documentElement.setAttribute("data-theme", "dark");
+    btnTema.innerHTML = "☀️";
   } else {
-
     document.documentElement.removeAttribute("data-theme");
-
-    document.getElementById("btnTema").innerHTML = "🌙";
-
+    btnTema.innerHTML = "🌙";
   }
 
-  init();
+  btnTema.addEventListener("click", () => {
+
+    const html = document.documentElement;
+
+    if (html.getAttribute("data-theme") === "dark") {
+
+      html.removeAttribute("data-theme");
+      localStorage.setItem("tema", "light");
+      btnTema.innerHTML = "🌙";
+
+    } else {
+
+      html.setAttribute("data-theme", "dark");
+      localStorage.setItem("tema", "dark");
+      btnTema.innerHTML = "☀️";
+
+    }
+
+  });
+
+  mostrarLoaderAbas(); // 🔥 aparece abaixo das abas
+
+  await init();
+
+  abrirAba(
+    "dashboard",
+    document.querySelector(".tab-btn")
+  );
+
+  gerarDashboard();
+
+  esconderLoaderAbas(); // 🔥 some quando tudo pronto
 };
   
 </script>
-
+<script src="js/config.js"></script>
+<script src="js/core.js"></script>
+<script src="js/base.js"></script>
+<script src="js/professor.js"></script>
+<script src="js/turma.js"></script>
+<script src="js/dashboard.js"></script>
+<script src="js/sabado.js"></script>
+<script src="js/horario.js"></script>
+<script src="js/relatorios.js"></script>
+<script src="js/laboratorios.js"></script>
 </body>
 </html>
-
-
-
-
-
-:root{
-  --primary:#2e7d32;
-
-  --bg:#f4f7f6;
-  --surface:#ffffff;
-
-  --text:#000000;
-  --text-soft:#333333;
-  --border:#bbbbbb;
-  --time-bg:#f1f3f4;
-
-  --footer-bg:#2e7d32;
-  --footer-text:#ffffff;
-
-  --shadow:0 2px 10px rgba(0,0,0,.12);
-
-  /* Cursos */
-  --agroec:#e8f5e9;
-  --agropec:#e3f2fd;
-  --info:#fff8e1;
-  --geo:#f3e5f5;
-  --mat:#e0f7fa;
-  --agroneg:#efebe9;
-  --zoo:#fce4ec;
-  --agron:#f1f8e9;
-
-  /* Destaques */
-  --highlight:#fbc02d;
-  --intervalo:#e0e0e0;
-  --caed:#fff3cd;
-}
-
-[data-theme="dark"]{
-  --bg:#0f172a;
-  --surface:#1e293b;
-
-  --text:#f8fafc;
-  --text-soft:#cbd5e1;
-
-  --border:#475569;
-  --time-bg:#334155;
-
-  --footer-bg:#14532d;
-  --footer-text:#ffffff;
-
-  --shadow:0 4px 18px rgba(0,0,0,.35);
-
-  /* Cursos (versões escuras) */
-  --agroec:#1f3b2a;
-  --agropec:#1c3245;
-  --info:#4a3f16;
-  --geo:#3b2942;
-  --mat:#173944;
-  --agroneg:#3a312e;
-  --zoo:#4a2732;
-  --agron:#2e4020;
-
-  /* Destaques */
-  --highlight:#b8860b;
-  --intervalo:#374151;
-  --caed:#665200;
-}
-
-*{
-  box-sizing:border-box;
-}
-
-body{
-  font-family:'Segoe UI',sans-serif;
-  background:var(--bg);
-  color:var(--text);
-  margin:0;
-  transition:.3s;
-}
-
-/* CABEÇALHO */
-
-.ifro-header{
-  position:sticky;
-  top:0;
-  z-index:1100;
-  background:var(--surface);
-  border-bottom:4px solid var(--primary);
-}
-
-.ifro-header-content{
-  text-align:center;
-  padding:12px;
-}
-
-.ifro-linha1{
-  font-size:20px;
-  font-weight:bold;
-  color:var(--text);
-}
-
-.ifro-linha2{
-  font-size:18px;
-  font-weight:bold;
-  color:var(--text);
-}
-
-.ifro-linha3{
-  font-size:16px;
-  color:var(--text);
-}
-
-.ifro-linha4{
-  font-size:17px;
-  font-weight:bold;
-  color:var(--text);
-}
-
-/* CONTROLES */
-
-.header-sticky{
-  position:sticky;
-  top:110px;
-  z-index:1000;
-  background:var(--bg);
-  padding:9px;
-}
-
-.controls-card{
-  background:var(--surface);
-  padding:15px;
-  border-radius:12px;
-  display:flex;
-  flex-wrap:wrap;
-  gap:10px;
-  justify-content:center;
-  box-shadow:var(--shadow);
-}
-
-select,
-.search-box,
-.btn-pdf{
-  padding:12px;
-  font-size:14px;
-  border-radius:6px;
-}
-
-select,
-.search-box{
-  background:var(--surface);
-  color:var(--text);
-  border:2px solid var(--primary);
-}
-
-.search-box{
-  width:260px;
-}
-
-.btn-pdf{
-  background:#d32f2f;
-  color:#fff;
-  border:none;
-  cursor:pointer;
-  font-weight:bold;
-}
-
-.btn-pdf:hover{
-  opacity:.92;
-}
-
-/* CONTEÚDO */
-
-.week-container{
-  padding:14px;
-}
-
-.table-responsive{
-  width:100%;
-  overflow-x:auto;
-  background:var(--surface);
-  border-radius:8px;
-  box-shadow:var(--shadow);
-}
-
-table{
-  min-width:1400px;
-  width:100%;
-  border-collapse:separate;
-  border-spacing:0;
-  font-size:9px;
-  table-layout:fixed;
-}
-
-th,
-td{
-  border:1px solid var(--border);
-  padding:6px;
-  text-align:center;
-  vertical-align:middle;
-  color:var(--text);
-}
-
-td,
-th{
-  word-break:break-word;
-}
-
-.aula-cell{
-  white-space:normal;
-}
-
-/* CORES CURSOS */
-
-.c-agroec{background:var(--agroec) !important;}
-.c-agropec{background:var(--agropec) !important;}
-.c-info{background:var(--info) !important;}
-.c-geo{background:var(--geo) !important;}
-.c-mat{background:var(--mat) !important;}
-.c-agroneg{background:var(--agroneg) !important;}
-.c-zoo{background:var(--zoo) !important;}
-.c-agron{background:var(--agron) !important;}
-
-/* DIVISOR DIA */
-
-.day-divider{
-  background:var(--primary);
-  color:#fff;
-  font-weight:bold;
-  font-size:15px;
-}
-
-.day-divider td{
-  color:#fff;
-}
-
-/* HORÁRIO */
-
-.time-col{
-  font-weight:bold;
-  width:85px;
-  background:var(--time-bg);
-  position:sticky;
-  left:0;
-  z-index:2;
-}
-
-th.time-col{
-  z-index:3;
-}
-
-/* BUSCA */
-
-.highlight{
-  background:var(--highlight) !important;
-}
-
-.opaco{
-  opacity:.1;
-}
-
-/* INTERVALOS */
-
-.intervalo,
-.marcacao-extra{
-  background:var(--intervalo) !important;
-  font-weight:bold;
-}
-
-/* FERIADO */
-
-.feriado{
-  font-size:120px;
-  text-align:center;
-  font-weight:bold;
-  color:rgba(200,0,0,.4);
-  height:200px;
-}
-
-/* LINHAS VAZIAS */
-
-tr.linha-vazia td{
-  padding:2px !important;
-  font-size:8px !important;
-  height:10px !important;
-}
-
-/* DESTAQUES */
-
-.reserva-ensino{
-  color:#fbc02d;
-  font-weight:bold;
-}
-
-.pps{
-  color:#0b3d91;
-  font-weight:bold;
-}
-
-.estudos{
-  color:#1e7e34;
-  font-weight:bold;
-}
-
-.reuniao{
-  color:#fb8c00;
-  font-weight:bold;
-}
-
-.caed{
-  background:var(--caed) !important;
-}
-
-.reposicao{
-  color:#0b3d91;
-  font-weight:bold;
-}
-
-/* PAINEL ALTERAÇÕES */
-
-#painelAlteracoes{
-  background:var(--surface) !important;
-  color:var(--text);
-  box-shadow:var(--shadow);
-}
-
-#conteudoAlteracoes{
-  color:var(--text);
-}
-
-/* BOTÕES RELATÓRIO */
-
-#botoesRelatorio button{
-  transition:.2s;
-}
-
-#botoesRelatorio button:hover{
-  transform:translateY(-1px);
-}
-
-/* RODAPÉ */
-
-.ifro-footer{
-  background:var(--footer-bg);
-  color:var(--footer-text);
-  padding:20px;
-  text-align:center;
-  margin-top:15px;
-}
-
-/* SCROLL */
-
-::-webkit-scrollbar{
-  height:10px;
-  width:10px;
-}
-
-::-webkit-scrollbar-thumb{
-  background:#999;
-  border-radius:8px;
-}
-
-#btnTema{
-  width:48px;
-  height:48px;
-
-  border:none;
-  border-radius:50%;
-
-  background:var(--surface);
-  color:var(--text);
-
-  cursor:pointer;
-
-  font-size:22px;
-
-  display:flex;
-  justify-content:center;
-  align-items:center;
-
-  box-shadow:var(--shadow);
-
-  transition:.3s;
-}
-
-#btnTema:hover{
-  transform:rotate(15deg) scale(1.08);
-}
-
-.tabs-container{
-  display:flex;
-  gap:10px;
-  padding:10px;
-  justify-content:center;
-  background:var(--surface);
-  border-bottom:1px solid var(--border);
-}
-
-.tab-btn{
-  padding:12px 20px;
-  border:none;
-  border-radius:8px;
-  cursor:pointer;
-  background:#e0e0e0;
-  font-weight:bold;
-}
-
-.tab-btn.active{
-  background:var(--primary);
-  color:white;
-}
-
-.tab-content{
-  display:none;
-}
-
-.tab-content.active{
-  display:block;
-}
-
-.dashboard-grid{
-  display:grid;
-  grid-template-columns:
-      repeat(auto-fit,minmax(350px,1fr));
-
-  gap:20px;
-  padding:20px;
-}
-
-.dash-card{
-  background:var(--surface);
-  border-radius:12px;
-  padding:20px;
-  box-shadow:var(--shadow);
-}
-
-.dash-card h2{
-  margin-top:0;
-  color:var(--primary);
-}
-
-.dash-item{
-  display:flex;
-  justify-content:space-between;
-  padding:12px 0;
-  border-bottom:1px solid var(--border);
-}
-
-.dash-item strong{
-  font-size:24px;
-}
-
-#sabados .controls-card{
-    display:flex;
-    gap:15px;
-    align-items:center;
-    flex-wrap:wrap;
-}
-
-#sabados label{
-    font-weight:600;
-    color:#2e7d32;
-}
