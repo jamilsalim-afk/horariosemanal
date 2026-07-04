@@ -1543,3 +1543,52 @@ body {
   }
 
 }
+
+/* =====================================================
+   AJUSTE FINO 2 — TABELAS AINDA MENORES (~40% adicional)
+   Não afeta a tabela de Relatórios (#tabelaRelatorioEstatistica,
+   #tabelaResumoRelatorio, #tabelaDetalhadaRelatorio, #relatorioContainer),
+   que já tem suas próprias regras com !important e ficou boa.
+
+   Também desativa o "text-size-adjust" automático que o
+   Safari/Chrome mobile aplicam em tabelas largas — esse recurso
+   do navegador aumenta a fonte sozinho para "ajudar" na leitura,
+   e estava anulando parte da redução anterior.
+===================================================== */
+@media (max-width: 768px){
+
+  table:not(#tabelaRelatorioEstatistica):not(#tabelaResumoRelatorio):not(#tabelaDetalhadaRelatorio),
+  th:not(#tabelaRelatorioEstatistica *):not(#tabelaResumoRelatorio *):not(#tabelaDetalhadaRelatorio *),
+  td:not(#tabelaRelatorioEstatistica *):not(#tabelaResumoRelatorio *):not(#tabelaDetalhadaRelatorio *){
+    -webkit-text-size-adjust: 100% !important;
+    text-size-adjust: 100% !important;
+  }
+
+  table:not(#tabelaRelatorioEstatistica):not(#tabelaResumoRelatorio):not(#tabelaDetalhadaRelatorio){
+    font-size: 4px !important;
+  }
+
+  th:not(#tabelaRelatorioEstatistica *):not(#tabelaResumoRelatorio *):not(#tabelaDetalhadaRelatorio *),
+  td:not(#tabelaRelatorioEstatistica *):not(#tabelaResumoRelatorio *):not(#tabelaDetalhadaRelatorio *){
+    padding: 2px !important;
+    font-size: 4px !important;
+  }
+
+  .time-col{
+    width: 24px !important;
+  }
+
+  th[style*="width"]{
+    width: 54px !important;
+  }
+
+  [style*="min-width:160px"]{
+    min-width: 48px !important;
+  }
+
+  tr.linha-vazia td{
+    font-size: 3px !important;
+    height: 3px !important;
+  }
+
+}
