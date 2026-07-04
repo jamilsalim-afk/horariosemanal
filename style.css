@@ -113,7 +113,7 @@
   top: 55px;
   z-index: 4999;
   background: var(--bg);
-  padding: 10px 0;
+  padding: 6px 0;
   width: 100%;
   border-bottom: 1px solid var(--border);
   box-shadow: 0 4px 10px rgba(0,0,0,.15);
@@ -121,31 +121,40 @@
 
 /* CARD DOS CONTROLES */
 .controls-card{
+
   position: relative;
   z-index: 10000;
 
   background: var(--surface);
 
-  padding: 15px;
+  padding:10px 12px;
 
-  border-radius: 12px;
+  border-radius:14px;
 
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
 
-  justify-content: center;
+  justify-content:center;
+  align-items:center;
 
-  box-shadow: var(--shadow);
+  box-shadow:var(--shadow);
 }
 
 /* INPUTS PADRÃO */
 select,
 .search-box,
 .btn-pdf{
-  padding: 12px;
-  font-size: 14px;
-  border-radius: 6px;
+
+  height:42px;
+
+  padding:0 14px;
+
+  font-size:14px;
+
+  border-radius:12px;
+
+  font-weight:500;
 }
 
 /* SELECT E BUSCA */
@@ -159,7 +168,10 @@ select,
 
 /* BUSCA */
 .search-box{
-  width: 260px;
+
+    width:240px;
+
+    flex:1;
 }
 
 /* BOTÃO PDF */
@@ -193,15 +205,37 @@ select,
     top: 60px;
   }
 
-  .controls-card{
-    flex-direction: column;
-    align-items: stretch;
-  }
+.controls-card{
 
-  .search-box{
-    width: 100%;
-  }
+display:grid;
 
+grid-template-columns:1fr 1fr;
+
+gap:8px;
+
+padding:8px;
+
+}
+
+select{
+
+width:100%;
+
+}
+
+.search-box{
+
+grid-column:1/3;
+
+width:100%;
+
+}
+
+.btn-pdf{
+
+grid-column:1/3;
+
+}
 }
 
 /* CONTEÚDO */
@@ -559,17 +593,33 @@ tr.linha-vazia td{
    CELULAR
 ========================== */
 
-@media (max-width: 480px){
+@media (max-width:480px){
 
-  .tab-btn{
-    flex: 1 1 100%;
+.tabs-container{
 
-    padding:16px 12px;
+display:grid;
 
-    font-size:14px;
+grid-template-columns:repeat(2,1fr);
 
-    border-radius:12px;
-  }
+gap:8px;
+
+padding:8px;
+
+}
+
+.tab-btn{
+
+width:100%;
+
+padding:14px 6px;
+
+font-size:15px;
+
+font-weight:600;
+
+border-radius:14px;
+
+}
 }
 
   /* ==========================
