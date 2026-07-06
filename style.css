@@ -185,11 +185,24 @@ select,
 
 /* =========================
    RESPONSIVO
-   (regras de Mobile/Tablet para .header-sticky, .controls-card
-   e .search-box foram movidas para o bloco MOBILE consolidado
-   no final do arquivo — procure por "RESPONSIVIDADE — REGRAS
-   ESPECÍFICAS POR ELEMENTO")
 ========================= */
+
+@media (max-width: 768px){
+
+  .header-sticky{
+    top: 60px;
+  }
+
+  .controls-card{
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .search-box{
+    width: 100%;
+  }
+
+}
 
 /* CONTEÚDO */
 
@@ -210,7 +223,7 @@ table{
   width:100%;
   border-collapse:separate;
   border-spacing:0;
-  font-size:7px;
+  font-size:9px;
   table-layout:fixed;
 }
 
@@ -255,7 +268,7 @@ th{
   background:var(--primary);
   color:#fff;
   font-weight:bold;
-  font-size:13px;
+  font-size:15px;
 }
 
 .day-divider td{
@@ -502,7 +515,7 @@ tr.linha-vazia td{
 
   box-shadow:var(--shadow);
 
-  font-size:12px;
+  font-size:14px;
 }
 
 /* HOVER */
@@ -553,7 +566,7 @@ tr.linha-vazia td{
 
     padding:16px 12px;
 
-    font-size:12px;
+    font-size:14px;
 
     border-radius:12px;
   }
@@ -704,8 +717,19 @@ color:white !important;
     margin-bottom:8px;
 }
 
-/* Responsividade de .dashboard-grid (Tablet/Mobile) consolidada
-   no bloco MOBILE/TABLET no final do arquivo. */
+@media(max-width:1100px){
+
+    .dashboard-grid{
+        grid-template-columns:1fr 1fr;
+    }
+}
+
+@media(max-width:768px){
+
+    .dashboard-grid{
+        grid-template-columns:1fr;
+    }
+}
 
   /* DASHBOARD */
 
@@ -812,8 +836,12 @@ color:white !important;
     padding:5px;
 }
 
-/* Responsividade de .dashboard-grid já consolidada no bloco
-   MOBILE/TABLET no final do arquivo. */
+@media(max-width:1000px){
+    .dashboard-grid{
+        grid-template-columns:1fr;
+    }
+
+}
 
     [data-theme="dark"] .dashboard-card,
     [data-theme="dark"] .info-card,
@@ -1287,325 +1315,4 @@ body {
 .sem-estilo{
   color:var(--text);
   background:transparent;
-}
-
-
-/* ============================================================
-   RESPONSIVIDADE — REGRAS ESPECÍFICAS POR ELEMENTO
-   (substitui os patches genéricos anteriores)
-
-   Cada componente tem sua própria regra para Tablet e para
-   Mobile, isolado por classe/id específico — nada aqui depende
-   de regra genérica solta (table/th/td sem escopo, por exemplo).
-
-   Única exceção inevitável: as tabelas de Professor e Turma são
-   geradas via JavaScript com estilo INLINE (width, font-size,
-   padding direto no HTML). Estilo inline sempre vence estilo de
-   arquivo CSS, então só o "!important" consegue sobrescrever
-   isso — não é uma escolha nossa, é uma regra do navegador.
-   A tabela de Relatórios (#tabelaRelatorioEstatistica,
-   #tabelaResumoRelatorio, #tabelaDetalhadaRelatorio) já tem
-   estilo próprio e não é tocada aqui.
-============================================================ */
-
-/* =========================================
-   TABLET  (769px – 1024px)
-========================================= */
-@media (min-width: 769px) and (max-width: 1024px){
-
-  /* Cabeçalho */
-  .header{ padding: 12px 18px; }
-  .brand-title{ font-size: 16px; }
-  .brand-subtitle{ font-size: 11px; }
-  #btnTema{ width: 40px; height: 40px; font-size: 18px; }
-
-  /* Abas */
-  .tabs{ gap: 6px; padding: 8px; }
-  .tab{ padding: 8px 12px; font-size: 12px; }
-
-  /* Controles */
-  .controls-card{ padding: 12px; gap: 8px; }
-  select,
-  .search-box,
-  .btn-pdf{ padding: 10px; font-size: 13px; }
-
-  /* Dashboard */
-  .dashboard-header h1{ font-size: 22px; }
-  .dashboard-grid{ grid-template-columns: 1fr 1fr; gap: 15px; padding: 15px; }
-  .dashboard-card strong{ font-size: 18px; }
-
-  /* Estatísticas */
-  .estatistica-header h1{ font-size: 24px; }
-  .estat-card span{ font-size: 24px; }
-
-  /* Tabela de Horários */
-  #tabelaHorario table{ font-size: 11px; }
-  #tabelaHorario th,
-  #tabelaHorario td{ padding: 5px; }
-  #tabelaHorario th[style*="width"]{ width: 130px !important; }
-
-  /* Tabela de Sábados */
-  #containerSabados table{ font-size: 11px; }
-  #containerSabados th,
-  #containerSabados td{ padding: 5px; }
-
-  /* Tabela de Laboratórios */
-  #tabelaLaboratorio table{ font-size: 11px; }
-  #tabelaLaboratorio th,
-  #tabelaLaboratorio td{ padding: 5px; }
-
-  /* Tabela de Professor (gerada via JS com estilo inline) */
-  #tabelaProfessor table{ font-size: 11px !important; }
-  #tabelaProfessor th,
-  #tabelaProfessor td{ padding: 5px !important; font-size: 11px !important; }
-
-  /* Tabela de Turma (gerada via JS com estilo inline) */
-  #tabelaTurma table{ font-size: 11px !important; }
-  #tabelaTurma th,
-  #tabelaTurma td{ padding: 5px !important; font-size: 11px !important; }
-
-  .time-col{ width: 65px; }
-}
-
-/* =========================================
-   MOBILE  (até 768px)
-========================================= */
-@media (max-width: 768px){
-
-  /* Cabeçalho */
-  .header{ padding: 8px 12px; }
-  .brand-title{ font-size: 13px; }
-  .brand-subtitle{ font-size: 10px; }
-  #btnTema{ width: 30px; height: 30px; font-size: 14px; }
-
-  /* Abas */
-  .tabs{ gap: 4px; padding: 5px; }
-  .tab{ padding: 6px 8px; font-size: 11px; border-radius: 6px; }
-
-  /* Controles */
-  .header-sticky{
-    padding: 5px 0;
-    top: 60px;
-  }
-  .controls-card{
-    padding: 8px;
-    gap: 6px;
-    border-radius: 8px;
-    flex-direction: column;
-    align-items: stretch;
-  }
-  select,
-  .search-box,
-  .btn-pdf{ padding: 7px; font-size: 12px; border-radius: 5px; }
-  .search-box{ width: 100%; }
-
-  .week-container{ padding: 7px; }
-
-  /* Dashboard */
-  .dashboard-header{ padding: 10px; }
-  .dashboard-header h1{ font-size: 15px; }
-  .dashboard-header p{ font-size: 11px; }
-  .dashboard-grid{ grid-template-columns: 1fr; gap: 10px; padding: 10px; }
-  .dashboard-panel{ padding: 8px; border-radius: 8px; }
-  .dashboard-panel h2{ font-size: 13px; }
-  .dashboard-card{ padding: 9px; border-radius: 8px; min-height: 55px; }
-  .dashboard-card strong{ font-size: 14px; }
-  .progress-label{ font-size: 9px; }
-  .info-card,
-  .recuperacao-card,
-  .exame-card,
-  .feriado-card{ padding: 7px; border-radius: 6px; font-size: 12px; }
-  summary{ font-size: 12px; }
-
-  /* Estatísticas (cards — a tabela de relatório não é tocada) */
-  .estatistica-header{ padding: 10px; }
-  .estatistica-header h1{ font-size: 17px; }
-  .estatistica-header p{ font-size: 11px; }
-  .estatistica-cards{ gap: 8px; margin: 10px; }
-  .estat-card{ padding: 10px; border-radius: 6px; }
-  .estat-card span{ font-size: 17px; }
-  .estat-card small{ font-size: 11px; }
-
-  /* Painel de alterações */
-  #painelAlteracoes .painel-header{ padding: 6px 8px; font-size: 12px; }
-  #conteudoAlteracoes{ padding: 6px 8px; font-size: 11px; }
-  #painelAlteracoes > button{ padding: 6px; font-size: 12px; }
-
-  /* Rodapé e loader */
-  .ifro-footer{ padding: 10px; font-size: 11px; }
-  .aba-loader-text{ font-size: 12px; }
-
-  /* ---------- TABELAS, cada uma isolada ---------- */
-
-  /* Horários — reduzida mais uma vez a pedido (só Mobile) */
-  #tabelaHorario table{
-    width: auto;
-    min-width: 100%;
-    table-layout: auto;
-    font-size: 6px;
-    -webkit-text-size-adjust: 100%;
-    text-size-adjust: 100%;
-  }
-  #tabelaHorario th,
-  #tabelaHorario td{ padding: 2px; font-size: 6px; }
-  #tabelaHorario th[style*="width"]{ width: 50px !important; }
-  #tabelaHorario .time-col{ width: 30px !important; }
-
-  /* Sábados — reduzida mais uma vez a pedido (só Mobile) */
-  #containerSabados table{
-    width: auto;
-    min-width: 100%;
-    table-layout: auto;
-    font-size: 6px;
-    -webkit-text-size-adjust: 100%;
-    text-size-adjust: 100%;
-  }
-  #containerSabados th,
-  #containerSabados td{ padding: 2px; font-size: 6px; }
-  #containerSabados .time-col{ width: 30px !important; }
-
-  /* Laboratórios */
-  #tabelaLaboratorio table{
-    width: auto;
-    min-width: 100%;
-    table-layout: auto;
-    font-size: 8px;
-    -webkit-text-size-adjust: 100%;
-    text-size-adjust: 100%;
-  }
-  #tabelaLaboratorio th,
-  #tabelaLaboratorio td{ padding: 3px; font-size: 8px; }
-
-  /* Professor (gerada via JS com estilo inline: width/font-size/padding) */
-  #tabelaProfessor table{
-    width: auto !important;
-    font-size: 8px !important;
-    -webkit-text-size-adjust: 100% !important;
-    text-size-adjust: 100% !important;
-  }
-  #tabelaProfessor th,
-  #tabelaProfessor td{ padding: 3px !important; font-size: 8px !important; }
-  #tabelaProfessor [style*="min-width:160px"]{ min-width: 90px !important; }
-
-  /* Turma (gerada via JS com estilo inline: width/font-size/padding) */
-  #tabelaTurma table{
-    width: auto !important;
-    font-size: 8px !important;
-    -webkit-text-size-adjust: 100% !important;
-    text-size-adjust: 100% !important;
-  }
-  #tabelaTurma th,
-  #tabelaTurma td{ padding: 3px !important; font-size: 8px !important; }
-  #tabelaTurma [style*="min-width:160px"]{ min-width: 90px !important; }
-
-  /* Coluna de horário, comum a Professor/Turma/Laboratório
-     (Horário e Sábados já têm sua própria regra acima) */
-  #tabelaProfessor .time-col,
-  #tabelaTurma .time-col,
-  #tabelaLaboratorio .time-col{
-    width: 42px !important;
-  }
-
-  #tabelaHorario tr.linha-vazia td,
-  #containerSabados tr.linha-vazia td{
-    font-size: 4px !important;
-    height: 4px !important;
-  }
-
-  .feriado{
-    font-size: 60px !important;
-    height: 100px !important;
-  }
-
-}
-
-/* =========================================
-   PC / DESKTOP  (1025px em diante)
-   Antes esses valores ficavam "escondidos"
-   nas regras sem media query (servindo de
-   base + PC ao mesmo tempo, de forma implícita).
-   Agora o PC tem seu próprio bloco explícito,
-   igual ao Tablet e ao Mobile — edite aqui sem
-   afetar as outras telas.
-========================================= */
-@media (min-width: 1025px){
-
-  /* Cabeçalho */
-  .header{ padding: 16px 24px; }
-  .brand-title{ font-size: 18px; }
-  .brand-subtitle{ font-size: 12px; }
-  #btnTema{ width: 48px; height: 48px; font-size: 22px; }
-
-  /* Abas */
-  .tabs{ gap: 8px; padding: 10px; }
-  .tab{ padding: 10px 14px; font-size: 13px; border-radius: 8px; }
-
-  /* Controles */
-  .header-sticky{ padding: 10px 0; top: 55px; }
-  .controls-card{
-    padding: 15px;
-    gap: 10px;
-    border-radius: 12px;
-    flex-direction: row;
-    align-items: normal;
-  }
-  select,
-  .search-box,
-  .btn-pdf{ padding: 12px; font-size: 14px; border-radius: 6px; }
-  .search-box{ width: 260px; }
-
-  .week-container{ padding: 14px; }
-
-  /* Dashboard */
-  .dashboard-header h1{ font-size: 28px; }
-  .dashboard-grid{ grid-template-columns: 1.2fr 1.2fr 1fr; gap: 20px; padding: 20px; }
-  .dashboard-panel{ padding: 15px; border-radius: 15px; }
-  .dashboard-card{ padding: 18px; border-radius: 14px; min-height: 110px; }
-  .dashboard-card strong{ font-size: 22px; }
-  .progress-label{ font-size: 12px; }
-  .info-card,
-  .recuperacao-card,
-  .exame-card{ padding: 14px; border-radius: 12px; }
-  .feriado-card{ padding: 10px; border-radius: 8px; }
-  summary{ font-size: 15px; }
-
-  /* Estatísticas */
-  .estatistica-header h1{ font-size: 32px; }
-  .estatistica-header p{ font-size: 15px; }
-  .estatistica-cards{ gap: 15px; margin: 20px; }
-  .estat-card{ padding: 20px; }
-  .estat-card span{ font-size: 32px; }
-  .estat-card small{ font-size: 14px; }
-
-  /* Painel de alterações */
-  #painelAlteracoes .painel-header{ padding: 12px 15px; }
-  #conteudoAlteracoes{ padding: 12px 15px; font-size: 13px; }
-  #painelAlteracoes > button{ padding: 10px; }
-
-  /* Rodapé e loader */
-  .ifro-footer{ padding: 20px; }
-  .aba-loader-text{ font-size: 20px; }
-
-  /* Tabelas — Horário, Sábados e Laboratórios (sem estilo inline via JS) */
-  #tabelaHorario table,
-  #containerSabados table,
-  #tabelaLaboratorio table{
-    font-size: 9px;
-  }
-  #tabelaHorario th, #tabelaHorario td,
-  #containerSabados th, #containerSabados td,
-  #tabelaLaboratorio th, #tabelaLaboratorio td{
-    padding: 6px;
-  }
-  #tabelaHorario .time-col,
-  #containerSabados .time-col,
-  #tabelaLaboratorio .time-col{
-    width: 85px;
-  }
-
-  /* Professor e Turma: o valor de PC já vem do estilo inline
-     gerado pelo próprio JS (professor.js/turma.js) — é a fonte
-     única de verdade para o tamanho no PC, por isso não
-     duplicamos a regra aqui. */
-
 }
