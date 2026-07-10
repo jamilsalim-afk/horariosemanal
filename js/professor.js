@@ -348,30 +348,42 @@ function renderProfessor(){
         );
 
 // ========================================
-// Datas correspondentes aos dias da semana
+// Datas da semana (segunda até sábado)
 // ========================================
 
 const datasSemana = {};
 
-aulas.forEach(aula => {
+const [diaIni, mesIni, anoIni] = semana.split("/");
 
-    const [dia, mes, ano] = aula.data.split("/");
+const dataBase = new Date(
+    anoIni,
+    mesIni - 1,
+    diaIni
+);
 
-    const dt = new Date(ano, mes - 1, dia);
+const nomesDias = [
+    "SEGUNDA",
+    "TERÇA",
+    "QUARTA",
+    "QUINTA",
+    "SEXTA",
+    "SÁBADO"
+];
 
-    const nomeDia = [
-        "DOMINGO",
-        "SEGUNDA",
-        "TERÇA",
-        "QUARTA",
-        "QUINTA",
-        "SEXTA",
-        "SÁBADO"
-    ][dt.getDay()];
+for (let i = 0; i < 6; i++) {
 
-    datasSemana[nomeDia] = aula.data;
+    const data = new Date(dataBase);
 
-});
+    data.setDate(dataBase.getDate() + i);
+
+    const dia = String(data.getDate()).padStart(2, "0");
+    const mes = String(data.getMonth() + 1).padStart(2, "0");
+    const ano = data.getFullYear();
+
+    datasSemana[nomesDias[i]] =
+        `${dia}/${mes}/${ano}`;
+
+}
     
     const totalAulas = aulas.length;
     const totalTurmas = new Set(
