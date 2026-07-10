@@ -1125,9 +1125,9 @@ function gerarPDFTodosLaboratorios(semana) {
     pdf.roundedRect(75,33,60,22,2,2);
     pdf.roundedRect(140,33,60,22,2,2);
     pdf.setFontSize(8);
-    pdf.text("LABORATÓRIOS",52,38,{align:"center"});
-    pdf.text("TOTAL DE AULAS",142,38,{align:"center"});
-    pdf.text("SEMANA",232,38,{align:"center"});
+    pdf.text("LABORATÓRIOS",40,38,{align:"center"});
+    pdf.text("TOTAL DE AULAS",105,38,{align:"center"});
+    pdf.text("SEMANA",170,38,{align:"center"});
     pdf.setFont(undefined,"bold");
     pdf.setFontSize(18);
     pdf.text(String(labs.length),52,47,{align:"center"});
