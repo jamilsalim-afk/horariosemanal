@@ -341,6 +341,33 @@ function renderProfessor(){
             professor,
             semana
         );
+
+    // ========================================
+// Datas correspondentes aos dias da semana
+// ========================================
+
+const datasSemana = {};
+
+aulas.forEach(aula => {
+
+    const [dia, mes, ano] = aula.data.split("/");
+
+    const dt = new Date(ano, mes - 1, dia);
+
+    const nomeDia = [
+        "DOMINGO",
+        "SEGUNDA",
+        "TERÇA",
+        "QUARTA",
+        "QUINTA",
+        "SEXTA",
+        "SÁBADO"
+    ][dt.getDay()];
+
+    datasSemana[nomeDia] = aula.data;
+
+});
+    
     const aulas = getDadosProfessor(
             professor,
             semana
@@ -447,15 +474,30 @@ function renderProfessor(){
     `;
 
     dias.forEach(d => {
-        html += `
-            <th style="
-                padding:8px;
-                border:1px solid #ccc;
-            ">
+
+    html += `
+        <th style="
+            padding:8px;
+            border:1px solid #ccc;
+            text-align:center;
+        ">
+
+            <div style="font-weight:bold">
                 ${d}
-            </th>
-        `;
-    });
+            </div>
+
+            <div style="
+                font-size:10px;
+                font-weight:normal;
+                margin-top:3px;
+            ">
+                ${datasSemana[d] || ""}
+            </div>
+
+        </th>
+    `;
+
+});
     html += `
         </tr>
         </thead>
