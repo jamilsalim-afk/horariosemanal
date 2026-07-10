@@ -433,196 +433,121 @@ if (!lab) {
 }
 
 function renderTodosLaboratorios(semanaSelecionada) {
-
     const tabela = document.getElementById("tabelaLaboratorio");
-
     const labs = Object.keys(mapaLaboratorios).sort((a, b) => {
-
         const na = parseInt(a.match(/\d+/)?.[0] || 999);
         const nb = parseInt(b.match(/\d+/)?.[0] || 999);
-
         return na - nb;
-
     });
 
     const dias = [
-
         "SEGUNDA",
         "TERÇA",
         "QUARTA",
         "QUINTA",
         "SEXTA",
         "SÁBADO"
-
     ];
 
+    // Apenas horários reais, sem separadores de intervalo/almoço/jantar
     const horarios = [
-
         "07:30 - 08:20",
         "08:20 - 09:10",
-
-        "__INTERVALO_1__",
-
         "09:30 - 10:20",
         "10:20 - 11:10",
         "11:10 - 12:00",
-
-        "__ALMOCO__",
-
         "13:50 - 14:40",
         "14:40 - 15:30",
-
-        "__INTERVALO_2__",
-
         "15:50 - 16:40",
         "16:40 - 17:30",
         "17:30 - 18:20",
-
-        "__JANTAR__",
-
         "19:00 - 19:50",
         "19:50 - 20:40",
-
-        "__INTERVALO_3__",
-
         "20:50 - 21:40",
         "21:40 - 22:30"
-
     ];
 
     let html = `
     <table class="tabela-professor">
-
         <thead>
-
             <tr>
-
-                <th>Horário</th>
-
                 <th>Dia</th>
-
+                <th>Horário</th>
                 ${labs.map(l => `<th>${l}</th>`).join("")}
-
             </tr>
-
         </thead>
-
         <tbody>
     `;
 
-    horarios.forEach(h => {
-
-        const ehIntervalo =
-            h.includes("__INTERVALO") ||
-            h.includes("__ALMOCO__") ||
-            h.includes("__JANTAR__");
-
-        if (ehIntervalo) {
-
-            html += `
-            <tr>
-
-                <td colspan="${labs.length + 2}" class="intervalo">
-
-                    ${formatarIntervalo(h)}
-
-                </td>
-
-            </tr>`;
-
-            return;
-
-        }
-
-        dias.forEach((dia, indice) => {
-
+    dias.forEach((dia, indiceDia) => {
+        horarios.forEach((h, indiceHorario) => {
             html += `<tr>`;
 
-            if (indice === 0) {
-
+            // Primeira linha do dia recebe o rowspan com o nome do dia
+            if (indiceHorario === 0) {
                 html += `
-                <td rowspan="6">
-
-                    <strong>${h}</strong>
-
+                <td rowspan="${horarios.length}">
+                    <strong>${dia}</strong>
                 </td>`;
-
             }
 
-            html += `<td><strong>${dia}</strong></td>`;
+            html += `<td><strong>${h}</strong></td>`;
 
             labs.forEach(lab => {
-
                 const { grade } = montarGradeLaboratorio(lab, semanaSelecionada);
-
                 const celula = grade[h][dia];
 
                 if (!celula.length) {
-
                     html += `
                     <td class="livre">
-
                         🟢 LIVRE
-
                     </td>`;
-
                     return;
-
                 }
 
                 if (celula.length === 1) {
-
                     const aula = celula[0];
-
                     html += `
                     <td>
-
                         <strong>${aula.disciplina}</strong><br>
-
                         ${aula.turma}<br>
-
                         <small style="color:${
                             aula.modalidade === "INTEGRADO"
                                 ? "#16a34a"
                                 : "#2563eb"
                         }">
-
                             ${aula.modalidade}
-
                         </small>
-
                     </td>`;
-
                     return;
-
                 }
 
                 html += `
                 <td style="background:#fee2e2;color:#991b1b;">
-
                     ⚠ CONFLITO<br><br>
-
                     ${celula.map(c => `
                         ${c.disciplina}<br>
                         ${c.turma}<hr>
                     `).join("")}
-
                 </td>`;
-
             });
 
             html += `</tr>`;
-
         });
 
+        // Linha em branco separando os dias (exceto após o último)
+        if (indiceDia < dias.length - 1) {
+            html += `
+            <tr>
+                <td colspan="${labs.length + 2}" style="height:8px;background:#fff;border:none;"></td>
+            </tr>`;
+        }
     });
 
     html += `
         </tbody>
     </table>`;
-
     tabela.innerHTML = html;
-
 }
 
 function formatarIntervalo(h) {
