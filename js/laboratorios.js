@@ -1049,7 +1049,7 @@ ${a.modalidade}`;
 // ======================================================
 function gerarPDFTodosLaboratorios(semana) {
     const { jsPDF } = window.jspdf;
-    const pdf = new jsPDF("l", "mm", "a4");
+    const pdf = new jsPDF("p", "mm", "a4");
     const pageWidth = pdf.internal.pageSize.getWidth();
     const labs = Object.keys(mapaLaboratorios).sort((a, b) => {
         const na = parseInt(a.match(/\d+/)?.[0] || 999);
@@ -1121,9 +1121,9 @@ function gerarPDFTodosLaboratorios(semana) {
         totalAulas += getDadosLaboratorio(lab, semana).length;
     });
     pdf.setDrawColor(180);
-    pdf.roundedRect(15,33,75,22,2,2);
-    pdf.roundedRect(105,33,75,22,2,2);
-    pdf.roundedRect(195,33,75,22,2,2);
+    pdf.roundedRect(10,33,60,22,2,2);
+    pdf.roundedRect(75,33,60,22,2,2);
+    pdf.roundedRect(140,33,60,22,2,2);
     pdf.setFontSize(8);
     pdf.text("LABORATÓRIOS",52,38,{align:"center"});
     pdf.text("TOTAL DE AULAS",142,38,{align:"center"});
@@ -1193,10 +1193,10 @@ ${a.turma}`
     // =====================================
     const columnStyles = {
         0:{cellWidth:22},
-        1:{cellWidth:20}
+        1:{cellWidth:22}
     };
     labs.forEach((lab, i)=>{
-        columnStyles[i+2]={cellWidth:35};
+        columnStyles[i+2]={cellWidth:55};
     });
     // =====================================
     // TABELA
