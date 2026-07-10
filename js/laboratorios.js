@@ -501,7 +501,7 @@ function renderTodosLaboratorios(semanaSelecionada) {
                 html += `
                 <td rowspan="${horarios.length}">
                     <strong>${dia}</strong><br>
-                    <small>${calcularDataDia(dia)}</small>
+                    ${calcularDataDia(dia)}
                 </td>`;
             }
 
