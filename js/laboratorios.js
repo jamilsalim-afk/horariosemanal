@@ -467,6 +467,19 @@ function renderTodosLaboratorios(semanaSelecionada) {
         "21:40 - 22:30"
     ];
 
+    // =====================================
+    // CALCULA A DATA (dd/mm) DE CADA DIA DA SEMANA
+    // "semanaSelecionada" é a data de SEGUNDA-FEIRA no formato dd/mm/aaaa
+    // =====================================
+    function calcularDataDia(dia) {
+        const [d, m, a] = semanaSelecionada.split("/").map(Number);
+        const data = new Date(a, m - 1, d);
+        data.setDate(data.getDate() + dias.indexOf(dia));
+        const dd = String(data.getDate()).padStart(2, "0");
+        const mm = String(data.getMonth() + 1).padStart(2, "0");
+        return `${dd}/${mm}`;
+    }
+
     let html = `
     <table class="tabela-professor">
         <thead>
@@ -487,7 +500,8 @@ function renderTodosLaboratorios(semanaSelecionada) {
             if (indiceHorario === 0) {
                 html += `
                 <td rowspan="${horarios.length}">
-                    <strong>${dia}</strong>
+                    <strong>${dia}</strong><br>
+                    <small>${calcularDataDia(dia)}</small>
                 </td>`;
             }
 
@@ -1001,12 +1015,34 @@ function gerarPDFTodosLaboratorios(semana) {
         "21:40 - 22:30"
     ];
 
+    const dias = [
+        "SEGUNDA",
+        "TERÇA",
+        "QUARTA",
+        "QUINTA",
+        "SEXTA",
+        "SÁBADO"
+    ];
+
     // Dias agrupados 2 a 2, cada grupo = 1 página
     const paresDias = [
         ["SEGUNDA", "TERÇA"],
         ["QUARTA", "QUINTA"],
         ["SEXTA", "SÁBADO"]
     ];
+
+    // =====================================
+    // CALCULA A DATA (dd/mm) DE CADA DIA DA SEMANA
+    // "semana" é a data de SEGUNDA-FEIRA no formato dd/mm/aaaa
+    // =====================================
+    function calcularDataDia(dia) {
+        const [d, m, a] = semana.split("/").map(Number);
+        const data = new Date(a, m - 1, d);
+        data.setDate(data.getDate() + dias.indexOf(dia));
+        const dd = String(data.getDate()).padStart(2, "0");
+        const mm = String(data.getMonth() + 1).padStart(2, "0");
+        return `${dd}/${mm}`;
+    }
 
     // =====================================
     // FUNÇÃO: CABEÇALHO (repetido em cada página)
@@ -1077,7 +1113,7 @@ function gerarPDFTodosLaboratorios(semana) {
                 // Primeira linha do dia recebe o rowSpan com o nome do dia
                 if (indiceHorario === 0) {
                     row.push({
-                        content: dia,
+                        content: `${dia}\n${calcularDataDia(dia)}`,
                         rowSpan: horarios.length,
                         styles: {
                             valign: "middle",
