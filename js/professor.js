@@ -341,8 +341,13 @@ function renderProfessor(){
             professor,
             semana
         );
+    
+    const aulas = getDadosProfessor(
+            professor,
+            semana
+        );
 
-    // ========================================
+// ========================================
 // Datas correspondentes aos dias da semana
 // ========================================
 
@@ -368,10 +373,6 @@ aulas.forEach(aula => {
 
 });
     
-    const aulas = getDadosProfessor(
-            professor,
-            semana
-        );
     const totalAulas = aulas.length;
     const totalTurmas = new Set(
             aulas.map(a => a.turma)
@@ -480,24 +481,22 @@ aulas.forEach(aula => {
             padding:8px;
             border:1px solid #ccc;
             text-align:center;
+            line-height:1.2;
         ">
-
             <div style="font-weight:bold">
                 ${d}
             </div>
-
             <div style="
-                font-size:10px;
+                font-size:9px;
                 font-weight:normal;
-                margin-top:3px;
             ">
                 ${datasSemana[d] || ""}
             </div>
-
         </th>
     `;
 
 });
+    
     html += `
         </tr>
         </thead>
