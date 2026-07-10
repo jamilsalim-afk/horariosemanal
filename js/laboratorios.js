@@ -1196,7 +1196,7 @@ ${a.turma}`
         1:{cellWidth:22}
     };
     labs.forEach((lab, i)=>{
-        columnStyles[i+2]={cellWidth:50};
+        columnStyles[i+2]={cellWidth:45};
     });
     // =====================================
     // TABELA
