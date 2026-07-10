@@ -1130,9 +1130,9 @@ function gerarPDFTodosLaboratorios(semana) {
     pdf.text("SEMANA",170,38,{align:"center"});
     pdf.setFont(undefined,"bold");
     pdf.setFontSize(18);
-    pdf.text(String(labs.length),52,47,{align:"center"});
-    pdf.text(String(totalAulas),142,47,{align:"center"});
-    pdf.text(semana,232,47,{align:"center"});
+    pdf.text(String(labs.length),40,46,{align:"center"});
+    pdf.text(String(totalAulas),105,46,{align:"center"});
+    pdf.text(semana,170,46,{align:"center"});
     pdf.setFont(undefined,"normal");
     // =====================================
     // MONTA TABELA
