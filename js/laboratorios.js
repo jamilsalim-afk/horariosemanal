@@ -1238,20 +1238,21 @@ ${a.turma}`
             }
         }
     });
-    // =====================================
-    // RODAPÉ (AGORA FUNCIONANDO CORRETAMENTE)
-    // =====================================
-    const pageCount = pdf.getNumberOfPages();
-    for (let i = 1; i <= pageCount; i++) {
-        pdf.setPage(i);
-        pdf.setFontSize(8);
-        pdf.text(
-            "IFRO - Campus Cacoal | BR 364, Km 228, Lote 2-A | (69) 3443-2445 | dape.cacoal@ifro.edu.br",
-            pageWidth / 2,
-            pageHeight - 10, // 🔥 CORREÇÃO IMPORTANTE
-            { align: "center" }
-        );
-    }
+// =====================================
+// RODAPÉ EM TODAS AS PÁGINAS
+// =====================================
+const totalPaginas = pdf.internal.getNumberOfPages();
+for (let pagina = 1; pagina <= totalPaginas; pagina++) {
+    pdf.setPage(pagina);
+    const alturaPagina = pdf.internal.pageSize.getHeight();
+    pdf.setFontSize(8);
+    pdf.text(
+        "IFRO - Campus Cacoal | BR 364, Km 228, Lote 2-A | (69) 3443-2445 | dape.cacoal@ifro.edu.br",
+        pageWidth / 2,
+        alturaPagina - 6,
+        { align: "center" }
+    );
+}
     // =====================================
     // SALVAR
     // =====================================
