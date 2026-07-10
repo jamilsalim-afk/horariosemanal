@@ -674,21 +674,30 @@ for (let i = 0; i < 6; i++) {
 
     datasSemana[nomesDias[i]] =
         `${dia}/${mes}/${ano}`;
-}
+    }
     const totalAulasSegSex = aulas.filter(a => {
-        const [dia, mes, ano] = a.data.split("/");
-        const dt = new Date(ano, mes - 1, dia);
-
-        return (dt.getDay() >= 1 && dt.getDay() <= 5);
+    if (!a.professor || !a.professor.trim()) {
+        return false;
+    }
+    const [dia, mes, ano] = a.data.split("/");
+    const dt = new Date(ano, mes - 1, dia);
+    return dt.getDay() >= 1 && dt.getDay() <= 5;
     }).length;
     const totalAulasSab = aulas.filter(a => {
-        const [dia, mes, ano] = a.data.split("/");
-        const dt = new Date(ano, mes - 1, dia);
-        return dt.getDay() === 6;
+    if (!a.professor || !a.professor.trim()) {
+        return false;
+    }
+    const [dia, mes, ano] = a.data.split("/");
+    const dt = new Date(ano, mes - 1, dia);
+    return dt.getDay() === 6;
     }).length;
     const totalAulas = totalAulasSegSex + totalAulasSab;
-    const totalProfessores = new Set(aulas.map(a => a.professor)).size;
-    const totalDias = new Set(aulas.map(a => a.data)).size;
+    const totalProfessores = new Set(aulas
+        .filter(a => a.professor && a.professor.trim() !== "")
+        .map(a => a.professor)).size;
+    const totalDias = new Set(aulas
+        .filter(a => a.professor && a.professor.trim() !== "")
+        .map(a => a.data)).size;
 
     // =====================================
     // CABEÇALHO
@@ -831,22 +840,24 @@ for (let i = 0; i < 6; i++) {
     // =====================================
 
     const aulasPorDia = dias.map(d => {
-            return aulas.filter(a => {
-                const [dia, mes, ano] = a.data.split("/");
-                const dt = new Date(ano, mes - 1, dia);
-                const nomeDia =
-                    [
-                        "DOMINGO",
-                        "SEGUNDA",
-                        "TERÇA",
-                        "QUARTA",
-                        "QUINTA",
-                        "SEXTA",
-                        "SÁBADO"
-                    ][dt.getDay()];
-                return nomeDia === d;
-            }).length;
-        });
+    return aulas.filter(a => {
+        if (!a.professor || !a.professor.trim()) {
+            return false;
+        }
+        const [dia, mes, ano] = a.data.split("/");
+        const dt = new Date(ano, mes - 1, dia);
+        const nomeDia = [
+            "DOMINGO",
+            "SEGUNDA",
+            "TERÇA",
+            "QUARTA",
+            "QUINTA",
+            "SEXTA",
+            "SÁBADO"
+        ][dt.getDay()];
+        return nomeDia === d;
+    }).length;
+});
 
     body.push([
         "AULAS/DIA",
