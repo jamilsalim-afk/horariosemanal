@@ -279,6 +279,43 @@ grade[horario][diaSemana].push(`
             semana
         );
 
+    // ========================================
+// Datas da semana (segunda até sábado)
+// ========================================
+
+const datasSemana = {};
+
+const [diaIni, mesIni, anoIni] = semana.split("/");
+
+const dataBase = new Date(
+    anoIni,
+    mesIni - 1,
+    diaIni
+);
+
+const nomesDias = [
+    "SEGUNDA",
+    "TERÇA",
+    "QUARTA",
+    "QUINTA",
+    "SEXTA",
+    "SÁBADO"
+];
+
+for (let i = 0; i < 6; i++) {
+
+    const data = new Date(dataBase);
+
+    data.setDate(dataBase.getDate() + i);
+
+    const dia = String(data.getDate()).padStart(2, "0");
+    const mes = String(data.getMonth() + 1).padStart(2, "0");
+    const ano = data.getFullYear();
+
+    datasSemana[nomesDias[i]] =
+        `${dia}/${mes}/${ano}`;
+}
+
     const totalAulas = aulas.filter(a =>
     a.professor &&
     a.professor.trim() !== ""
@@ -409,18 +446,31 @@ const totalDias = new Set(
 
     dias.forEach(d => {
 
-        html += `
+    html += `
 
-            <th style="
-                padding:8px;
-                border:1px solid #ccc;
-            ">
+        <th style="
+            padding:8px;
+            border:1px solid #ccc;
+            text-align:center;
+            line-height:1.2;
+        ">
+
+            <div style="font-weight:bold">
                 ${d}
-            </th>
+            </div>
 
-        `;
+            <div style="
+                font-size:9px;
+                font-weight:normal;
+            ">
+                ${datasSemana[d]}
+            </div>
 
-    });
+        </th>
+
+    `;
+
+});
 
     html += `
         </tr>
@@ -589,6 +639,42 @@ function exportarFichaTurmaPDF() {
         );
 
     const aulas = getDadosTurma(turma, semana);
+  // =====================================
+// Datas do cabeçalho (segunda a sábado)
+// =====================================
+
+const datasSemana = {};
+
+const [diaIni, mesIni, anoIni] = semana.split("/");
+
+const dataBase = new Date(
+    anoIni,
+    mesIni - 1,
+    diaIni
+);
+
+const nomesDias = [
+    "SEGUNDA",
+    "TERÇA",
+    "QUARTA",
+    "QUINTA",
+    "SEXTA",
+    "SÁBADO"
+];
+
+for (let i = 0; i < 6; i++) {
+
+    const data = new Date(dataBase);
+
+    data.setDate(dataBase.getDate() + i);
+
+    const dia = String(data.getDate()).padStart(2, "0");
+    const mes = String(data.getMonth() + 1).padStart(2, "0");
+    const ano = data.getFullYear();
+
+    datasSemana[nomesDias[i]] =
+        `${dia}/${mes}/${ano}`;
+}
     const totalAulasSegSex = aulas.filter(a => {
         const [dia, mes, ano] = a.data.split("/");
         const dt = new Date(ano, mes - 1, dia);
@@ -771,8 +857,15 @@ function exportarFichaTurmaPDF() {
     // TABELA
     // =====================================
     pdf.autoTable({
-        head: [["Horário",...dias]
-        ],
+        head: [[
+
+    "Horário",
+
+    ...dias.map(d =>
+        `${d}\n${datasSemana[d]}`
+    )
+
+]],
 
         body,
         startY: 60,
@@ -785,9 +878,13 @@ function exportarFichaTurmaPDF() {
         },
 
         headStyles: {
-            fillColor: [21,128,61],
-            textColor: [255,255,255]
-        },
+    fillColor: [21,128,61],
+    textColor: [255,255,255],
+    halign: "center",
+    valign: "middle",
+    minCellHeight: 10,
+    fontStyle: "bold"
+},
 
         columnStyles: {
             0: {cellWidth: 18},
