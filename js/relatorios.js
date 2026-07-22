@@ -772,6 +772,7 @@ ${meses.map(m=>`<th class="col-mes">${m}</th>`).join("")}
 <th class="col-mes">EX</th>
 <th class="col-mes">TOTAL</th>
 <th class="col-mes">CH Outros Prof.</th>
+<th class="col-mes">CH Total</th>
 </tr>`;
 
     tbody.innerHTML="";
@@ -795,6 +796,8 @@ ${meses.map(m=>`<th class="col-mes">${m}</th>`).join("")}
         const chOutrosTexto =
             chOutros > 0 ? `${chOutros}*` : `${chOutros}`;
 
+        const chTotal = l.total + chOutros;
+
         const tr =
             document.createElement("tr");
 
@@ -810,7 +813,8 @@ ${meses.map(m=>`<td class="col-mes">${l.meses[m]||0}</td>`).join("")}
 <td class="col-mes">${l.rec}</td>
 <td class="col-mes">${l.ex}</td>
 <td class="col-mes">${l.total}</td>
-<td class="col-mes">${chOutrosTexto}</td>`;
+<td class="col-mes">${chOutrosTexto}</td>
+<td class="col-mes">${chTotal}</td>`;
 
         tbody.appendChild(tr);
 
@@ -818,6 +822,37 @@ ${meses.map(m=>`<td class="col-mes">${l.meses[m]||0}</td>`).join("")}
 
     exibirLegendaCHOutrosProfessores(algumOutro);
 
+}
+
+function extrairCorpoTabelaComRowspan(tabela) {
+
+    const linhasDOM = [...tabela.querySelectorAll("tbody tr")];
+
+    const body = [];
+
+    linhasDOM.forEach(tr => {
+
+        const celulas = [...tr.querySelectorAll("td")];
+
+        const linha = celulas.map(td => {
+
+            const rowspan = parseInt(td.getAttribute("rowspan") || "1", 10);
+
+            const texto = td.innerText
+                .replace(/\s+/g, " ")
+                .trim();
+
+            if (rowspan > 1) {
+                return { content: texto, rowSpan: rowspan };
+            }
+
+            return texto;
+        });
+
+        body.push(linha);
+    });
+
+    return body;
 }
 
 function gerarRelatorioTurma() {
@@ -1209,6 +1244,10 @@ function limparTabelasRelatorio() {
     if (thead) thead.innerHTML = "";
     if (tbody) tbody.innerHTML = "";
   });
+
+  // 🔥 esconde a legenda de CH de outros professores sempre que as tabelas são limpas
+  // (ela só deve reaparecer se o relatório por professor for gerado novamente)
+  exibirLegendaCHOutrosProfessores(false);
 }
 
 function exportarRelatorioAcademicoPDF() {
@@ -1236,21 +1275,7 @@ function exportarRelatorioResumoPDF() {
         [...tabela.querySelectorAll("thead th")]
         .map(th => th.innerText.trim());
 
-    const body = [];
-
-    tabela
-        .querySelectorAll("tbody tr")
-        .forEach(tr => {
-
-            body.push(
-                [...tr.querySelectorAll("td")]
-                .map(td =>
-                    td.innerText
-                      .replace(/\s+/g, " ")
-                      .trim()
-                )
-            );
-        });
+    const body = extrairCorpoTabelaComRowspan(tabela);
 
     const pageWidth =
         pdf.internal.pageSize.getWidth();
@@ -1316,20 +1341,20 @@ function exportarRelatorioResumoPDF() {
 
         head: [headers],
 
-body,
+        body,
 
-tableWidth: 'auto',
+        tableWidth: 'auto',
 
-startY: 30,
-      
+        startY: 30,
+
         theme: "grid",
 
         margin: {
-    top: 28,
-    bottom: 15,
-    left: 12,
-    right: 12
-},
+            top: 28,
+            bottom: 15,
+            left: 12,
+            right: 12
+        },
 
         styles: {
             fontSize: 6.5,
@@ -1347,17 +1372,17 @@ startY: 30,
 
         columnStyles: {
 
-    0: {
-        cellWidth: 55,
-        halign: "left"
-    },
+            0: {
+                cellWidth: 55,
+                halign: "left"
+            },
 
-    1: {
-        cellWidth: 45,
-        halign: "left"
-    }
+            1: {
+                cellWidth: 45,
+                halign: "left"
+            }
 
-},
+        },
 
         didDrawPage: function() {
 
