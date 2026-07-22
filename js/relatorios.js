@@ -396,6 +396,59 @@ function classificarTipoRelatorio(valor, data = null) {
   return "NORMAL";
 }
 
+function calcularCHOutrosProfessoresRelatorio(turma, disciplina, periodo, professorAtual) {
+
+    const profAtualUpper = professorAtual.toUpperCase().trim();
+
+    let total = 0;
+
+    BASE_GERAL.forEach(a => {
+
+        if (a.turma !== turma) return;
+        if (!a.valor) return;
+
+        const disc = obterDisciplinaRelatorio(a.valor);
+        if (disc !== disciplina) return;
+
+        const periodoAula = obterPeriodoRelatorio(a.data, a.modalidade);
+        if (periodoAula !== periodo) return;
+
+        const prof = obterProfessorRelatorio(a.valor);
+        if (!prof) return;
+        if (prof.toUpperCase().trim() === profAtualUpper) return;
+
+        const tipo = classificarTipoRelatorio(a.valor);
+
+        if (tipo === "RECUPERAÇÃO" || tipo === "EXAME") return;
+
+        total++;
+    });
+
+    return total;
+}
+
+function exibirLegendaCHOutrosProfessores(mostrar) {
+
+    let legenda = document.getElementById("legendaCHOutrosProfessores");
+
+    if (!legenda) {
+        legenda = document.createElement("p");
+        legenda.id = "legendaCHOutrosProfessores";
+        legenda.style.fontSize = "11px";
+        legenda.style.marginTop = "6px";
+        legenda.style.fontStyle = "italic";
+
+        const tabela = document.getElementById("tabelaResumoRelatorio");
+        tabela.insertAdjacentElement("afterend", legenda);
+    }
+
+    legenda.textContent = mostrar
+        ? "* VALOR ABSOLUTO DA SOMA DE AULAS DE OUTROS PROFESSORES QUE MINISTRARAM AULAS DA MESMA DISCIPLINA"
+        : "";
+
+    legenda.style.display = mostrar ? "block" : "none";
+}
+
 function obterProfessorRelatorio(valor) {
 
   if (!valor || !valor.includes(" - ")) return "";
@@ -479,45 +532,47 @@ function renderTabelaDetalhadaDisciplina(dados) {
 
   tbody.innerHTML = "";
 
-  dados.forEach(a => {
+  dados.forEach((a, idx) => {
 
     const tipo = classificarTipoRelatorio(a.valor, a.data);
 
-let classeTipo = "";
+    let classeTipo = "";
 
-switch (tipo) {
-  case "SÁBADO":
-    classeTipo = "tipo-sabado";
-    break;
+    switch (tipo) {
+      case "SÁBADO":
+        classeTipo = "tipo-sabado";
+        break;
 
-  case "RECUPERAÇÃO":
-    classeTipo = "tipo-rec";
-    break;
+      case "RECUPERAÇÃO":
+        classeTipo = "tipo-rec";
+        break;
 
-  case "EXAME":
-    classeTipo = "tipo-ex";
-    break;
+      case "EXAME":
+        classeTipo = "tipo-ex";
+        break;
 
-  case "REPOSIÇÃO":
-    classeTipo = "tipo-rep";
-    break;
+      case "REPOSIÇÃO":
+        classeTipo = "tipo-rep";
+        break;
 
-  case "EXTRA":
-    classeTipo = "tipo-extra";
-    break;
+      case "EXTRA":
+        classeTipo = "tipo-extra";
+        break;
 
-  default:
-    classeTipo = "tipo-normal";
-}
+      default:
+        classeTipo = "tipo-normal";
+    }
 
-const tr = document.createElement("tr");
+    const tr = document.createElement("tr");
 
-tr.innerHTML = `
-  <td>${a.data}</td>
-  <td>${a.horario}</td>
-  <td>${obterProfessorRelatorio(a.valor)}</td>
-  <td class="${classeTipo}">${tipo}</td>
-`;
+    tr.className = idx % 2 === 0 ? "linha-clara" : "linha-escura";
+
+    tr.innerHTML = `
+      <td>${a.data}</td>
+      <td>${a.horario}</td>
+      <td>${obterProfessorRelatorio(a.valor)}</td>
+      <td class="${classeTipo}">${tipo}</td>
+    `;
 
     tbody.appendChild(tr);
   });
@@ -716,9 +771,13 @@ ${meses.map(m=>`<th class="col-mes">${m}</th>`).join("")}
 <th class="col-mes">REC</th>
 <th class="col-mes">EX</th>
 <th class="col-mes">TOTAL</th>
+<th class="col-mes">CH Outros Prof.</th>
 </tr>`;
 
     tbody.innerHTML="";
+
+    let contador = 0;
+    let algumOutro = false;
 
     linhas.forEach(l=>{
 
@@ -727,8 +786,20 @@ ${meses.map(m=>`<th class="col-mes">${m}</th>`).join("")}
             ? "Anual"
             : `${l.periodo}º Semestre`;
 
+        const chOutros = calcularCHOutrosProfessoresRelatorio(
+            l.turma, l.disciplina, l.periodo, Relatorio.professor
+        );
+
+        if (chOutros > 0) algumOutro = true;
+
+        const chOutrosTexto =
+            chOutros > 0 ? `${chOutros}*` : `${chOutros}`;
+
         const tr =
             document.createElement("tr");
+
+        tr.className = contador % 2 === 0 ? "linha-clara" : "linha-escura";
+        contador++;
 
         tr.innerHTML=`
 <td class="col-texto">${l.disciplina}</td>
@@ -738,11 +809,14 @@ ${meses.map(m=>`<td class="col-mes">${l.meses[m]||0}</td>`).join("")}
 <td class="col-mes">${l.sab}</td>
 <td class="col-mes">${l.rec}</td>
 <td class="col-mes">${l.ex}</td>
-<td class="col-mes">${l.total}</td>`;
+<td class="col-mes">${l.total}</td>
+<td class="col-mes">${chOutrosTexto}</td>`;
 
         tbody.appendChild(tr);
 
     });
+
+    exibirLegendaCHOutrosProfessores(algumOutro);
 
 }
 
@@ -766,7 +840,7 @@ function gerarRelatorioTurma() {
     // 🔥 FILTRO ANTI-LINHA VAZIA
     if (!disc || !prof) return;
 
-    // 🔥 NOVO: identifica o período
+    // 🔥 identifica o período
     const periodo = obterPeriodoRelatorio(
       a.data,
       a.modalidade
@@ -781,7 +855,7 @@ function gerarRelatorioTurma() {
       month: "short",
     });
 
-    // 🔥 AGORA A CHAVE CONSIDERA O PERÍODO
+    // 🔥 CHAVE CONSIDERA O PERÍODO
     const key = `${disc}|${prof}|${periodo}`;
 
     if (!mapa[key]) {
@@ -822,29 +896,28 @@ function gerarRelatorioTurma() {
       .sort((a, b) => {
 
         const disc =
-          a.disciplina.localeCompare(
-            b.disciplina,
-            "pt-BR"
-          );
+          a.disciplina.localeCompare(b.disciplina, "pt-BR");
 
         if (disc !== 0)
           return disc;
 
-        const prof =
-          a.professor.localeCompare(
-            b.professor,
-            "pt-BR"
-          );
+        const periodo =
+          a.periodo.localeCompare(b.periodo, "pt-BR");
 
-        if (prof !== 0)
-          return prof;
+        if (periodo !== 0)
+          return periodo;
 
-        return a.periodo.localeCompare(
-          b.periodo,
-          "pt-BR"
-        );
+        return a.professor.localeCompare(b.professor, "pt-BR");
 
       });
+
+  // 🔥 soma absoluta por grupo disciplina+período (todos os professores)
+  const totaisGrupo = {};
+
+  linhas.forEach(l => {
+    const key = `${l.disciplina}|||${l.periodo}`;
+    totaisGrupo[key] = (totaisGrupo[key] || 0) + l.total;
+  });
 
   const tabela =
     document.getElementById("tabelaResumoRelatorio");
@@ -870,7 +943,9 @@ function gerarRelatorioTurma() {
 
   tbody.innerHTML = "";
 
-  linhas.forEach(l => {
+  let contador = 0;
+
+  linhas.forEach((l, idx) => {
 
     const periodoTexto =
       l.periodo === "ANUAL"
@@ -880,6 +955,27 @@ function gerarRelatorioTurma() {
     const tr =
       document.createElement("tr");
 
+    tr.className = contador % 2 === 0 ? "linha-clara" : "linha-escura";
+    contador++;
+
+    const mesmoGrupoAnterior =
+      idx > 0 &&
+      linhas[idx - 1].disciplina === l.disciplina &&
+      linhas[idx - 1].periodo === l.periodo;
+
+    let colunaTotal = "";
+
+    if (!mesmoGrupoAnterior) {
+
+      const tamanhoGrupo = linhas.filter(
+        x => x.disciplina === l.disciplina && x.periodo === l.periodo
+      ).length;
+
+      const key = `${l.disciplina}|||${l.periodo}`;
+
+      colunaTotal = `<td class="col-mes" rowspan="${tamanhoGrupo}">${totaisGrupo[key]}</td>`;
+    }
+
     tr.innerHTML = `
       <td class="col-texto">${l.disciplina}</td>
       <td class="col-texto">${l.professor}</td>
@@ -888,7 +984,7 @@ function gerarRelatorioTurma() {
       <td class="col-mes">${l.sab}</td>
       <td class="col-mes">${l.rec}</td>
       <td class="col-mes">${l.ex}</td>
-      <td class="col-mes">${l.total}</td>
+      ${colunaTotal}
     `;
 
     tbody.appendChild(tr);
@@ -946,45 +1042,47 @@ function renderTabelaDetalhadaRelatorio(dados) {
 
   tbody.innerHTML = "";
 
-  dados.forEach(a => {
+  dados.forEach((a, idx) => {
 
     const tipo = classificarTipoRelatorio(a.valor, a.data);
 
-let classeTipo = "";
+    let classeTipo = "";
 
-switch (tipo) {
-  case "SÁBADO":
-    classeTipo = "tipo-sabado";
-    break;
+    switch (tipo) {
+      case "SÁBADO":
+        classeTipo = "tipo-sabado";
+        break;
 
-  case "RECUPERAÇÃO":
-    classeTipo = "tipo-rec";
-    break;
+      case "RECUPERAÇÃO":
+        classeTipo = "tipo-rec";
+        break;
 
-  case "EXAME":
-    classeTipo = "tipo-ex";
-    break;
+      case "EXAME":
+        classeTipo = "tipo-ex";
+        break;
 
-  case "REPOSIÇÃO":
-    classeTipo = "tipo-rep";
-    break;
+      case "REPOSIÇÃO":
+        classeTipo = "tipo-rep";
+        break;
 
-  case "EXTRA":
-    classeTipo = "tipo-extra";
-    break;
+      case "EXTRA":
+        classeTipo = "tipo-extra";
+        break;
 
-  default:
-    classeTipo = "tipo-normal";
-}
+      default:
+        classeTipo = "tipo-normal";
+    }
 
-const tr = document.createElement("tr");
+    const tr = document.createElement("tr");
 
-tr.innerHTML = `
-  <td>${a.data}</td>
-  <td>${a.horario}</td>
-  <td>${obterProfessorRelatorio(a.valor)}</td>
-  <td class="${classeTipo}">${tipo}</td>
-`;
+    tr.className = idx % 2 === 0 ? "linha-clara" : "linha-escura";
+
+    tr.innerHTML = `
+      <td>${a.data}</td>
+      <td>${a.horario}</td>
+      <td>${obterProfessorRelatorio(a.valor)}</td>
+      <td class="${classeTipo}">${tipo}</td>
+    `;
 
     tbody.appendChild(tr);
   });
