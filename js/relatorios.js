@@ -1264,7 +1264,7 @@ function exportarRelatorioResumoPDF() {
 
     const { jsPDF } = window.jspdf;
 
-    const pdf = new jsPDF("p", "mm", "a4");
+    const pdf = new jsPDF("l", "mm", "a4");
 
     const tabela =
         document.getElementById("tabelaResumoRelatorio");
@@ -1357,8 +1357,8 @@ function exportarRelatorioResumoPDF() {
         },
 
         styles: {
-            fontSize: 6.5,
-            cellPadding: 1.2,
+            fontSize: 8,
+            cellPadding: 1.8,
             overflow: "linebreak",
             valign: "middle",
             halign: "center"
@@ -1378,7 +1378,12 @@ function exportarRelatorioResumoPDF() {
             },
 
             1: {
-                cellWidth: 45,
+                cellWidth: 50,
+                halign: "left"
+            },
+
+            2: {
+                cellWidth: 30,
                 halign: "left"
             }
 
