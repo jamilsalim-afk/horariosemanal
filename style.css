@@ -1316,3 +1316,11 @@ body {
   color:var(--text);
   background:transparent;
 }
+
+.linha-clara {
+  background-color: #ffffff;
+}
+
+.linha-escura {
+  background-color: #f2f2f2;
+}
