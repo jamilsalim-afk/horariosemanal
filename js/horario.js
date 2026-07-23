@@ -84,12 +84,18 @@ function renderizarTabela(){
 
                 return linhas.some(r => {
 
-                    const val =
-                        normalizarTexto(
-                            r[idx] || ""
-                        );
+                    let val =
+                        (r[idx] || "").trim();
 
-                    return val.includes(busca);
+                    // 🔥 NOVO: ignora célula que só contém o nome da turma
+                    if (normalizarTexto(val) === normalizarTexto(turma)) {
+                        val = "";
+                    }
+
+                    const valNorm =
+                        normalizarTexto(val);
+
+                    return valNorm.includes(busca);
 
                 });
 
@@ -139,11 +145,21 @@ function renderizarTabela(){
 
             linhas = linhas.filter(r => {
 
-                return r.some(c =>
-                    normalizarTexto(
-                        String(c || "")
-                    ).includes(busca)
-                );
+                return turmasAtivas.some(turma => {
+
+                    const idx =
+                        dadosGlobais[0].indexOf(turma);
+
+                    let val =
+                        (r[idx] || "").trim();
+
+                    if (normalizarTexto(val) === normalizarTexto(turma)) {
+                        val = "";
+                    }
+
+                    return normalizarTexto(val).includes(busca);
+
+                });
 
             });
 
@@ -222,6 +238,15 @@ function renderizarTabela(){
                 let val =
                     (r[idx] || "").trim();
 
+                // ======================================================
+                // 🔥 NOVO: se a célula só contém o nome da turma
+                // (preenchimento automático da planilha sem aula real),
+                // trata como vazia
+                // ======================================================
+                if (normalizarTexto(val) === normalizarTexto(turma)) {
+                    val = "";
+                }
+
                 const valNorm =
                     normalizarTexto(val);
 
@@ -297,7 +322,7 @@ function renderizarTabela(){
 container.innerHTML = html;
 
 criarBotoesDias();
-  
+
 }
 
 function exportarPDF(){
@@ -384,7 +409,14 @@ const body = diasObj[dia].map(r=>{
 let line=[r[1]];
 turmasAtivas.forEach(t=>{
 const idx = dadosGlobais[0].indexOf(t);
-line.push((r[idx]||"").trim());
+let val = (r[idx]||"").trim();
+
+// 🔥 NOVO: mesma regra do HTML — ignora célula com só o nome da turma
+if (normalizarTexto(val) === normalizarTexto(t)) {
+    val = "";
+}
+
+line.push(val);
 });
 return line;
 });
