@@ -957,11 +957,14 @@ function gerarRelatorioDia(dia) {
   texto += `📅 DATA: ${dia}\n`;
   texto += `🎓 MODALIDADE: ${modalidade}\n\n`;
 
-  Object.keys(agrupado).forEach(turma => {
-    const horariosUnicos = [...new Set(agrupado[turma])];
-    texto += `🏫 TURMA: ${turma}\n`;
-    texto += `⏰ AULAS VAGAS: ${horariosUnicos.join(", ")}\n\n`;
-  });
+  // 🔥 ORDENA PELA POSIÇÃO DA TURMA NA PLANILHA (esquerda -> direita)
+  Object.keys(agrupado)
+    .sort((a, b) => turmasDaPlanilha.indexOf(a) - turmasDaPlanilha.indexOf(b))
+    .forEach(turma => {
+      const horariosUnicos = [...new Set(agrupado[turma])];
+      texto += `🏫 TURMA: ${turma}\n`;
+      texto += `⏰ AULAS VAGAS: ${horariosUnicos.join(", ")}\n\n`;
+    });
 
   return texto;
 }
@@ -992,10 +995,13 @@ function gerarRelatorioSemana() {
     return;
   }
 
+  // 🔥 ORDENA POR DATA e, dentro do mesmo dia, pela posição da turma na planilha
   listaFinal.sort((a, b) => {
     const [da, ma, aa] = a.dia.split('/');
     const [db, mb, ab] = b.dia.split('/');
-    return new Date(aa, ma - 1, da) - new Date(ab, mb - 1, db);
+    const diffData = new Date(aa, ma - 1, da) - new Date(ab, mb - 1, db);
+    if (diffData !== 0) return diffData;
+    return turmasDaPlanilha.indexOf(a.turma) - turmasDaPlanilha.indexOf(b.turma);
   });
 
   let diaAtual = "";
