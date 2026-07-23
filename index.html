@@ -798,15 +798,26 @@ function processarBaseModalidade(dados) {
 }
   
 function getTurmasAtivasNaSemana(dias){
-return turmasDaPlanilha.filter(t=>{
-const idx=dadosGlobais[0].indexOf(t);
-return Object.values(dias).some(d=>d.some(r=>{
-const v=(r[idx]||"").trim();
-return v && v!=="-" && !r[1].toUpperCase().includes("INTERVALO");
-}));
-});
-}
+    return turmasDaPlanilha.filter(t=>{
+        const idx = dadosGlobais[0].indexOf(t);
+        const turmaNorm = normalizarTexto(t);
 
+        return Object.values(dias).some(d => d.some(r => {
+
+            const v = (r[idx] || "").trim();
+
+            if (!v || v === "-") return false;
+            if (r[1].toUpperCase().includes("INTERVALO")) return false;
+
+            // 🔥 NOVO: ignora se a célula só tem o nome da própria turma
+            if (normalizarTexto(v) === turmaNorm) return false;
+
+            return true;
+
+        }));
+    });
+}
+  
 function normalizarDia(texto) {
     if (!texto) return "";
 
