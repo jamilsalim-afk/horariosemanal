@@ -811,13 +811,8 @@ function gerarPDFLaboratorio(laboratorio, semana) {
             }
 
             const texto = celula.map(a=>{
-
-                return `${a.disciplina}\
-                n${a.professor}\
-n${a.turma}\
-n${a.modalidade}`;
-
-            }).join("\n\n");
+    return `${a.disciplina}\n${a.professor}\n${a.turma}\n${a.modalidade}`;
+}).join("\n\n");
 
             row.push(texto);
 
@@ -1138,8 +1133,8 @@ function gerarPDFTodosLaboratorios(semana) {
                         return;
                     }
                     const texto = celula
-                        .map(a => `${a.disciplina}\n${a.professor}\n${a.turma}`)
-                        .join("\n\n");
+    .map(a => `${a.disciplina}\n${a.professor}\n${a.turma}`)
+    .join("\n\n");
                     row.push(texto);
                 });
 
