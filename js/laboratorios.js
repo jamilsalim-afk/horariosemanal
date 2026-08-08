@@ -812,9 +812,9 @@ function gerarPDFLaboratorio(laboratorio, semana) {
 
             const texto = celula.map(a=>{
 
-                return `${a.disciplina}
-                ${a.professor}
-${a.turma}
+                return `${a.disciplina}\
+                ${a.professor}\
+${a.turma}\
 ${a.modalidade}`;
 
             }).join("\n\n");
