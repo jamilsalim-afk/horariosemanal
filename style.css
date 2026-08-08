@@ -1331,3 +1331,9 @@ body {
 #tabelaDetalhadaRelatorio td{
   color: var(--text) !important;
 }
+
+.header-actions{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
