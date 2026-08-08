@@ -213,6 +213,7 @@ function getDadosLaboratorio(labSelecionado, semanaSelecionada) {
                 horario: r.horario,
                 turma: r.turma,
                 disciplina: normalizarDisciplinaLab(r.valor),
+                professor: obterProfessorRelatorio(r.valor),   // 🔥 NOVO
                 modalidade: r.modalidade
             });
 
@@ -313,6 +314,7 @@ function montarGradeLaboratorio(labSelecionado, semanaSelecionada) {
 
             turma: aula.turma,
             disciplina: aula.disciplina,
+            professor: aula.professor,   // 🔥 NOVO
             modalidade: aula.modalidade
 
         });
@@ -520,21 +522,22 @@ function renderTodosLaboratorios(semanaSelecionada) {
                 }
 
                 if (celula.length === 1) {
-                    const aula = celula[0];
-                    html += `
-                    <td>
-                        <strong>${aula.disciplina}</strong><br>
-                        ${aula.turma}<br>
-                        <small style="color:${
-                            aula.modalidade === "INTEGRADO"
-                                ? "#16a34a"
-                                : "#2563eb"
-                        }">
-                            ${aula.modalidade}
-                        </small>
-                    </td>`;
-                    return;
-                }
+    const aula = celula[0];
+    html += `
+    <td>
+        <strong>${aula.disciplina}</strong><br>
+        ${aula.turma}<br>
+        <small>${aula.professor || ""}</small><br>
+        <small style="color:${
+            aula.modalidade === "INTEGRADO"
+                ? "#16a34a"
+                : "#2563eb"
+        }">
+            ${aula.modalidade}
+        </small>
+    </td>`;
+    return;
+}
 
                 html += `
                 <td style="background:#fee2e2;color:#991b1b;">
@@ -810,6 +813,7 @@ function gerarPDFLaboratorio(laboratorio, semana) {
             const texto = celula.map(a=>{
 
                 return `${a.disciplina}
+                ${a.professor}
 ${a.turma}
 ${a.modalidade}`;
 
