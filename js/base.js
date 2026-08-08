@@ -96,7 +96,39 @@ esconderLoaderAbas();
 
 async function atualizarTudo(){
   mostrarLoaderAbas("Atualizando");
+
   await init();
+
+  // 🔥 re-renderiza a aba que estiver aberta no momento
+  const abaAtiva = document.querySelector('.tab-content.active')?.id;
+
+  switch(abaAtiva){
+    case 'dashboard':
+      gerarDashboard();
+      break;
+    case 'horarios':
+      renderizarTabela();
+      break;
+    case 'sabados':
+      renderSabados();
+      break;
+    case 'professores':
+      renderProfessor();
+      break;
+    case 'turmas':
+      renderTurma();
+      break;
+    case 'laboratorios':
+      renderLaboratorio();
+      break;
+    case 'estatisticas':
+      atualizarRelatorio();
+      break;
+    case 'relatorios':
+      gerarRelatorio();
+      break;
+  }
+
   esconderLoaderAbas();
 }
   
