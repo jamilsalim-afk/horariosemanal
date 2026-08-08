@@ -1138,7 +1138,7 @@ function gerarPDFTodosLaboratorios(semana) {
                         return;
                     }
                     const texto = celula
-                        .map(a => `${a.disciplina}\n${a.turma}`)
+                        .map(a => `${a.disciplina}\${a.professor}\n${a.turma}`)
                         .join("\n\n");
                     row.push(texto);
                 });
