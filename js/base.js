@@ -42,7 +42,7 @@ async function carregarProfessores(){
 
     console.log("LISTA PROFESSORES:", listaProfessores);
 }
-  
+
 async function init(){
 
   document.getElementById('searchProf').value = "";
@@ -92,6 +92,12 @@ esconderLoaderAbas();
   setTimeout(() => {
     verificarMudancaAoAbrir();
   }, 200);
+}
+
+async function atualizarTudo(){
+  mostrarLoaderAbas("Atualizando");
+  await init();
+  esconderLoaderAbas();
 }
   
 function processarDados(){
