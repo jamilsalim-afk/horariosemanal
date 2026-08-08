@@ -1317,10 +1317,17 @@ body {
   background:transparent;
 }
 
-.linha-clara {
-  background-color: var(--surface);
+#tabelaResumoRelatorio tbody tr:nth-child(even),
+#tabelaDetalhadaRelatorio tbody tr:nth-child(even){
+  background: rgba(46,125,50,.08) !important;
 }
 
-.linha-escura {
-  background-color: var(--bg);
+#tabelaResumoRelatorio tbody tr:nth-child(odd),
+#tabelaDetalhadaRelatorio tbody tr:nth-child(odd){
+  background: var(--surface) !important;
+}
+
+#tabelaResumoRelatorio td,
+#tabelaDetalhadaRelatorio td{
+  color: var(--text) !important;
 }
