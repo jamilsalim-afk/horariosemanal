@@ -1,5 +1,5 @@
-// 🔧 AJUSTE AQUI: link da planilha mestra (ID + GID da aba de config)
-const CONFIG_URL = "https://docs.google.com/spreadsheets/d/122GdHocj0Ia-o_LOeHm9fTF3TkPkWrYZ9MHYYpyHt4g/edit?gid=0#gid=0";
+// Link da aba de configuração na planilha mestra (planilha real do sistema)
+const CONFIG_URL = "https://docs.google.com/spreadsheets/d/122GdHocj0Ia-o_LOeHm9fTF3TkPkWrYZ9MHYYpyHt4g/export?format=csv&gid=0";
 
 let dadosGlobais = [];
 
