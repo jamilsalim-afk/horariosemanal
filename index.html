@@ -28,6 +28,11 @@
     </div>
 
     <div class="header-actions">
+      <!-- 🔥 NOVO: seletor de ano — carregado antes de tudo, define qual conjunto
+           de planilhas (Integrado/Superior/Professores) o sistema vai buscar.
+           As <option> são preenchidas dinamicamente pelo base.js (montarSelectDeAnos),
+           a partir dos anos cadastrados na planilha mestra. -->
+      <select id="selectAno" class="ano-select" onchange="trocarAno()"></select>
       <button id="btnTema" class="theme-btn">🌙</button>
       <button class="btn-pdf" onclick="atualizarTudo()">🔄 Atualizar</button>
     </div>
