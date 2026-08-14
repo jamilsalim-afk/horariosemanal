@@ -1,8 +1,5 @@
-const SHEETS={
-INTEGRADO:{id:'1j33kiPqwtzZNuvkBgYDaIiXZvVMY_J0qWAtRfYGdnD8',gid:'1936248769'},
-SUPERIOR:{id:'14ALXZgFIT68ee9ajuIdG63SpGVm0HyTjwp63-J6vRyg',gid:'1706802967'},
-PROFESSORES:{id:'1IDjs0oS6lQBGDrL7ja1Ge0vaBdNCNIULDH7J5p89c5s',gid:'1694280391'}
-};
+// 🔧 AJUSTE AQUI: link da planilha mestra (ID + GID da aba de config)
+const CONFIG_URL = "https://docs.google.com/spreadsheets/d/122GdHocj0Ia-o_LOeHm9fTF3TkPkWrYZ9MHYYpyHt4g/edit?gid=0#gid=0";
 
 let dadosGlobais = [];
 
