@@ -29,8 +29,6 @@
    em vez do CSV.
    ============================================================ */
 
-// 🔧 AJUSTE AQUI: link da planilha mestra (ID + GID da aba de config)
-const CONFIG_URL = "https://docs.google.com/spreadsheets/d/122GdHocj0Ia-o_LOeHm9fTF3TkPkWrYZ9MHYYpyHt4g/edit?gid=0#gid=0";
 
 let CONFIG_COMPLETA = [];  // todas as linhas cruas da planilha mestra (todos os anos)
 let SHEETS = {};           // config filtrada do ano atualmente selecionado -> { CHAVE: {id, gid} }
