@@ -221,7 +221,7 @@ async function init(){
   carregarListaTurmas();
   carregarSemanasTurma();
 
-  gerarDashboard();
+  renderizarTabela();
 
   esconderLoaderAbas();
 
@@ -239,9 +239,6 @@ async function atualizarTudo(){
   const abaAtiva = document.querySelector('.tab-content.active')?.id;
 
   switch(abaAtiva){
-    case 'dashboard':
-      gerarDashboard();
-      break;
     case 'horarios':
       renderizarTabela();
       break;
@@ -262,6 +259,9 @@ async function atualizarTudo(){
       break;
     case 'relatorios':
       gerarRelatorio();
+      break;
+    case 'dashboard':
+      gerarDashboard();
       break;
   }
 
