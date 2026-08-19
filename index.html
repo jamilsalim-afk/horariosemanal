@@ -1753,16 +1753,9 @@ window.onload = async () => {
   mostrarLoaderAbas(); // 🔥 aparece abaixo das abas
 
   await init();
-
-  abrirAba(
-    "horarios",
-    document.querySelector(".tab-btn")
-  );
-
-  gerarDashboard();
-
-  esconderLoaderAbas(); // 🔥 some quando tudo pronto
-};
+gerarDashboard();   // só popula os dados/HTML do dashboard, não deveria mexer em qual aba está visível
+abrirAba("horarios", document.querySelector(".tab.active"));
+esconderLoaderAbas();
   
 </script>
 <script src="js/config.js"></script>
